@@ -86,7 +86,7 @@
 
 \title[Distributed Fringe Search]{Distributed Fringe Search with MPI} % The short title appears at the bottom of every slide, the full title is only on the title page
 
-\author{Lukas Mosimann \& Christian Zeman} % Your name
+\author{Christian Zeman & Lukas Mosimann} % Your name
 \institute[ETH] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 {
 ETH Zürich \\ % Your institution for the title page
@@ -122,7 +122,7 @@ ETH Zürich \\ % Your institution for the title page
 \item Find a short path between two points
 \item Not optimal
 \item Similar to A*
-\item Uses threshold to determine the best nodes
+\item Uses threshold to determine the most promising nodes
 \item "Best-first" search with heuristic cost function
 \item Heuristic cost function $h$:
 	\begin{itemize}
@@ -183,6 +183,7 @@ ETH Zürich \\ % Your institution for the title page
 	\begin{itemize}
 	\item Not optimal
 	\item Bad configuration may leed to bad path
+	\item Worst case not better then A*
 	\end{itemize}
 \end{itemize}
 \end{frame}
