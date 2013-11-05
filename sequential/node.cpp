@@ -19,48 +19,6 @@ Node::~Node()
 	max_index--;
 }
 
-bool Node::hasAdjEdge() const
-{
-	return (!adjEdges.empty());
-}
-
-Node* Node::getNearestNode() const
-{
-
-	if (!hasAdjEdge()) return 0;
-
-	length_t minDist = INT_MAX;
-	Node* pNearestNode = 0;
-
-	for (pEdg_v::const_iterator it = adjEdges.begin(); it != adjEdges.end(); it++)
-		if (minDist > (*it)->getDistance()) 
-		{
-			minDist = (*it)->getDistance();
-			pNearestNode = (*it)->getTo();
-		}
-		
-	return pNearestNode;
-}
-
-Node* Node::getNearestOpenNode() const
-{
-	if (!hasAdjEdge()) return 0;
-
-	//not the best way .... ;)
-	length_t minDist = INT_MAX;
-	Node* pNearestNode = 0;
-
-	for (pEdg_v::const_iterator it = adjEdges.begin(); it != adjEdges.end(); it++)
-		if (minDist > (*it)->getDistance() && (!(*it)->getTo()->status == open))
-		{
-			minDist = (*it)->getDistance();
-			pNearestNode = (*it)->getTo();
-		}
-		
-	return pNearestNode;
-
-}
-
 length_t Node::HeurDistanceTo(Node* pTo) const
 {
 	return ((pTo->xPos - xPos) * (pTo->xPos - xPos) 

@@ -30,9 +30,6 @@ class Node
 		length_t getY() const;
 		unsigned int getIndex() const;
 
-		bool hasAdjEdge() const;
-		Node* getNearestNode() const;
-		Node* getNearestOpenNode() const;
 		void addEdge(Edge*);
 		
 		length_t HeurDistanceTo(Node*) const;
