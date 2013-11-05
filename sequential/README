@@ -1,0 +1,10 @@
+Esch no en sehr onfertigi version, aber was sölls, be etz 1.5 h dra gsi :P
+
+Folgendes: Es esch no vell zvell public, wo ned mösst/sött public si, abr es het mi am schlsos chli agschesse
+Im Algorithmus werd no ned a de ideale Ort igfüegt, evtl. möche mer gliich zwe Liste, müemr üs no öbrlegge :)
+
+Im Moment rächnetr sResultat ou no ned Zrög, sondrn hört eifach uf wenr am Ziel esch.
+
+Abr er Chont immrhin am Ziel ah. Usgabeformat esch im moment gml igstellt, chame ou im yEd azeige loh :)
+
+Insert/Remove im Graph esch sehr suboptimal, abr das spellt eigentli ke Rolle, well das ned zo üsere Ufgob ghört, mer erwarte sozsäge en "guete Graph" als Input.
