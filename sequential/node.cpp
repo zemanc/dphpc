@@ -16,7 +16,7 @@ Node::Node(length_t xP, length_t yP) : xPos(xP)
 }
 Node::~Node()
 {
-	max_index--;
+//	max_index--; das wäre ja gar nicht gut! :-) der Index muss einmalig sein!
 }
 
 length_t Node::HeurDistanceTo(Node* pTo) const
@@ -41,18 +41,24 @@ unsigned int Node::getIndex() const
 void Node::addEdge(Edge* pnewEdge)
 {
 	adjEdges.push_back(pnewEdge);
+	return;
 }
 
 void Node::removeEdge(Edge* e)
 {
-	for (unsigned int i = 0; i < adjEdges.size(); i++)
+	for (pEdg_v::iterator it = adjEdges.begin(); it != adjEdges.end(); it++)
 	{
-		if (adjEdges[i] == e) 
-			adjEdges.erase(adjEdges.begin() + i);	
+		if (*it == e) 
+		{
+			adjEdges.erase(it);
+			return;
+		}
 	}
+	return;
 }
 
 void Node::print() const
 {
 	std::cout << index << " " << xPos << " " << yPos << " " << status << std::endl;
+	return;
 }

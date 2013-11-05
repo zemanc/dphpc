@@ -1,34 +1,39 @@
 #include "graph.h"
 #include <list>
+#include <stdlib.h>
+#include <iostream>
 
 int main()
 {
 	Graph g;
 
-	for (int i = 0; i < 10; i++)
-		for (int j = 0; j < 10; j++)
+	int max = 100;
+	for (int i = 0; i < max; i++)
+		for (int j = 0; j < max; j++)
 		{
 			g.addNode(i, j);
 		}
 	
 
 	std::vector<Edge*> pEdges_v;
-	for (int i = 0; i < 10; i++)
-		for (int j = 1; j < 10; j++)
+	for (int i = 0; i < max; i++)
+		for (int j = 1; j < max; j++)
 		{
-			g.addEdge(10*i+j-1, 10*i+j);
-			g.addEdge(10*(j-1)+i, 10*j+i);
+			g.addEdge(max*i+j-1, max*i+j);
+			g.addEdge(max*(j-1)+i, max*j+i);
 		}
 
- 	g.removeEdge(33, 34);
-	g.removeNode(69);
-	g.removeNode(25);
-	g.removeNode(26);
-	g.removeNode(24);
-	g.removeNode(34);
+	for (int i = 50; i < 70; i++)
+		for (int j = 30; j < 80; j++)
+			g.removeNode(max*i + j - 1);
 
+	srand(0);
+	for (int i = 0; i < max * 10; i++)
+		g.removeNode(g.getNodeIndexByInternalIndex(rand() % (max*max- i)));
+
+  	g.printGml();
 	std::list<Node*> *path = new std::list<Node*>;
-	g.getShortestPath(1, 88, path);
+	g.getShortestPath(6, 6655, path);
 
  	g.printGml();
 

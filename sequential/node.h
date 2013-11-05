@@ -17,7 +17,7 @@ class Node
 	public:
 		typedef std::vector<Edge*> pEdg_v;
 
-		enum state_t {closed, open, inactive};
+		enum state_t {closed, open, inactive, onPath};
 		Node* parent;
 
 

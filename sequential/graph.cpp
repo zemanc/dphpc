@@ -9,30 +9,42 @@ void Graph::addNode(length_t xPos, length_t yPos)
 void Graph::removeNode(unsigned int index)
 {
 
-	for  (unsigned int i = 0; i < pEdges_v.size(); i++)
+	pEdg_v_it it_edg = pEdges_v.begin();
+	while (it_edg != pEdges_v.end() )
 	{
-		if ((pEdges_v[i]->getFrom()->getIndex() == index)
-		  || (pEdges_v[i]->getTo()->getIndex() == index))
-			removeEdge(i);
+		if ( ( (*it_edg)->getFrom()->getIndex() == index)
+		  || ( (*it_edg)->getTo()->getIndex() == index))
+			removeEdge(it_edg);
+		else
+			it_edg++;
 	}
 
-	for (unsigned int i = 0; i < pNodes_v.size(); i++)
-		if (pNodes_v[i]->getIndex() == index)
+	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+		if ((*it)->getIndex() == index)
 		{
-			delete pNodes_v[i];
-			pNodes_v.erase(pNodes_v.begin() + i);
+			delete *it;
+			pNodes_v.erase(it);
+			return;
 		}
+
+	return;
 
 }
 Node* Graph::getNode(unsigned int index)
 {
-	for (unsigned int i = 0; i < pNodes_v.size(); i++)
-		if (pNodes_v[i]->getIndex() == index)
-			return pNodes_v[i];
+	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+		if ((*it)->getIndex() == index)
+			return *it;
 	
 	return 0;
 }
 
+void Graph::removeEdge(pEdg_v_it& it)
+{
+	(*it)->getFrom()->removeEdge(*it);
+	delete *it;
+	it = pEdges_v.erase(it);
+}
 void Graph::removeEdge(unsigned int index)
 {
 	pEdges_v[index]->getFrom()->removeEdge(pEdges_v[index]);
@@ -41,12 +53,12 @@ void Graph::removeEdge(unsigned int index)
 }
 bool Graph::removeEdge(unsigned int from, unsigned int to)
 {
-	for (unsigned int i = 0; i < pEdges_v.size(); i++)
+	for  (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
 	{
-		if ((pEdges_v[i]->getFrom()->getIndex() == from)
-		  		&& pEdges_v[i]->getTo()->getIndex() == to)
+		if (((*it)->getFrom()->getIndex() == from)
+		  		&& (*it)->getTo()->getIndex() == to)
 		{	
-		  	removeEdge(i);
+		  	removeEdge(it);
 			return true;
 		}
 	}
@@ -59,7 +71,7 @@ bool Graph::addEdge(unsigned int from, unsigned int to)
 {
 	if ((from < pNodes_v.size()) && (to < pNodes_v.size()))
 	{
-		pEdges_v.push_back(new Edge(pNodes_v[from], pNodes_v[to]));
+		pEdges_v.push_back(new Edge(getNode(from), getNode(to)));
 		return true;
 	} else {
 		return false;
@@ -68,11 +80,11 @@ bool Graph::addEdge(unsigned int from, unsigned int to)
 
 Graph::~Graph()
 {
-	for (unsigned int i = 0; i < pEdges_v.size(); i++)
-		delete pEdges_v[i];
+	for  (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
+		delete *it;
 
-	for (unsigned int i = 0; i < pNodes_v.size(); i++)
-		delete pNodes_v[i];
+	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+		delete *it;
 }
 
 std::string Graph::getColor(Node::state_t s) const
@@ -85,6 +97,8 @@ std::string Graph::getColor(Node::state_t s) const
 			return "#BBEEBB";
 		case Node::inactive:
 			return "#FFFFFF";
+		case Node::onPath:
+			return "#0000FF";
 		default:
 			return "#000000";
 	}
@@ -92,15 +106,20 @@ std::string Graph::getColor(Node::state_t s) const
 void Graph::printGml() const
 {
 	std::cout << "graph [" << std::endl;
-	std::cout << '\t' << "directed 1";
+	std::cout << '\t' << "directed 1" << std::endl;
 
 	for (unsigned int i = 0; i < pNodes_v.size(); i++)
 		std::cout << '\t' << "node [" << std::endl
 			      << "\t\tid " << pNodes_v[i]->getIndex() << std::endl
 			      << "\t\tlabel \"" << pNodes_v[i]->getIndex() << "\"" << std::endl
-				  << "\t\tgraphics [ fill \""
-				      << getColor(pNodes_v[i]->status)
-					  << "\" ]" << std::endl
+				  << "\t\tgraphics [ " << std::endl
+				  	  << "\t\t\tfill \"" << 
+					  	getColor(pNodes_v[i]->status) << "\"" << std::endl
+					  << "\t\t\tx " << pNodes_v[i]->getX()*100 << std::endl
+					  << "\t\t\ty " << pNodes_v[i]->getY()*100 << std::endl
+					  << "\t\t\tw 60" << std::endl
+					  << "\t\t\th 60" << std::endl
+					  << "\t\t]" << std::endl
 				  << "\t]" << std::endl << std::endl;
 
 	std::cout << std::endl;
@@ -112,6 +131,8 @@ void Graph::printGml() const
 				  << "\t]" << std::endl << std::endl;
 	
 	std::cout << "]" << std::endl;
+
+	return;
 }
 void Graph::printTgf() const
 {
@@ -124,6 +145,8 @@ void Graph::printTgf() const
 	for (unsigned int i = 0; i < pEdges_v.size(); i++)
 		std::cout << pEdges_v[i]->getFrom()->getIndex() << " " 
 			      << pEdges_v[i]->getTo()->getIndex() << std::endl;
+	
+	return;
 }
 
 double Graph::newThreshold(double oldThreshold)
@@ -131,12 +154,30 @@ double Graph::newThreshold(double oldThreshold)
 	return oldThreshold + 1;
 }
 
+void Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end)
+{
+
+	Node* it = end;
+	while (it != start)
+	{
+		vals->push_front(it);
+		it->status = Node::onPath;
+		it = it->parent;
+	}
+
+	vals->push_front(start);
+	start->status = Node::onPath;
+
+	return;
+}
+
 void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>* vals)
 {
 	std::list<Node*> nowlater;
 
-	Node* start = getNode(from);
-	Node* end = getNode(to);
+	//geht besser so als randomized... für den Moment. Später ist das wohl dann der "richtige" Index, nicht der interne!
+	Node* start = pNodes_v[from];
+	Node* end = pNodes_v[to];
 
 	start->g = 0;
 	start->h = start->HeurDistanceTo(end);
@@ -146,29 +187,26 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 
 	double threshold = start->f; //start with shortest possible paths
 
-	while (true)
+	while (true) //wann ist fertig ... wenn wir nichts finden? oder ist das precondition
 	{
+
 		std::list<Node*>::iterator it = nowlater.begin();
 		while (it != nowlater.end())
 		{
-
 			Node* curNode = *it;
 
 			//if under treshold, than work with it - otherwise ignore!
 			if (curNode->f <= threshold)
 			{
-
 				if (curNode == end)
-					return;
+					return reconstructPath(vals, start, end);
 					
 				curNode->status = Node::closed;
-				it = nowlater.erase(it);
 
 				//for each neighbor
 				for (Node::pEdg_v::iterator edge_it = curNode->adjEdges.begin(); 
 					 edge_it != curNode->adjEdges.end(); edge_it++)
 				{
-
 					Node* edge_to = (*edge_it)->getTo();
 
 					if (edge_to->status == Node::inactive)
@@ -180,10 +218,11 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 
 						edge_to->parent = curNode;
 
-						//at the moment for simplifying, insert in the end
+						//at the moment for simplifying, insert at the end
 						nowlater.push_back(edge_to);
 
 						edge_to->status = Node::open;
+
 					} else if (edge_to->status == Node::open) {
 						
 						double newDist = curNode->g + (*edge_it)->getDistance();
@@ -201,11 +240,19 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 					}
 						
 				}
+				it = nowlater.erase(it);
+
+			} else {
+				it++;
 			}
-		it++;
 		}
 
 		threshold = newThreshold(threshold);
 
 	}
+}
+
+unsigned int Graph::getNodeIndexByInternalIndex(unsigned int i)
+{
+	return pNodes_v[i]->getIndex();
 }
