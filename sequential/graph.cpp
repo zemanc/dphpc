@@ -96,7 +96,7 @@ std::string Graph::getColor(Node::state_t s) const
 		case Node::closed:
 			return "#BBEEBB";
 		case Node::inactive:
-			return "#FFFFFF";
+			return "#EEEEEE";
 		case Node::onPath:
 			return "#0000FF";
 		default:
@@ -111,7 +111,6 @@ void Graph::printGml() const
 	for (unsigned int i = 0; i < pNodes_v.size(); i++)
 		std::cout << '\t' << "node [" << std::endl
 			      << "\t\tid " << pNodes_v[i]->getIndex() << std::endl
-			      << "\t\tlabel \"" << pNodes_v[i]->getIndex() << "\"" << std::endl
 				  << "\t\tgraphics [ " << std::endl
 				  	  << "\t\t\tfill \"" << 
 					  	getColor(pNodes_v[i]->status) << "\"" << std::endl
@@ -173,7 +172,9 @@ void Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end)
 
 void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>* vals)
 {
-	std::list<Node*> nowlater;
+	typedef std::list<Node*> node_list;
+
+	node_list nowlater;
 
 	//geht besser so als randomized... für den Moment. Später ist das wohl dann der "richtige" Index, nicht der interne!
 	Node* start = pNodes_v[from];
@@ -183,14 +184,14 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 	start->h = start->HeurDistanceTo(end);
 	start->f = start->g + start->h;
 
-	nowlater.push_back(start);
+	start->list_pos = nowlater.insert(nowlater.begin(), start);
 
 	double threshold = start->f; //start with shortest possible paths
 
-	while (true) //wann ist fertig ... wenn wir nichts finden? oder ist das precondition
+	while (!nowlater.empty())
 	{
 
-		std::list<Node*>::iterator it = nowlater.begin();
+		node_list::iterator it = nowlater.begin();
 		while (it != nowlater.end())
 		{
 			Node* curNode = *it;
@@ -212,14 +213,16 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 					if (edge_to->status == Node::inactive)
 					{
 						//New Node!
-						edge_to->g = curNode->f + (*edge_it)->getDistance();
+						edge_to->g = curNode->g + (*edge_it)->getDistance();
 						edge_to->h = edge_to->HeurDistanceTo(end);
 						edge_to->f = edge_to->g + edge_to->h;
 
 						edge_to->parent = curNode;
 
 						//at the moment for simplifying, insert at the end
-						nowlater.push_back(edge_to);
+						node_list::iterator it2 = it;
+						it2++;
+						edge_to->list_pos = nowlater.insert(it2, edge_to);
 
 						edge_to->status = Node::open;
 
@@ -235,6 +238,10 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 
 							edge_to->parent = curNode;
 
+							node_list::iterator it2 = it;
+							it2++;
+							nowlater.splice(it2, nowlater, edge_to->list_pos);
+
 							//now we could change the list, if it' sunder the threshold!
 						}
 					}
@@ -246,7 +253,6 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 				it++;
 			}
 		}
-
 		threshold = newThreshold(threshold);
 
 	}

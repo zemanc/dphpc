@@ -3,6 +3,7 @@
 #define __node_h__
 
 #include <vector>
+#include <list>
 
 class Edge;
 
@@ -19,6 +20,7 @@ class Node
 
 		enum state_t {closed, open, inactive, onPath};
 		Node* parent;
+		std::list<Node*>::iterator list_pos;
 
 
 		pEdg_v adjEdges;

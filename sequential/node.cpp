@@ -1,6 +1,7 @@
 #include "edge.h"
 #include <climits>
 #include <iostream>
+#include <cmath>
 
 unsigned int Node::max_index = 0;
 
@@ -21,8 +22,9 @@ Node::~Node()
 
 length_t Node::HeurDistanceTo(Node* pTo) const
 {
-	return ((pTo->xPos - xPos) * (pTo->xPos - xPos) 
-		   +(pTo->yPos - yPos) * (pTo->yPos - yPos));
+// 	return ((pTo->xPos - xPos) * (pTo->xPos - xPos) 
+// 		   +(pTo->yPos - yPos) * (pTo->yPos - yPos));
+	return std::abs(pTo->xPos - xPos) + std::abs(pTo->yPos - yPos);
 }
 
 length_t Node::getX() const
