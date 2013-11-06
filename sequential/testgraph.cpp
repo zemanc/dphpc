@@ -23,10 +23,7 @@ Graph Testgraph::getSimpleGraph(unsigned int graphsize) const
 
 	for (unsigned int i = 0; i < graphsize; i++)
 		for (unsigned int j = 0; j < graphsize; j++)
-		{
 			g.addNode(i, j);
-		}
-	
 
 	for (unsigned int i = 0; i < graphsize; i++)
 		for (unsigned int j = 1; j < graphsize; j++)
