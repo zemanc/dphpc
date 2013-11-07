@@ -1,9 +1,10 @@
 #include "testgraph.h"
 #include <stdlib.h>
+#include <cmath>
 
 Graph Testgraph::getLukasOriginalGraph(unsigned int graphsize) const
 {
-	Graph g = getSimpleGraph(graphsize);;
+	Graph g = getSimpleGraph(graphsize);
 
 	for (int i = 50; i < 70; i++)
 		for (int j = 30; j < 80; j++)
@@ -13,6 +14,35 @@ Graph Testgraph::getLukasOriginalGraph(unsigned int graphsize) const
 	for (unsigned int i = 0; i < graphsize * 10; i++)
 		g.removeNode(g.getNodeIndexByInternalIndex(rand() % (graphsize*graphsize- i)));
 
+	return g;
+
+}
+
+Graph Testgraph::getSmileyGraph(unsigned int graphsize) const
+{
+	Graph g = getSimpleGraph(graphsize);
+
+	int gs = int(graphsize);
+	const int sr = graphsize/2;		// smiley radius
+	const int er = graphsize/8;		// eye radius
+	const int ep = graphsize/3;		// eye pos
+	const int ml = graphsize/2;		// mouth length
+	const int mh = graphsize/8;		// mouth height
+	const int mp = graphsize*2/3;	// mouth pos
+
+	for (int i = 0; i < gs; i++)
+		for (int j = 0; j < gs; j++)
+		{
+			if ( sqrt(pow(int(i)-sr, 2) + pow(int(j)-sr, 2)) > sr  )
+				g.removeNode(gs*i + j);	// head
+			else if ( sqrt(pow(int(i)-ep, 2) + pow(int(j)-ep, 2)) < er )
+				g.removeNode(gs*i + j);	// left eye
+			else if ( sqrt(pow(int(i)-2*ep, 2) + pow(int(j)-ep, 2)) < er )
+				g.removeNode(gs*i + j);	// right eye
+			else if ( j > mp && j < mp+mh && i > ml/2 && i < ml/2+ml )
+				g.removeNode(gs*i + j);	// mouth
+		}
+		
 	return g;
 
 }
@@ -37,3 +67,4 @@ Graph Testgraph::getSimpleGraph(unsigned int graphsize) const
 	return g;
 
 }
+
