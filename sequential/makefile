@@ -2,6 +2,16 @@
 CC = g++
 CFLAGS = -Wall -pedantic -ansi -c
 LFLAGS = -Wall
+
+# make
+all: fringe
+# make profile
+profile: CC += -pg
+profile: fringe
+# make optimized
+optimized: CC += -O3
+optimized: fringe
+
 fringe: main.o graph.o testgraph.o edge.o node.o
 	$(CC) $(LFLAGS) -o $@ $^
 main.o: main.cpp graph.h testgraph.h node.h edge.h
