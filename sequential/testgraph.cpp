@@ -29,20 +29,23 @@ Graph Testgraph::getSmileyGraph(unsigned int graphsize) const
 	const int ml = graphsize/2;		// mouth length
 	const int mh = graphsize/8;		// mouth height
 	const int mp = graphsize*2/3;	// mouth pos
+	std::map<unsigned int, char> nodesToRemove;
 
 	for (int i = 0; i < gs; i++)
 		for (int j = 0; j < gs; j++)
 		{
 			if ( sqrt(pow(int(i)-sr, 2) + pow(int(j)-sr, 2)) > sr  )
-				g.removeNode(gs*i + j);	// head
+				nodesToRemove.insert(std::pair<unsigned int,char>(gs*i+j,'a') );
 			else if ( sqrt(pow(int(i)-ep, 2) + pow(int(j)-ep, 2)) < er )
-				g.removeNode(gs*i + j);	// left eye
+				nodesToRemove.insert(std::pair<unsigned int,char>(gs*i+j,'a') );
 			else if ( sqrt(pow(int(i)-2*ep, 2) + pow(int(j)-ep, 2)) < er )
-				g.removeNode(gs*i + j);	// right eye
+				nodesToRemove.insert(std::pair<unsigned int,char>(gs*i+j,'a') );
 			else if ( j > mp && j < mp+mh && i > ml/2 && i < ml/2+ml )
-				g.removeNode(gs*i + j);	// mouth
+				nodesToRemove.insert(std::pair<unsigned int,char>(gs*i+j,'a') );
+// 				g.removeNode(gs*i + j);	// mouth
 		}
-		
+	
+	g.removeNodesEdges(nodesToRemove);	
 	return g;
 
 }

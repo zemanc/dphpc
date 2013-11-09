@@ -3,6 +3,7 @@
 #define __graph_h__
 
 #include <vector>
+#include <map>
 #include <list>
 #include <string>
 
@@ -16,6 +17,8 @@ class Graph
 		typedef pEdg_v::iterator pEdg_v_it;
 		typedef std::vector<Node*> pNode_v;
 		typedef pNode_v::iterator pNode_v_it;
+// 		typedef std::map<unsigned int, char> pNtr_v;
+// 		typedef pNtr_v::iterator pNtr_v_it;
 
 		pNode_v pNodes_v;
 		pEdg_v pEdges_v;
@@ -28,6 +31,7 @@ class Graph
 
 		// no need to provide performant inserting and removing!
 		void addNode(length_t, length_t);
+		void removeNodesEdges(std::map<unsigned int, char>&);
 		bool addEdge(unsigned int, unsigned int);
 		void removeNode(unsigned int);
 		bool removeEdge(unsigned int, unsigned int);
