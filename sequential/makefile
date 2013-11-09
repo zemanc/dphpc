@@ -5,12 +5,12 @@ LFLAGS = -Wall
 
 # make
 all: fringe
-# make profile
-profile: CC += -pg
-profile: fringe
 # make optimized
 optimized: CC += -O3
 optimized: fringe
+# make profile
+profile: CC += -pg
+profile: optimized
 
 fringe: main.o graph.o testgraph.o edge.o node.o
 	$(CC) $(LFLAGS) -o $@ $^

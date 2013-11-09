@@ -3,6 +3,7 @@
 #define __graph_h__
 
 #include <vector>
+//#include <unordered_set>
 #include <set>
 #include <list>
 #include <string>
@@ -10,8 +11,6 @@
 #include "edge.h"
 #include "node.h"
 
-
-// typedef std::map<unsigned int, char> pNtr_v;
 typedef std::set<unsigned int> pNtr_v;
 typedef pNtr_v::iterator pNtr_v_it;
 
