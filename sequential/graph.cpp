@@ -7,16 +7,16 @@ void Graph::addNode(length_t xPos, length_t yPos)
 	return;
 }
 
-void Graph::removeNodesEdges(std::map<unsigned int, char>& nodesToRemove)
+void Graph::removeNodesEdges(pNtr_v& nodesToRemove)
 {
 	pNode_v_it it_node = pNodes_v.begin();
 	pEdg_v_it it_edg = pEdges_v.begin();
-	std::map<unsigned int, char>::iterator it_ntr;
+	pNtr_v_it it_ntr;
 	// remove nodes
 	while (it_node != pNodes_v.end() )
 	{
 		it_ntr = nodesToRemove.find((*it_node)->getIndex());
-		if (it_ntr != nodesToRemove.end())
+		if ((*it_node)->getIndex() == *it_ntr)
 			it_node = pNodes_v.erase(it_node);
 		else
 			it_node++;
@@ -25,8 +25,8 @@ void Graph::removeNodesEdges(std::map<unsigned int, char>& nodesToRemove)
 	while (it_edg != pEdges_v.end())
 	{
 		it_ntr = nodesToRemove.find((*it_node)->getIndex());
-		if ( ( (*it_edg)->getFrom()->getIndex() == it_ntr->first)
-		  || ( (*it_edg)->getTo()->getIndex() == it_ntr->first) )
+		if ( ( (*it_edg)->getFrom()->getIndex() == *it_ntr)
+		  || ( (*it_edg)->getTo()->getIndex() == *it_ntr) )
 			 it_edg = pEdges_v.erase(it_edg);
 		else 
 			it_edg++;	
