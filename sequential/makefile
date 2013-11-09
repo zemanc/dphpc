@@ -16,9 +16,9 @@ fringe: main.o graph.o testgraph.o edge.o node.o
 	$(CC) $(LFLAGS) -o $@ $^
 main.o: main.cpp graph.h testgraph.h node.h edge.h
 	$(CC) $(CFLAGS) $<
-graph.o: graph.cpp graph.h testgraph.h node.h edge.h
+testgraph.o: testgraph.cpp testgraph.h graph.h edge.h node.h
 	$(CC) $(CFLAGS) $<
-testgraph.o: testgraph.cpp testgraph.h edge.h node.h
+graph.o: graph.cpp graph.h node.h edge.h
 	$(CC) $(CFLAGS) $<
 edge.o: edge.cpp edge.h node.h
 	$(CC) $(CFLAGS) $<

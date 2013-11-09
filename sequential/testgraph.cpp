@@ -42,7 +42,6 @@ Graph Testgraph::getSmileyGraph(unsigned int graphsize) const
 				nodesToRemove.insert(gs*i+j);
 			else if ( j > mp && j < mp+mh && i > ml/2 && i < ml/2+ml )
 				nodesToRemove.insert(gs*i+j);
-// 				g.removeNode(gs*i + j);	// mouth
 		}
 	
 	g.removeNodesEdges(nodesToRemove);	
@@ -58,15 +57,8 @@ Graph Testgraph::getSimpleGraph(unsigned int graphsize) const
 		for (unsigned int j = 0; j < graphsize; j++)
 			g.addNode(i, j);
 
-	for (unsigned int i = 0; i < graphsize; i++)
-		for (unsigned int j = 1; j < graphsize; j++)
-		{
-			g.addEdge(graphsize*i+j-1, graphsize*i+j);
-			g.addEdge(graphsize*i+j, graphsize*i+j-1);
-			g.addEdge(graphsize*(i-1)+j, graphsize*i+j);
-			g.addEdge(graphsize*i+j, graphsize*(i-1)+j);
-		}
-
+	g.addAllEdges(graphsize);
+	
 	return g;
 
 }

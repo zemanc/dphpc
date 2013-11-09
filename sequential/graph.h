@@ -13,15 +13,14 @@
 
 typedef std::set<unsigned int> pNtr_v;
 typedef pNtr_v::iterator pNtr_v_it;
+typedef std::vector<Edge*> pEdg_v;
+typedef pEdg_v::iterator pEdg_v_it;
+typedef std::vector<Node*> pNode_v;
+typedef pNode_v::iterator pNode_v_it;
 
 class Graph
 {
 	private:
-		typedef std::vector<Edge*> pEdg_v;
-		typedef pEdg_v::iterator pEdg_v_it;
-		typedef std::vector<Node*> pNode_v;
-		typedef pNode_v::iterator pNode_v_it;
-
 		pNode_v pNodes_v;
 		pEdg_v pEdges_v;
 
@@ -31,14 +30,14 @@ class Graph
 	public:
 		~Graph();
 
-		// no need to provide performant inserting and removing!
 		void addNode(length_t, length_t);
  		void removeNodesEdges(pNtr_v);
-		bool addEdge(unsigned int, unsigned int);
-		void removeNode(unsigned int);
-		bool removeEdge(unsigned int, unsigned int);
-		void removeEdge(unsigned int);
-		void removeEdge(pEdg_v_it&);
+		void addAllEdges(unsigned int);
+		bool addEdge(unsigned int, unsigned int);		// do not use
+		void removeNode(unsigned int);					// do not use
+		bool removeEdge(unsigned int, unsigned int);	// do not use
+		void removeEdge(unsigned int);					// do not use
+		void removeEdge(pEdg_v_it&);					// do not use
 		Node* getNode(unsigned int);
 
 		void printTgf() const;

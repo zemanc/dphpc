@@ -45,6 +45,33 @@ void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 	}
 }
 
+void Graph::addAllEdges(unsigned int graphsize)
+{
+	pNode_v_it it1 = pNodes_v.begin();
+	pNode_v_it it2 = pNodes_v.begin() + 1;
+	pNode_v_it it3 = pNodes_v.begin() + graphsize;
+	
+	for (unsigned int i = 1; i <= graphsize; i++)
+		for (unsigned int j = 1; j <= graphsize; j++)
+		{
+			if (j < graphsize)
+			{
+				pEdges_v.push_back(new Edge(*it1, *it2));
+				pEdges_v.push_back(new Edge(*it2, *it1));
+			}
+			if (i < graphsize)
+			{
+				pEdges_v.push_back(new Edge(*it1, *it3));
+				pEdges_v.push_back(new Edge(*it3, *it1));
+			}
+			it1++;
+			it2++;
+			it3++;
+		}
+		it1 = it1 + graphsize;
+		it2 = it2 + graphsize;
+		it3 = it3 + graphsize;
+}
 
 void Graph::removeNode(unsigned int index)
 {
