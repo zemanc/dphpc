@@ -33,7 +33,7 @@ class Graph
 
 		// no need to provide performant inserting and removing!
 		void addNode(length_t, length_t);
- 		void removeNodesEdges(pNtr_v&);
+ 		void removeNodesEdges(pNtr_v);
 		bool addEdge(unsigned int, unsigned int);
 		void removeNode(unsigned int);
 		bool removeEdge(unsigned int, unsigned int);

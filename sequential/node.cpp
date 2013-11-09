@@ -43,7 +43,6 @@ unsigned int Node::getIndex() const
 void Node::addEdge(Edge* pnewEdge)
 {
 	adjEdges.push_back(pnewEdge);
-	return;
 }
 
 void Node::removeEdge(Edge* e)

@@ -7,29 +7,41 @@ void Graph::addNode(length_t xPos, length_t yPos)
 	return;
 }
 
-void Graph::removeNodesEdges(pNtr_v& nodesToRemove)
+void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 {
-	pNode_v_it it_node = pNodes_v.begin();
+	//wenn wir das schlau machen.... ;-)
+	pNtr_v_it it_ntr =  nodesToRemove.begin();
+
+	// remove edges
 	pEdg_v_it it_edg = pEdges_v.begin();
-	pNtr_v_it it_ntr;
+	while (it_edg != pEdges_v.end() )
+	{
+		if (( (*it_edg)->getFrom()->getIndex() == *it_ntr )
+		 || ((*it_edg)->getTo()->getIndex() == *it_ntr ))
+		{
+			it_edg = pEdges_v.erase(it_edg);
+			it_ntr++;
+		}
+		else
+		{
+			it_edg++;
+		}
+	}
+
 	// remove nodes
+	pNode_v_it it_node = pNodes_v.begin();
+	it_ntr =  nodesToRemove.begin();
 	while (it_node != pNodes_v.end() )
 	{
-		it_ntr = nodesToRemove.find((*it_node)->getIndex());
-		if ((*it_node)->getIndex() == *it_ntr)
-			it_node = pNodes_v.erase(it_node);
+		if ( (*it_node)->getIndex() == *it_ntr )
+		{
+			it_node== pNodes_v.erase(it_node);
+			it_ntr++;
+		}
 		else
+		{
 			it_node++;
-	}
-	// remove edges
-	while (it_edg != pEdges_v.end())
-	{
-		it_ntr = nodesToRemove.find((*it_node)->getIndex());
-		if ( ( (*it_edg)->getFrom()->getIndex() == *it_ntr)
-		  || ( (*it_edg)->getTo()->getIndex() == *it_ntr) )
-			 it_edg = pEdges_v.erase(it_edg);
-		else 
-			it_edg++;	
+		}
 	}
 }
 
@@ -270,7 +282,6 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 							it2++;
 							nowlater.splice(it2, nowlater, edge_to->list_pos);
 
-							//now we could change the list, if it' sunder the threshold!
 						}
 					}
 						
