@@ -9,31 +9,32 @@ void Graph::addNode(length_t xPos, length_t yPos)
 
 void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 {
-	//wenn wir das schlau machen.... ;-)
-	pNtr_v_it it_ntr =  nodesToRemove.begin();
+	pNode_v_it it_node = pNodes_v.begin();
+    pEdg_v_it it_edg = pEdges_v.begin();
+    pNtr_v_it it_ntr1;
+	pNtr_v_it it_ntr2;
 
-	// remove edges
-	pEdg_v_it it_edg = pEdges_v.begin();
-	while (it_edg != pEdges_v.end() )
+    // remove edges
+	while (it_edg != pEdges_v.end())
 	{
-		if (( (*it_edg)->getFrom()->getIndex() == *it_ntr )
-		 || ((*it_edg)->getTo()->getIndex() == *it_ntr ))
+		it_ntr1 = nodesToRemove.find((*it_edg)->getFrom()->getIndex());
+		it_ntr2 = nodesToRemove.find((*it_edg)->getTo()->getIndex());
+		if ( it_ntr1 != nodesToRemove.end() || it_ntr2 != nodesToRemove.end() )
 		{
 			(*it_edg)->getFrom()->removeEdge(*it_edg);
 			(*it_edg)->getTo()->removeEdge(*it_edg);
-			delete *it_edg;
+//			delete *it_edg;
 			it_edg = pEdges_v.erase(it_edg);
-			it_ntr++;
 		}
-		else
+		else 
 		{
 			it_edg++;
 		}
 	}
 
 	// remove nodes
-	pNode_v_it it_node = pNodes_v.begin();
-	it_ntr =  nodesToRemove.begin();
+	it_node = pNodes_v.begin();
+	pNtr_v_it it_ntr =  nodesToRemove.begin();
 	while (it_node != pNodes_v.end() )
 	{
 		if ( (*it_node)->getIndex() == *it_ntr )
