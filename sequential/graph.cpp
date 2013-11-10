@@ -10,16 +10,16 @@ void Graph::addNode(length_t xPos, length_t yPos)
 void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 {
 	pNode_v_it it_node = pNodes_v.begin();
-    pEdg_v_it it_edg = pEdges_v.begin();
-    pNtr_v_it it_ntr1;
-	pNtr_v_it it_ntr2;
+	pEdg_v_it it_edg = pEdges_v.begin();
+	pNtr_v_it it_ntrFrom;
+	pNtr_v_it it_ntrTo;
 
-    // remove edges
+	// remove edges
 	while (it_edg != pEdges_v.end())
 	{
-		it_ntr1 = nodesToRemove.find((*it_edg)->getFrom()->getIndex());
-		it_ntr2 = nodesToRemove.find((*it_edg)->getTo()->getIndex());
-		if ( it_ntr1 != nodesToRemove.end() || it_ntr2 != nodesToRemove.end() )
+		it_ntrFrom = nodesToRemove.find((*it_edg)->getFrom()->getIndex());
+		it_ntrTo = nodesToRemove.find((*it_edg)->getTo()->getIndex());
+		if ( it_ntrFrom != nodesToRemove.end() || it_ntrTo != nodesToRemove.end() )
 		{
 			(*it_edg)->getFrom()->removeEdge(*it_edg);
 			(*it_edg)->getTo()->removeEdge(*it_edg);
