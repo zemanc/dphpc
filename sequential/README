@@ -1,2 +1,3 @@
-ups... doch nicht so toll, der pfad geht voll durch das auge :D
---> etwas verbesserungswürdig!
+so, es goht wieder.
+aber immer weni graph.cpp ziile 41 ( delete *it_node ) uskommentiere, gits segmentation fault.... idee?
+will so löschemer de node jo gar ned richtig :(
