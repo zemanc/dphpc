@@ -50,7 +50,7 @@ void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 	}
 }
 
-void Graph::addAllEdges(unsigned int graphsize)
+void Graph::addAllEdges4Directions(unsigned int graphsize)
 {
 	pNode_v_it it1 = pNodes_v.begin();
 	pNode_v_it it2 = pNodes_v.begin() + 1;

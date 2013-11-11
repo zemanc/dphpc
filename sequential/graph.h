@@ -32,7 +32,7 @@ class Graph
 
 		void addNode(length_t, length_t);
  		void removeNodesEdges(pNtr_v);
-		void addAllEdges(unsigned int);
+		void addAllEdges4Directions(unsigned int);
 		bool addEdge(unsigned int, unsigned int);		// do not use
 		void removeNode(unsigned int);					// do not use
 		bool removeEdge(unsigned int, unsigned int);	// do not use

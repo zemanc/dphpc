@@ -57,7 +57,7 @@ Graph Testgraph::getSimpleGraph(unsigned int graphsize) const
 		for (unsigned int j = 0; j < graphsize; j++)
 			g.addNode(i, j);
 
-	g.addAllEdges(graphsize);
+	g.addAllEdges4Directions(graphsize);
 	
 	return g;
 
