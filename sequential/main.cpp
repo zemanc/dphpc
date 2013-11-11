@@ -17,6 +17,8 @@ int main()
 
   	g.printGml();
 
+	delete path;
+
 	return 0;
 }
 
