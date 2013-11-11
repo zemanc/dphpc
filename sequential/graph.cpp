@@ -23,7 +23,7 @@ void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 		{
 			(*it_edg)->getFrom()->removeEdge(*it_edg);
 			(*it_edg)->getTo()->removeEdge(*it_edg);
-//			delete *it_edg;
+			delete *it_edg;
 			it_edg = pEdges_v.erase(it_edg);
 		}
 		else 
@@ -39,7 +39,7 @@ void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 	{
 		if ( (*it_node)->getIndex() == *it_ntr )
 		{
-// 			delete *it_node;
+ 			delete *it_node;
 			it_node = pNodes_v.erase(it_node);
 			it_ntr++;
 		}
