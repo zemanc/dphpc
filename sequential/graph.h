@@ -32,6 +32,7 @@ class Graph
 
 		void addNode(length_t, length_t);
  		void removeNodesEdges(pNtr_v);
+		void addAllEdges8Directions(unsigned int);
 		void addAllEdges4Directions(unsigned int);
 		bool addEdge(unsigned int, unsigned int);		// do not use
 		void removeNode(unsigned int);					// do not use
@@ -42,6 +43,8 @@ class Graph
 
 		void printTgf() const;
 		void printGml() const;
+		
+		unsigned int nodeCount() const { return pNodes_v.size(); };
 
 		void getShortestPath(unsigned int, unsigned int, std::list<Node*>*);
 		void reconstructPath(std::list<Node*>* vals, Node*, Node*);

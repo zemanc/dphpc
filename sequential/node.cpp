@@ -12,6 +12,8 @@ Node::Node(length_t xP, length_t yP) : xPos(xP)
 									 , f(0)
 									 , g(0)
 									 , h(0)
+									 , next(NULL)
+									 , prev(NULL)
 {
 	index = max_index++;
 }
@@ -20,10 +22,14 @@ Node::~Node()
 //	max_index--; das wäre ja gar nicht gut! :-) der Index muss einmalig sein!
 }
 
-length_t Node::HeurDistanceTo(Node* pTo) const
+length_t Node::EuklidDistanceTo(Node* pTo) const
 {
-// 	return ((pTo->xPos - xPos) * (pTo->xPos - xPos) 
-// 		   +(pTo->yPos - yPos) * (pTo->yPos - yPos));
+	return std::sqrt((pTo->xPos - xPos) * (pTo->xPos - xPos) 
+		   +(pTo->yPos - yPos) * (pTo->yPos - yPos));
+}
+
+length_t Node::ManhattanDistanceTo(Node* pTo) const
+{
 	return std::abs(pTo->xPos - xPos) + std::abs(pTo->yPos - yPos);
 }
 

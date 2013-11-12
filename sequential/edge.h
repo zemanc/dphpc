@@ -17,9 +17,9 @@ class Edge
 		Edge(Node*, Node*);
 		Edge(Node*, Node*, length_t);
 
-		Node* getFrom() const;
-		Node* getTo() const;
-		length_t getDistance() const;
+		inline Node* getFrom() const { return from; };
+		inline Node* getTo() const { return to; };
+		inline length_t getDistance() const { return dist; };
 
 };
 

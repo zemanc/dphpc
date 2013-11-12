@@ -34,20 +34,53 @@ void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 
 	// remove nodes
 	it_node = pNodes_v.begin();
-	pNtr_v_it it_ntr =  nodesToRemove.begin();
 	while (it_node != pNodes_v.end() )
 	{
-		if ( (*it_node)->getIndex() == *it_ntr )
+		if (nodesToRemove.find((*it_node)->getIndex()) != nodesToRemove.end())
 		{
  			delete *it_node;
 			it_node = pNodes_v.erase(it_node);
-			it_ntr++;
 		}
 		else
 		{
 			it_node++;
 		}
+
 	}
+}
+
+void Graph::addAllEdges8Directions(unsigned int graphsize)
+{
+	pNode_v_it it1 = pNodes_v.begin();
+	pNode_v_it it2 = pNodes_v.begin() + 1;
+	pNode_v_it it3 = pNodes_v.begin() + graphsize;
+	pNode_v_it it4 = pNodes_v.begin() + graphsize + 1;
+	
+	for (unsigned int i = 1; i <= graphsize; i++)
+		for (unsigned int j = 1; j <= graphsize; j++)
+		{
+			if (j < graphsize)
+			{
+				pEdges_v.push_back(new Edge(*it1, *it2));
+				pEdges_v.push_back(new Edge(*it2, *it1));
+			}
+			if (i < graphsize)
+			{
+				pEdges_v.push_back(new Edge(*it1, *it3));
+				pEdges_v.push_back(new Edge(*it3, *it1));
+			}
+			if (i < graphsize && j < graphsize)
+			{
+				pEdges_v.push_back(new Edge(*it1, *it4));
+				pEdges_v.push_back(new Edge(*it4, *it1));
+				pEdges_v.push_back(new Edge(*it2, *it3));
+				pEdges_v.push_back(new Edge(*it3, *it2));
+			}
+			it1++;
+			it2++;
+			it3++;
+			it4++;
+		}
 }
 
 void Graph::addAllEdges4Directions(unsigned int graphsize)
@@ -73,9 +106,6 @@ void Graph::addAllEdges4Directions(unsigned int graphsize)
 			it2++;
 			it3++;
 		}
-		it1 = it1 + graphsize;
-		it2 = it2 + graphsize;
-		it3 = it3 + graphsize;
 }
 
 void Graph::removeNode(unsigned int index)
@@ -244,89 +274,117 @@ void Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end)
 
 void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>* vals)
 {
-	typedef std::list<Node*> node_list;
-
-	node_list nowlater;
 
 	//geht besser so als randomized... für den Moment. Später ist das wohl dann der "richtige" Index, nicht der interne!
 	Node* start = pNodes_v[from];
 	Node* end = pNodes_v[to];
 
+	//start heuristische funktion initialisieren
 	start->g = 0;
-	start->h = start->HeurDistanceTo(end);
+	start->h = start->EuklidDistanceTo(end);
 	start->f = start->g + start->h;
-
-	start->list_pos = nowlater.insert(nowlater.begin(), start);
 
 	double threshold = start->f; //start with shortest possible paths
 
-	while (!nowlater.empty())
+	//init list
+	Node* zero_node = new Node(0, 0);
+	zero_node->prev = zero_node;
+	zero_node->next = zero_node;
+
+	//insert start into list
+	zero_node->next = zero_node->prev = start;
+	start->next = start->prev = zero_node;
+
+	//solange nicht leer
+	while (zero_node->next != zero_node)
 	{
+		//beginne bei erstem Node (nach zero_node)
+		Node* nl_pos = zero_node->next;
 
-		node_list::iterator it = nowlater.begin();
-		while (it != nowlater.end())
+		//wenn dieser wieder das zero_node ist, dann ist die Liste leer!
+		while (nl_pos != zero_node)
 		{
-			Node* curNode = *it;
-
-			//if under treshold, than work with it - otherwise ignore!
-			if (curNode->f <= threshold)
+			//nur bearbeiten, wenn unter threshold. zero_node (f=0) ist ausgeschlossen
+			if (nl_pos->f <= threshold)
 			{
-				if (curNode == end)
+				//wenn fertig dann fertig
+				if (nl_pos == end)
 					return reconstructPath(vals, start, end);
 					
-				curNode->status = Node::closed;
+				//node schliessen
+				nl_pos->status = Node::closed;
 
 				//for each neighbor
-				for (Node::pEdg_v::iterator edge_it = curNode->adjEdges.begin(); 
-					 edge_it != curNode->adjEdges.end(); edge_it++)
+				for (Node::pEdg_v::iterator edge_it = nl_pos->adjEdges.begin(); 
+					 edge_it != nl_pos->adjEdges.end(); edge_it++)
 				{
 					Node* edge_to = (*edge_it)->getTo();
 
 					if (edge_to->status == Node::inactive)
 					{
-						//New Node!
-						edge_to->g = curNode->g + (*edge_it)->getDistance();
-						edge_to->h = edge_to->HeurDistanceTo(end);
+						//neuer Node!
+
+						//berechne heuristische Beträge
+						edge_to->g = nl_pos->g + (*edge_it)->getDistance();
+						edge_to->h = edge_to->EuklidDistanceTo(end);
 						edge_to->f = edge_to->g + edge_to->h;
 
-						edge_to->parent = curNode;
+						//für backtracking, damit wir wissen woher wir gekommen sind
+						edge_to->parent = nl_pos;
 
-						//at the moment for simplifying, insert at the end
-						node_list::iterator it2 = it;
-						it2++;
-						edge_to->list_pos = nowlater.insert(it2, edge_to);
+						//direkt nachher einfügen
+						edge_to->next = nl_pos->next;
+						nl_pos->next->prev = edge_to;
+						nl_pos->next = edge_to;
+						edge_to->prev = nl_pos;
 
 						edge_to->status = Node::open;
 
 					} else if (edge_to->status == Node::open) {
 						
-						double newDist = curNode->g + (*edge_it)->getDistance();
+						//wenn distanz besser ist
+						double newDist = nl_pos->g + (*edge_it)->getDistance();
 						if (edge_to->g > newDist)
 						{
-							//better node!
-
+							//heuristische Beträge berechnen
 							edge_to->g =  newDist;
 							edge_to->f = newDist + edge_to->h;
 
-							edge_to->parent = curNode;
+							//backtracking setzen
+							edge_to->parent = nl_pos;
 
-							node_list::iterator it2 = it;
-							it2++;
-							nowlater.splice(it2, nowlater, edge_to->list_pos);
+							//edge_to verschieben!
+							//remove 
+							edge_to->prev->next = edge_to->next;
+							edge_to->next->prev = edge_to->prev;
 
+							//insert
+							edge_to->next = nl_pos->next;
+							nl_pos->next->prev = edge_to;
+							nl_pos->next = edge_to;
+							edge_to->prev = nl_pos;
 						}
 					}
 						
 				}
-				it = nowlater.erase(it);
+				//lösche nl_pos und setze auf das nächste
+				Node* nl_next = nl_pos->next;
+				nl_pos->prev->next = nl_pos->next;
+				nl_pos->next->prev = nl_pos->prev;
+				nl_pos->prev = NULL;
+				nl_pos->next = NULL;
+				nl_pos = nl_next;
 
 			} else {
-				it++;
+				//Sonst überspringe
+				nl_pos = nl_pos->next;
 			}
 		}
+		//Neuer threshold berechnen
 		threshold = newThreshold(threshold);
 
 	}
+	delete zero_node;
 }
 
 unsigned int Graph::getNodeIndexByInternalIndex(unsigned int i)

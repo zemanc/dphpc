@@ -4,7 +4,7 @@ Edge::Edge(Node* pFrom, Node* pTo) : from(pFrom)
 								   , to(pTo)
 {
 	pFrom->addEdge(this);
-	dist = pFrom->HeurDistanceTo(pTo);
+	dist = pFrom->EuklidDistanceTo(pTo);
 }
 
 Edge::Edge(Node* pFrom, Node* pTo, length_t d) : from(pFrom)
@@ -14,17 +14,3 @@ Edge::Edge(Node* pFrom, Node* pTo, length_t d) : from(pFrom)
 	pFrom->addEdge(this);
 }
 
-Node* Edge::getFrom() const
-{
-	return from;
-}
-
-Node* Edge::getTo() const
-{
-	return to;
-}
-
-length_t Edge::getDistance() const
-{
-	return dist;
-}

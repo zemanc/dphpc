@@ -1,10 +1,11 @@
 #include "testgraph.h"
 #include <stdlib.h>
+#include <vector>
 #include <cmath>
 
 Graph Testgraph::getLukasOriginalGraph(unsigned int graphsize) const
 {
-	Graph g = getSimpleGraph(graphsize);
+	Graph g = getSimpleGraph(graphsize, Testgraph::dir8);
 
 	for (int i = 50; i < 70; i++)
 		for (int j = 30; j < 80; j++)
@@ -18,9 +19,23 @@ Graph Testgraph::getLukasOriginalGraph(unsigned int graphsize) const
 
 }
 
-Graph Testgraph::getSmileyGraph(unsigned int graphsize) const
+void Testgraph::removeRandomNodes(Graph& g, unsigned int count, unsigned int max) const
 {
-	Graph g = getSimpleGraph(graphsize);
+	pNtr_v nodesToRemove;
+	for (unsigned int i = 0; i < count; i++)
+	{
+		unsigned int num;
+		while (nodesToRemove.find(num = rand() % max ) != nodesToRemove.end());
+
+		nodesToRemove.insert(num);
+	}
+
+	g.removeNodesEdges(nodesToRemove);
+}
+
+Graph Testgraph::getSmileyGraph(unsigned int graphsize, edge_type e) const
+{
+	Graph g = getSimpleGraph(graphsize, e);
 
 	int gs = int(graphsize);
 	const int sr = graphsize/2;		// smiley radius
@@ -49,7 +64,7 @@ Graph Testgraph::getSmileyGraph(unsigned int graphsize) const
 
 }
 
-Graph Testgraph::getSimpleGraph(unsigned int graphsize) const
+Graph Testgraph::getSimpleGraph(unsigned int graphsize, edge_type e) const
 {
 	Graph g;
 
@@ -57,7 +72,10 @@ Graph Testgraph::getSimpleGraph(unsigned int graphsize) const
 		for (unsigned int j = 0; j < graphsize; j++)
 			g.addNode(i, j);
 
-	g.addAllEdges4Directions(graphsize);
+	if (e == dir4)
+		g.addAllEdges4Directions(graphsize);
+	else if (e == dir8)
+		g.addAllEdges8Directions(graphsize);
 	
 	return g;
 

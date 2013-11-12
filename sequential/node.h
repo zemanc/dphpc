@@ -10,33 +10,37 @@ class Edge;
 class Node
 {
 	private:
-		static unsigned int max_index;
+		static unsigned int max_index; //kein index wird doppelt vergeben
+
 		unsigned int index;
 		length_t xPos;
 		length_t yPos;
 
 	public:
-		typedef std::vector<Edge*> pEdg_v;
-
-		enum state_t {closed, open, inactive, onPath};
-		Node* parent;
-		std::list<Node*>::iterator list_pos;
-
-
-		pEdg_v adjEdges;
-
 		Node(length_t, length_t);
 		~Node();
 
+		//allgemeine funktionen
 		length_t getX() const;
 		length_t getY() const;
 		unsigned int getIndex() const;
 
-		void addEdge(Edge*);
-		
-		length_t HeurDistanceTo(Node*) const;
+		void print() const;
 
+		//Nachbarn
+		typedef std::vector<Edge*> pEdg_v;
+		pEdg_v adjEdges;
+
+		void addEdge(Edge*);
 		void removeEdge(Edge*);
+
+		//states für shortest Path
+		enum state_t {closed, open, inactive, onPath};
+		Node* parent; 
+
+		//Distanzfunktionen
+		length_t EuklidDistanceTo(Node*) const;
+		length_t ManhattanDistanceTo(Node*) const;
 
 		//does it make a difference when those are private with an 
 		//additional function (getF / getG / ...)
@@ -45,7 +49,10 @@ class Node
 		double g; //effective cost from start to this node
 		double h; //heuristic cost from this node to end
 
-		void print() const;
+
+		//"nowlater"-list
+		Node* next;
+		Node* prev;
 
 };
 
