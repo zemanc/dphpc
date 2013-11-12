@@ -1,3 +1,17 @@
-so, es goht wieder.
-aber immer weni graph.cpp ziile 41 ( delete *it_node ) uskommentiere, gits segmentation fault.... idee?
-will so löschemer de node jo gar ned richtig :(
+folgendi Änderige:
+- now later list esch direkt im Node implementiert met prev ond next. denke dör dä pointer wenigr werds ou nochli effizienter
+- me cha zuefällig x nodes entferne loh
+- me cha wähle öb 8 nochbere odr 4 (im mom sind 8 igstellt)
+- zuesätzlech euklid-distanz igstellt för 8 nochbere. weiss ned öb mr da wönd manuell omstelle ame odr wimr da wönd mache das jewiils dir echtig distanz gnoh werd, das mr ned för da performance verlüüred
+- diversi chlini änderige ouä no... :) seinte headerfile nochli omgstellt dases chli gordnet werkt (mösst node.h si)
+
+idee vo de laterlist: es get en zero_node. wenn zero_node->next of sech selbr zeigt de eschs leer, sösch zeigts of si nochfolger ...
+
+TODO: als nöchschts chönt mr folgendes z.B. mache
+... graphe abspichere odr lade (got zwor bi mer etz ärcht schnäll zom kreiere)
+... en sequentielli odr paralleli version vomne bereits existierende algorithmus separat implementiere zom benchmarke 
+    ... http://www.boost.org/doc/libs/1_46_1/libs/graph_parallel/doc/html/dijkstra_shortest_paths.html
+	... a* implementation? odr sogar fringe? findi grad ned
+... üse algorithmus verbessere odr gar afoh omschriibe :)
+
+
