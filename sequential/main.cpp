@@ -13,8 +13,9 @@ int main()
 	tg.removeRandomNodes(g, 2000, 10000);
 
 	std::list<Node*> *path = new std::list<Node*>;
+	EuklidDistance ek_distance;
 // 	g.getShortestPath(1, 5549, path);
-	g.getShortestPath(2686, 2481, path);	// smiley values
+	g.getShortestPath(2686, 2481, path, ek_distance);	// smiley values
 
   	g.printGml();
 

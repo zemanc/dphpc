@@ -14,7 +14,7 @@ class Edge
 		length_t dist;
 
 	public: 
-		Edge(Node*, Node*);
+		template<class F> Edge(Node*, Node*, const F&);
 		Edge(Node*, Node*, length_t);
 
 		inline Node* getFrom() const { return from; };
@@ -22,6 +22,16 @@ class Edge
 		inline length_t getDistance() const { return dist; };
 
 };
+
+template<class F>
+Edge::Edge(Node* pFrom, Node* pTo, const F& distance)
+											: from(pFrom)
+											, to(pTo)
+{
+	pFrom->addEdge(this);
+	this->dist = distance.get(pFrom, pTo);
+}
+	
 
 
 #endif

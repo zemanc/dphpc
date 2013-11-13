@@ -38,10 +38,6 @@ class Node
 		enum state_t {closed, open, inactive, onPath};
 		Node* parent; 
 
-		//Distanzfunktionen
-		length_t EuklidDistanceTo(Node*) const;
-		length_t ManhattanDistanceTo(Node*) const;
-
 		//does it make a difference when those are private with an 
 		//additional function (getF / getG / ...)
 		state_t status;
