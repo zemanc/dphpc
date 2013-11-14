@@ -1,6 +1,6 @@
 # Makefile for fringe search
 CC = g++
-CFLAGS = -Wall -pedantic -ansi -c
+CFLAGS = -Wall -pedantic -ansi -c -std=c++0x
 LFLAGS = -Wall
 
 # make
