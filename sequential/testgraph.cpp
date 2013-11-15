@@ -100,3 +100,4 @@ Graph Testgraph::getSimpleGraph(unsigned int graphsize, edge_type e) const
 
 }
 
+

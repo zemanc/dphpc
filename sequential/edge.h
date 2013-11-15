@@ -19,6 +19,7 @@ class Edge
 
 		inline Node* getFrom() const { return from; };
 		inline Node* getTo() const { return to; };
+		inline void setDistance(double d) { dist = d; return; };
 		inline length_t getDistance() const { return dist; };
 
 };

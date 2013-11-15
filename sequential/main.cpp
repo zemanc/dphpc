@@ -16,10 +16,12 @@ int main()
 // 	Graph g = tg.getSmileyGraph(100, Testgraph::dir8);
 	Graph g = tg.getCircleGraph(100, Testgraph::dir8);
 	tg.removeRandomNodes(g, 2000, 10000);
+	EuklidDistance ek_distance;
+
+	g.randomDisplaceAllNodes(0.1, ek_distance);
 
 	std::list<Node*> *path = new std::list<Node*>;
-// 	EuklidDistance ek_distance;
- 	ManhattanDistance ek_distance;
+//  	ManhattanDistance ek_distance;
 
 	// start timing
 	std::ofstream timeout("time.out", std::ios::out);
