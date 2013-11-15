@@ -37,7 +37,7 @@ Graph Testgraph::getSmileyGraph(unsigned int graphsize, edge_type e) const
 {
 	Graph g = getSimpleGraph(graphsize, e);
 
-	int gs = int(graphsize);
+	const int gs = int(graphsize);
 	const int sr = graphsize/2;		// smiley radius
 	const int er = graphsize/8;		// eye radius
 	const int ep = graphsize/3;		// eye pos
@@ -62,6 +62,25 @@ Graph Testgraph::getSmileyGraph(unsigned int graphsize, edge_type e) const
 	g.removeNodesEdges(nodesToRemove);	
 	return g;
 
+}
+
+Graph Testgraph::getCircleGraph(unsigned int graphsize, edge_type e) const
+{
+	Graph g = getSimpleGraph(graphsize, e);
+	const int gs = int(graphsize);
+	const int r = gs/4;
+	const int rr = r*r;
+	pNtr_v nodesToRemove;
+
+	for (int i = 0; i < gs; i++)
+		for (int j = 0; j < gs; j++)
+		{
+			if ( pow(int(i)-r, 2) + pow(int(j)-r, 2) < rr )
+				nodesToRemove.insert(gs*i+j);
+		}
+	
+	g.removeNodesEdges(nodesToRemove);
+	return g;
 }
 
 Graph Testgraph::getSimpleGraph(unsigned int graphsize, edge_type e) const

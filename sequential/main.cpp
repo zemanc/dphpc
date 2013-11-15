@@ -13,7 +13,8 @@ int main()
 	Testgraph tg;
 // 	Graph g = tg.getSimpleGraph(100);
 // 	Graph g = tg.getLukasOriginalGraph(100);
-	Graph g = tg.getSmileyGraph(100, Testgraph::dir8);
+// 	Graph g = tg.getSmileyGraph(100, Testgraph::dir8);
+	Graph g = tg.getCircleGraph(100, Testgraph::dir8);
 	tg.removeRandomNodes(g, 2000, 10000);
 
 	std::list<Node*> *path = new std::list<Node*>;
