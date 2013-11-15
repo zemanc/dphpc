@@ -38,7 +38,7 @@ void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 	{
 		if (nodesToRemove.find((*it_node)->getIndex()) != nodesToRemove.end())
 		{
- 			delete *it_node;
+			delete *it_node;
 			it_node = pNodes_v.erase(it_node);
 		}
 		else
@@ -53,12 +53,12 @@ void Graph::addAllEdges8Directions(unsigned int graphsize)
 {
 
 	EuklidDistance ek_distance;	
-	
+
 	pNode_v_it it1 = pNodes_v.begin();
 	pNode_v_it it2 = pNodes_v.begin() + 1;
 	pNode_v_it it3 = pNodes_v.begin() + graphsize;
 	pNode_v_it it4 = pNodes_v.begin() + graphsize + 1;
-	
+
 	for (unsigned int i = 1; i <= graphsize; i++)
 		for (unsigned int j = 1; j <= graphsize; j++)
 		{
@@ -93,7 +93,7 @@ void Graph::addAllEdges4Directions(unsigned int graphsize)
 	pNode_v_it it1 = pNodes_v.begin();
 	pNode_v_it it2 = pNodes_v.begin() + 1;
 	pNode_v_it it3 = pNodes_v.begin() + graphsize;
-	
+
 	for (unsigned int i = 1; i <= graphsize; i++)
 		for (unsigned int j = 1; j <= graphsize; j++)
 		{
@@ -120,7 +120,7 @@ void Graph::removeNode(unsigned int index)
 	while (it_edg != pEdges_v.end() )
 	{
 		if ( ( (*it_edg)->getFrom()->getIndex() == index)
-		  || ( (*it_edg)->getTo()->getIndex() == index))
+				|| ( (*it_edg)->getTo()->getIndex() == index))
 			removeEdge(it_edg);
 		else
 			it_edg++;
@@ -142,7 +142,7 @@ Node* Graph::getNode(unsigned int index)
 	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
 		if ((*it)->getIndex() == index)
 			return *it;
-	
+
 	return 0;
 }
 
@@ -163,9 +163,9 @@ bool Graph::removeEdge(unsigned int from, unsigned int to)
 	for  (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
 	{
 		if (((*it)->getFrom()->getIndex() == from)
-		  		&& (*it)->getTo()->getIndex() == to)
+				&& (*it)->getTo()->getIndex() == to)
 		{	
-		  	removeEdge(it);
+			removeEdge(it);
 			return true;
 		}
 	}
@@ -180,7 +180,7 @@ bool Graph::addEdge(unsigned int from, unsigned int to)
 	if ((from < pNodes_v.size()) && (to < pNodes_v.size()))
 	{
 		pEdges_v.push_back(new Edge(getNode(from), getNode(to), 
-						ek_distance));
+					ek_distance));
 		return true;
 	} else {
 		return false;
@@ -219,25 +219,25 @@ void Graph::printGml() const
 
 	for (unsigned int i = 0; i < pNodes_v.size(); i++)
 		std::cout << '\t' << "node [" << std::endl
-			      << "\t\tid " << pNodes_v[i]->getIndex() << std::endl
-				  << "\t\tgraphics [ " << std::endl
-				  	  << "\t\t\tfill \"" << 
-					  	getColor(pNodes_v[i]->status) << "\"" << std::endl
-					  << "\t\t\tx " << pNodes_v[i]->getX()*100 << std::endl
-					  << "\t\t\ty " << pNodes_v[i]->getY()*100 << std::endl
-					  << "\t\t\tw 60" << std::endl
-					  << "\t\t\th 60" << std::endl
-					  << "\t\t]" << std::endl
-				  << "\t]" << std::endl << std::endl;
+			<< "\t\tid " << pNodes_v[i]->getIndex() << std::endl
+			<< "\t\tgraphics [ " << std::endl
+			<< "\t\t\tfill \"" << 
+			getColor(pNodes_v[i]->status) << "\"" << std::endl
+			<< "\t\t\tx " << pNodes_v[i]->getX()*100 << std::endl
+			<< "\t\t\ty " << pNodes_v[i]->getY()*100 << std::endl
+			<< "\t\t\tw 60" << std::endl
+			<< "\t\t\th 60" << std::endl
+			<< "\t\t]" << std::endl
+			<< "\t]" << std::endl << std::endl;
 
 	std::cout << std::endl;
 
 	for (unsigned int i = 0; i < pEdges_v.size(); i++)
 		std::cout << "\tedge [" << std::endl
-		          << "\t\tsource " << pEdges_v[i]->getFrom()->getIndex() << std::endl
-				  << "\t\ttarget " << pEdges_v[i]->getTo()->getIndex() << std::endl
-				  << "\t]" << std::endl << std::endl;
-	
+			<< "\t\tsource " << pEdges_v[i]->getFrom()->getIndex() << std::endl
+			<< "\t\ttarget " << pEdges_v[i]->getTo()->getIndex() << std::endl
+			<< "\t]" << std::endl << std::endl;
+
 	std::cout << "]" << std::endl;
 
 	return;
@@ -246,14 +246,14 @@ void Graph::printTgf() const
 {
 	for (unsigned int i = 0; i < pNodes_v.size(); i++)
 		std::cout << pNodes_v[i]->getIndex() << 
-					 " " << pNodes_v[i]->getIndex() << std::endl;
-	
+			" " << pNodes_v[i]->getIndex() << std::endl;
+
 	std::cout << "#" << std::endl;
 
 	for (unsigned int i = 0; i < pEdges_v.size(); i++)
 		std::cout << pEdges_v[i]->getFrom()->getIndex() << " " 
-			      << pEdges_v[i]->getTo()->getIndex() << std::endl;
-	
+			<< pEdges_v[i]->getTo()->getIndex() << std::endl;
+
 	return;
 }
 
@@ -283,3 +283,4 @@ unsigned int Graph::getNodeIndexByInternalIndex(unsigned int i)
 {
 	return pNodes_v[i]->getIndex();
 }
+

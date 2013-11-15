@@ -22,6 +22,15 @@ Node::~Node()
 //	max_index--; das wäre ja gar nicht gut! :-) der Index muss einmalig sein!
 }
 
+void Node::setX(length_t x) 
+{
+	xPos = x;
+}
+void Node::setY(length_t y)
+{
+	yPos = y;
+}
+
 length_t Node::getX() const
 {
 	return xPos;

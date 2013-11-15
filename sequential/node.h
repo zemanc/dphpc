@@ -21,6 +21,8 @@ class Node
 		~Node();
 
 		//allgemeine funktionen
+		void setX(length_t);
+		void setY(length_t);
 		length_t getX() const;
 		length_t getY() const;
 		unsigned int getIndex() const;
