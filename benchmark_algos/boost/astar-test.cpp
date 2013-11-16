@@ -119,6 +119,11 @@ int main(int argc, char **argv)
   typedef mygraph_t::vertex_iterator vertex_iterator;
   typedef std::pair<int, int> edge;
 
+/*	==============================================================
+	START ÄNDERUNGEN CHRISTIAN
+	(erstellt einfach einen n*n Graphen ohne Hindernisse)
+	============================================================== */
+
 	const int n = 100;
 	const int num_nodes = n*n;
 	const int num_edges = 2*2*(n-1)*n;
@@ -198,6 +203,9 @@ int main(int argc, char **argv)
 //     84, 73, 69, 70, 116, 147, 173, 183, 74, 71, 124
 //   };
   
+/*	==============================================================
+	ENDE ÄNDERUNGEN CHRISTIAN
+	============================================================== */
   
   // create graph
   mygraph_t g(num_nodes);
