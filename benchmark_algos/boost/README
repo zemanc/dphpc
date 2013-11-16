@@ -1,4 +1,5 @@
-TODO:
-- hindernisse (z.b. smiley oder so) --> remove_nodes oder wie die funktion heisst
-- start/endpunkt fix definieren
-- timer
+habe mal versucht einen Graph mit einem Kreis in der Mitte (analog zu CircleGraph) zu machen.
+hat aber wohl noch fehler drin, da ich das "optimistisch" programmiert habe.
+werde mal dein gml-output modul dranhänken um zu schauen wie der graph effektiv ausschaut :)
+
+ach ja: cheibe gruuusigs umegeflicke, ich weiss :)
