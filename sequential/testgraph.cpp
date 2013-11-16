@@ -68,6 +68,7 @@ Graph Testgraph::getCircleGraph(unsigned int graphsize, edge_type e) const
 {
 	Graph g = getSimpleGraph(graphsize, e);
 	const int gs = int(graphsize);
+	const int cp = gs/2;
 	const int r = gs/4;
 	const int rr = r*r;
 	pNtr_v nodesToRemove;
@@ -75,7 +76,7 @@ Graph Testgraph::getCircleGraph(unsigned int graphsize, edge_type e) const
 	for (int i = 0; i < gs; i++)
 		for (int j = 0; j < gs; j++)
 		{
-			if ( pow(int(i)-r, 2) + pow(int(j)-r, 2) < rr )
+			if ( pow(int(i)-cp, 2) + pow(int(j)-cp, 2) < rr )
 				nodesToRemove.insert(gs*i+j);
 		}
 	

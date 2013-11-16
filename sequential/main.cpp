@@ -18,7 +18,7 @@ int main()
 	tg.removeRandomNodes(g, 2000, 10000);
 	EuklidDistance ek_distance;
 
-	g.randomDisplaceAllNodes(0.1, ek_distance);
+// 	g.randomDisplaceAllNodes(0.1, ek_distance);
 
 	std::list<Node*> *path = new std::list<Node*>;
 //  	ManhattanDistance ek_distance;
@@ -29,7 +29,8 @@ int main()
 	t_start = std::chrono::high_resolution_clock::now();
 
 // 	g.getShortestPath(1, 5549, path);
-	g.getShortestPath(2686, 2481, path, ek_distance);	// smiley values
+// 	g.getShortestPath(2686, 2481, path, ek_distance);	// smiley values
+	g.getShortestPath(1, 5000, path, ek_distance);	// smiley values
 
 	// end timing
 	t_end = std::chrono::high_resolution_clock::now();
