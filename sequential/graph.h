@@ -11,6 +11,7 @@
 #include "edge.h"
 #include "node.h"
 #include <cmath>
+#include <random>
 
 typedef std::set<unsigned int> pNtr_v;
 typedef pNtr_v::iterator pNtr_v_it;
@@ -72,8 +73,27 @@ class Graph
 
 		unsigned int getNodeIndexByInternalIndex(unsigned int);
 
+		template<class F>
+		void randomDisplaceAllNodes(double, const F&);
+
 };
 
 #include "graph.getShortestPath.h"
+
+template<class F>
+void Graph::randomDisplaceAllNodes(double sigma, const F& dist)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::normal_distribution<> d(0., sigma);
+	for (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+	{
+		(*it)->setX((*it)->getX() + d(gen));
+		(*it)->setY((*it)->getY() + d(gen));
+	}
+
+	for (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
+		(*it)->setDistance(dist.get((*it)->getFrom(), (*it)->getTo()));
+}
 
 #endif
