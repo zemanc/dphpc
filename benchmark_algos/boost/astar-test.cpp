@@ -19,7 +19,9 @@
 #include <list>
 #include <iostream>
 #include <fstream>
-#include <math.h>    // for sqrt
+#include <math.h>    // for sqrte
+#include <ctime>
+#include <chrono>
 
 using namespace boost;
 using namespace std;
@@ -124,23 +126,15 @@ int main(int argc, char **argv)
 	(erstellt einfach einen n*n Graphen ohne Hindernisse)
 	============================================================== */
 
+	// vectors
+	std::vector<location> locations_v;
+	std::vector<edge> edge_array_v;
+
 	const int n = 100;
-	const int num_nodes = n*n;
-	const int num_edges = 2*2*(n-1)*n;
-
-	// arrays
-	cost weights[num_edges];
-	location locations[num_nodes];
-  	edge edge_array[num_edges];
-
-	// weights
-	for (int i = 0; i < num_edges; i++)
-		weights[i] = 1;
-
-	// locations
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < n; j++)
-			locations[i*n+j] = {(float)i, (float)j};
+	// no nodes in the middle (circle graph)
+	const int cp = n/2;
+	const int r = n/4;
+	const int rr = r*r;
  
 	// edges
 	int e_no = 0;
@@ -152,19 +146,54 @@ int main(int argc, char **argv)
 		{
 			if (j < n)
 			{
-				edge_array[e_no++] = edge(it1, it2);
-				edge_array[e_no++] = edge(it2, it1);
+				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
+					&& pow(i-1-cp, 2) + pow(j-cp, 2) >= rr )
+				{
+// 					edge_array[e_no++] = edge(it1, it2);
+// 					edge_array[e_no++] = edge(it2, it1);
+					edge_array_v.push_back(edge(it1, it2));
+					edge_array_v.push_back(edge(it2, it1));
+				}
 			}
 			if (i < n)
 			{
-				edge_array[e_no++] = edge(it1, it3);
-				edge_array[e_no++] = edge(it3, it1);
+				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
+					&& pow(i-cp, 2) + pow(j-cp, 2) >= rr )
+				{
+// 					edge_array[e_no++] = edge(it1, it3);
+// 					edge_array[e_no++] = edge(it3, it1);
+					edge_array_v.push_back(edge(it1, it3));
+					edge_array_v.push_back(edge(it3, it1));
+				}
 			}
 			it1++;
 			it2++;
 			it3++;
 		}
 
+	// locations
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++)
+		{	// only outside of circle
+			if ( pow(i-cp, 2) + pow(j-cp, 2) >= rr )
+				locations_v.push_back({(float)i, (float)j});
+		}
+	
+	// define some constants
+	const int num_edges = edge_array_v.size();
+	const int num_nodes = locations_v.size();
+
+	// copy values of vectors into arrays
+	cost *weights = new cost[num_edges];
+	location *locations = new location[num_nodes];
+	edge *edge_array = new edge[num_edges];
+	for (int i = 0; i < num_edges; i++)
+	{
+		weights[i] = 1;
+		edge_array[i] = edge_array_v[i];
+	}
+	for (int i = 0; i < num_nodes; i++)
+		locations[i] = locations_v[i];
  
   // specify data
 //   enum nodes {
@@ -217,15 +246,23 @@ int main(int argc, char **argv)
     weightmap[e] = weights[j];
   }
   
+/*	==============================================================
+	START ÄNDERUNGEN CHRISTIAN
+	(erstellt einfach einen n*n Graphen ohne Hindernisse)
+	============================================================== */
   
   // pick random start/goal
-  mt19937 gen(time(0));
-  vertex start = random_vertex(g, gen);
-  vertex goal = random_vertex(g, gen);
+//   mt19937 gen(time(0));
+//   vertex start = random_vertex(g, gen);
+//   vertex goal = random_vertex(g, gen);
+
+
+	// set own start an goal
+	vertex start = 1;
+	vertex goal = 2000;
   
-  
-  cout << "Start vertex: " << start << endl;
-  cout << "Goal vertex: " << goal << endl;
+	cout << "Start vertex: " << start << endl;
+	cout << "Goal vertex: " << goal << endl;
   
 //   ofstream dotfile;
 //   dotfile.open("test-astar-cities.dot");
@@ -234,11 +271,15 @@ int main(int argc, char **argv)
 //                   (name, locations, 73.46, 78.86, 40.67, 44.93,
 //                    480, 400),
 //                  time_writer<WeightMap>(weightmap));
-  
+	
+	// timing
+	std::chrono::high_resolution_clock::time_point t_start, t_end;  
   
   vector<mygraph_t::vertex_descriptor> p(num_vertices(g));
   vector<cost> d(num_vertices(g));
   try {
+	// start timing
+	t_start = std::chrono::high_resolution_clock::now();
     // call astar named parameter interface
     astar_search
       (g, start,
@@ -249,6 +290,10 @@ int main(int argc, char **argv)
   
   
   } catch(found_goal fg) { // found a path to the goal
+	// end timing
+	t_end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span =
+		std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start);	
     list<vertex> shortest_path;
     for(vertex v = goal;; v = p[v]) {
       shortest_path.push_front(v);
@@ -262,8 +307,19 @@ int main(int argc, char **argv)
     for(++spi; spi != shortest_path.end(); ++spi)
       cout << " -> " << *spi;
     cout << endl << "Total travel time: " << d[goal] << endl;
+	cout << endl << "CPU time: " << time_span.count() << " seconds" << endl;
     return 0;
   }
+
+	// clean up
+	delete [] locations;
+	delete [] weights;
+	delete [] edge_array;
+
+/*	==============================================================
+	ENDE ÄNDERUNGEN CHRISTIAN
+	============================================================== */
+
   
   cout << "Didn't find a path from " << start << "to"
        << goal << "!" << endl;
