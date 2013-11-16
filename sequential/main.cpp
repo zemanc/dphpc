@@ -39,6 +39,8 @@ int main()
 
   	g.printGml();
 
+	g.save("out.graph");
+
 	delete path;
 
 	return 0;

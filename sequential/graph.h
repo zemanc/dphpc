@@ -17,8 +17,10 @@ typedef std::set<unsigned int> pNtr_v;
 typedef pNtr_v::iterator pNtr_v_it;
 typedef std::vector<Edge*> pEdg_v;
 typedef pEdg_v::iterator pEdg_v_it;
+typedef pEdg_v::const_iterator pEdg_v_cit;
 typedef std::vector<Node*> pNode_v;
 typedef pNode_v::iterator pNode_v_it;
+typedef pNode_v::const_iterator pNode_v_cit;
 
 struct EuklidDistance {
 	EuklidDistance() {};
@@ -49,6 +51,8 @@ class Graph
 
 	public:
 		~Graph();
+		Graph() {};
+		Graph(std::string);
 
 		void addNode(length_t, length_t);
  		void removeNodesEdges(pNtr_v);
@@ -75,6 +79,8 @@ class Graph
 
 		template<class F>
 		void randomDisplaceAllNodes(double, const F&);
+
+		void save(std::string fn) const;
 
 };
 
