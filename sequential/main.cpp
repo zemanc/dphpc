@@ -19,6 +19,7 @@ int main()
 	EuklidDistance ek_distance;
 
 // 	g.randomDisplaceAllNodes(0.1, ek_distance);
+	g.randomDisplaceAllNodes(0.4, ek_distance);
 
 	std::list<Node*> *path = new std::list<Node*>;
 //  	ManhattanDistance ek_distance;
@@ -30,7 +31,8 @@ int main()
 
 // 	g.getShortestPath(1, 5549, path);
 // 	g.getShortestPath(2686, 2481, path, ek_distance);	// smiley values
-	g.getShortestPath(1, 5000, path, ek_distance);	// smiley values
+// 	g.getShortestPath(1, 5000, path, ek_distance);	// smiley values
+	g.getShortestPath(1446, 20, path, ek_distance);	// smiley values
 
 	// end timing
 	t_end = std::chrono::high_resolution_clock::now();
@@ -39,6 +41,8 @@ int main()
 	timeout << time_span.count() << " seconds" << std::endl;
 
   	g.printGml();
+
+	g.save("out.graph");
 
 	delete path;
 
