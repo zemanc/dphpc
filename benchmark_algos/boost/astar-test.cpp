@@ -21,6 +21,7 @@
 #include <fstream>
 #include <math.h>    // for sqrte
 #include <ctime>
+#include <string>
 #include <chrono>
 
 using namespace boost;
@@ -38,9 +39,17 @@ typedef float cost_t;
 template <class LocMap>
 class city_writer {
 	public:
+		typedef adjacency_list<
+			listS, 
+			vecS, 
+			directedS, 
+			no_property,
+			property<edge_weight_t, cost_t> 
+		  >::vertex_descriptor vertex;
+
 		city_writer(
 			LocMap l, 
-			list<vertex> sp, 
+			list<vertex> shortest_path, 
 			float _minx, 
 			float _maxx,
 			float _miny, 
@@ -49,7 +58,7 @@ class city_writer {
 			unsigned int _pty
 		  )
 				: loc(l)
-				, shortest_path(sp)
+				, sp(shortest_path)
 				, minx(_minx)
 				, maxx(_maxx)
 				, miny(_miny)
@@ -78,6 +87,16 @@ class city_writer {
 		list<vertex> sp;
 		float minx, maxx, miny, maxy;
 		unsigned int ptx, pty;
+
+		template <class Vertex>
+		string getColor(const Vertex& v) const
+		{
+			for (list<vertex>::const_iterator it = sp.begin(); it != sp.end(); it++)
+				if ((loc[*it].x == loc[v].x) && (loc[*it].y == loc[v].y))
+					return "#0000FF";
+
+			return "#EEEEEE";
+		}
 
 };
 
@@ -152,7 +171,7 @@ int main(int argc, char **argv)
 		vecS, 
 		directedS, 
 		no_property,
-		property<edge_weight_t, cost> 
+		property<edge_weight_t, cost_t> 
 	  > mygraph_t;
 	typedef property_map<mygraph_t, edge_weight_t>::type WeightMap;
 	typedef mygraph_t::vertex_descriptor vertex;
@@ -176,7 +195,6 @@ int main(int argc, char **argv)
 	const int rr = r*r;
  
 	// edges
-	int e_no = 0;
 	int it1 = 0;
 	int it2 = 1;
 	int it3 = n;
@@ -223,7 +241,7 @@ int main(int argc, char **argv)
 	const int num_nodes = locations_v.size();
 
 	// copy values of vectors into arrays
-	cost *weights = new cost[num_edges];
+	cost_t *weights = new cost_t[num_edges];
 	location *locations = new location[num_nodes];
 	edge *edge_array = new edge[num_edges];
 	for (int i = 0; i < num_edges; i++)
@@ -234,43 +252,6 @@ int main(int argc, char **argv)
 	for (int i = 0; i < num_nodes; i++)
 		locations[i] = locations_v[i];
  
-  // specify data
-//   enum nodes {
-//     Troy, LakePlacid, Plattsburgh, Massena, Watertown, Utica,
-//     Syracuse, Rochester, Buffalo, Ithaca, Binghamton, Woodstock,
-//     NewYork, N
-//   };
-//   const char *name[] = {
-//     "Troy", "Lake Placid", "Plattsburgh", "Massena",
-//     "Watertown", "Utica", "Syracuse", "Rochester", "Buffalo",
-//     "Ithaca", "Binghamton", "Woodstock", "New York"
-//   };
-//   location locations[] = { // lat/long
-//     {42.73, 73.68}, {44.28, 73.99}, {44.70, 73.46},
-//     {44.93, 74.89}, {43.97, 75.91}, {43.10, 75.23},
-//     {43.04, 76.14}, {43.17, 77.61}, {42.89, 78.86},
-//     {42.44, 76.50}, {42.10, 75.91}, {42.04, 74.11},
-//     {40.67, 73.94}
-//   };
-//   edge edge_array[] = {
-//     edge(Troy,Utica), edge(Troy,LakePlacid),
-//     edge(Troy,Plattsburgh), edge(LakePlacid,Plattsburgh),
-//     edge(Plattsburgh,Massena), edge(LakePlacid,Massena),
-//     edge(Massena,Watertown), edge(Watertown,Utica),
-//     edge(Watertown,Syracuse), edge(Utica,Syracuse),
-//     edge(Syracuse,Rochester), edge(Rochester,Buffalo),
-//     edge(Syracuse,Ithaca), edge(Ithaca,Binghamton),
-//     edge(Ithaca,Rochester), edge(Binghamton,Troy),
-//     edge(Binghamton,Woodstock), edge(Binghamton,NewYork),
-//     edge(Syracuse,Binghamton), edge(Woodstock,Troy),
-//     edge(Woodstock,NewYork)
-//   };
-//   unsigned int num_edges = sizeof(edge_array) / sizeof(edge);
-//   cost weights[] = { // estimated travel time (mins)
-//     96, 134, 143, 65, 115, 133, 117, 116, 74, 56,
-//     84, 73, 69, 70, 116, 147, 173, 183, 74, 71, 124
-//   };
-  
 /*	==============================================================
 	ENDE ÄNDERUNGEN CHRISTIAN
 	============================================================== */
@@ -301,8 +282,8 @@ int main(int argc, char **argv)
 
 
 	// set own start an goal
-	vertex start = 1;
-	vertex goal = 2000;
+	vertex start = 9899;
+	vertex goal = 504;
   
 	cout << "Start vertex: " << start << endl;
 	cout << "Goal vertex: " << goal << endl;
@@ -311,7 +292,7 @@ int main(int argc, char **argv)
 	std::chrono::high_resolution_clock::time_point t_start, t_end;  
   
 	vector<mygraph_t::vertex_descriptor> p(num_vertices(g));
-	vector<cost> d(num_vertices(g));
+	vector<cost_t> d(num_vertices(g));
 
 	try {
 		// start timing
@@ -321,7 +302,7 @@ int main(int argc, char **argv)
 		astar_search(
 			g, 
 			start,
-			distance_heuristic<mygraph_t, cost, location*>
+			distance_heuristic<mygraph_t, cost_t, location*>
 				(locations, 
 				goal),
 			predecessor_map(
@@ -360,7 +341,7 @@ int main(int argc, char **argv)
 
 		ofstream dotfile;
 		dotfile.open("test_graph.dot");
-		write_graphviz(dotfile, g, city_writer<location*>(locations, shortest_path,0, 100, 0, 100, 400, 400));
+		write_graphviz(dotfile, g, city_writer<location*>(locations, shortest_path, 0, 100, 0, 100, 400, 400));
 
 		return 0;
 	}
