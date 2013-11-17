@@ -36,8 +36,8 @@ struct location
 
 typedef float cost_t;
 
-template <class LocMap>
-class city_writer {
+template <class LocMap, class ColorMap>
+class node_writer {
 	public:
 		typedef adjacency_list<
 			listS, 
@@ -47,9 +47,10 @@ class city_writer {
 			property<edge_weight_t, cost_t> 
 		  >::vertex_descriptor vertex;
 
-		city_writer(
+		node_writer(
 			LocMap l, 
 			list<vertex> shortest_path, 
+			ColorMap cm,
 			float _minx, 
 			float _maxx,
 			float _miny, 
@@ -59,6 +60,7 @@ class city_writer {
 		  )
 				: loc(l)
 				, sp(shortest_path)
+				, cmap(cm)
 				, minx(_minx)
 				, maxx(_maxx)
 				, miny(_miny)
@@ -85,6 +87,7 @@ class city_writer {
 	private:
 		LocMap loc;
 		list<vertex> sp;
+		ColorMap cmap;
 		float minx, maxx, miny, maxy;
 		unsigned int ptx, pty;
 
@@ -95,7 +98,14 @@ class city_writer {
 				if ((loc[*it].x == loc[v].x) && (loc[*it].y == loc[v].y))
 					return "#0000FF";
 
-			return "#EEEEEE";
+			if (cmap[v] == default_color_type::white_color )
+				return "#EEEEEE";
+			else if (cmap[v] == default_color_type::gray_color )
+				return "#FF0000";
+			else if (cmap[v] == default_color_type::black_color )
+				return "#BBEEBB";
+			else
+				return "#00FFFF";
 		}
 
 };
@@ -170,10 +180,11 @@ int main(int argc, char **argv)
 		listS, 
 		vecS, 
 		directedS, 
-		no_property,
-		property<edge_weight_t, cost_t> 
+		property<vertex_color_t, default_color_type>, 
+		property<edge_weight_t, cost_t>
 	  > mygraph_t;
 	typedef property_map<mygraph_t, edge_weight_t>::type WeightMap;
+	typedef property_map<mygraph_t, vertex_color_t>::type ColorMap;
 	typedef mygraph_t::vertex_descriptor vertex;
 	typedef mygraph_t::edge_descriptor edge_descriptor;
 	typedef mygraph_t::vertex_iterator vertex_iterator;
@@ -259,6 +270,7 @@ int main(int argc, char **argv)
 	// create graph
 	mygraph_t g(num_nodes);
 	WeightMap weightmap = get(edge_weight, g);
+	ColorMap cmap = get(vertex_color, g);
 
 	for(int j = 0; j < num_edges; ++j) 
 	{
@@ -306,7 +318,9 @@ int main(int argc, char **argv)
 				(locations, 
 				goal),
 			predecessor_map(
-				&p[0]).distance_map(&d[0]).visitor(astar_goal_visitor<vertex>(goal))
+				&p[0]).distance_map(&d[0])
+				.visitor(astar_goal_visitor<vertex>(goal))
+				.color_map(cmap)
 		);
 
 
@@ -341,7 +355,16 @@ int main(int argc, char **argv)
 
 		ofstream dotfile;
 		dotfile.open("test_graph.dot");
-		write_graphviz(dotfile, g, city_writer<location*>(locations, shortest_path, 0, 100, 0, 100, 400, 400));
+		write_graphviz(dotfile, g, node_writer<location*, ColorMap>
+					 (locations, 
+					  shortest_path, 
+					  cmap,
+					  0,
+					  100,
+					  0, 
+					  100,
+					  400,
+					  400));
 
 		return 0;
 	}
