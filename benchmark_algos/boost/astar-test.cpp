@@ -34,28 +34,29 @@ struct location
 };
 typedef float cost;
 
-template <class Name, class LocMap>
+template <class LocMap>
 class city_writer {
 public:
-  city_writer(Name n, LocMap l, float _minx, float _maxx,
+  city_writer(LocMap l, list<vertex> sp, float _minx, float _maxx,
               float _miny, float _maxy,
               unsigned int _ptx, unsigned int _pty)
-    : name(n), loc(l), minx(_minx), maxx(_maxx), miny(_miny),
+    : loc(l), shortest_path(sp), minx(_minx), maxx(_maxx), miny(_miny),
       maxy(_maxy), ptx(_ptx), pty(_pty) {}
   template <class Vertex>
   void operator()(ostream& out, const Vertex& v) const {
     float px = 1 - (loc[v].x - minx) / (maxx - minx);
     float py = (loc[v].y - miny) / (maxy - miny);
-    out << "[label=\"" << name[v] << "\", pos=\""
+    out << "[label=\" \", pos=\""
         << static_cast<unsigned int>(ptx * px) << ","
         << static_cast<unsigned int>(pty * py)
-        << "\", fontsize=\"11\"]";
+        << "\", fontsize=\"11\", fillcolor=\"" << getColor(v) << "\"]";
   }
 private:
-  Name name;
   LocMap loc;
+  list<vertex> sp;
   float minx, maxx, miny, maxy;
   unsigned int ptx, pty;
+
 };
 
 template <class WeightMap>
@@ -113,7 +114,7 @@ int main(int argc, char **argv)
 {
   
   // specify some types
-  typedef adjacency_list<listS, vecS, undirectedS, no_property,
+  typedef adjacency_list<listS, vecS, directedS, no_property,
     property<edge_weight_t, cost> > mygraph_t;
   typedef property_map<mygraph_t, edge_weight_t>::type WeightMap;
   typedef mygraph_t::vertex_descriptor vertex;
@@ -175,7 +176,7 @@ int main(int argc, char **argv)
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < n; j++)
 		{	// only outside of circle
-			if ( pow(i-cp, 2) + pow(j-cp, 2) >= rr )
+// 			if ( pow(i-cp, 2) + pow(j-cp, 2) >= rr )
 				locations_v.push_back({(float)i, (float)j});
 		}
 	
@@ -308,6 +309,14 @@ int main(int argc, char **argv)
       cout << " -> " << *spi;
     cout << endl << "Total travel time: " << d[goal] << endl;
 	cout << endl << "CPU time: " << time_span.count() << " seconds" << endl;
+
+  ofstream dotfile;
+  dotfile.open("test_graph.dot");
+  write_graphviz(dotfile, g, city_writer<location*>(locations, shortest_path,0, 100, 0, 100, 400, 400));
+
+
+
+
     return 0;
   }
 
@@ -323,6 +332,8 @@ int main(int argc, char **argv)
   
   cout << "Didn't find a path from " << start << "to"
        << goal << "!" << endl;
+
+
   return 0;
   
 }

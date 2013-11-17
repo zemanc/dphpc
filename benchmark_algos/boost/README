@@ -1,3 +1,14 @@
+im moment kompilierts zwor ned. de graph fonktioniert. im moment esch eifach dusgabefonktion (immr no cities ;) ) en boustell... me mösst etz shortestpath öbrgäh ond die ergendwie markiere. 
+
+de graph stimmt etz :) sschöne pngfile eshc so winr vorhär usgseh het. me döfe dnodes ned eifach lösche ebe, sösch stimme dverbindige ome chreis ome nömm...
+
+
+
+
+#####
+
+
+
 habe mal versucht einen Graph mit einem Kreis in der Mitte (analog zu CircleGraph) zu machen.
 hat aber wohl noch fehler drin, da ich das "optimistisch" programmiert habe.
 werde mal dein gml-output modul dranhänken um zu schauen wie der graph effektiv ausschaut :)
