@@ -190,11 +190,6 @@ int main(int argc, char **argv)
 	typedef mygraph_t::vertex_iterator vertex_iterator;
 	typedef std::pair<int, int> edge;
 
-/*	==============================================================
-	START ÄNDERUNGEN CHRISTIAN
-	(erstellt einfach einen n*n Graphen ohne Hindernisse)
-	============================================================== */
-
 	// vectors
 	std::vector<location> locations_v;
 	std::vector<edge> edge_array_v;
@@ -217,8 +212,6 @@ int main(int argc, char **argv)
 				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
 					&& pow(i-1-cp, 2) + pow(j-cp, 2) >= rr )
 				{
-// 					edge_array[e_no++] = edge(it1, it2);
-// 					edge_array[e_no++] = edge(it2, it1);
 					edge_array_v.push_back(edge(it1, it2));
 					edge_array_v.push_back(edge(it2, it1));
 				}
@@ -228,8 +221,6 @@ int main(int argc, char **argv)
 				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
 					&& pow(i-cp, 2) + pow(j-cp, 2) >= rr )
 				{
-// 					edge_array[e_no++] = edge(it1, it3);
-// 					edge_array[e_no++] = edge(it3, it1);
 					edge_array_v.push_back(edge(it1, it3));
 					edge_array_v.push_back(edge(it3, it1));
 				}
@@ -242,10 +233,7 @@ int main(int argc, char **argv)
 	// locations
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < n; j++)
-		{	// only outside of circle
-// 			if ( pow(i-cp, 2) + pow(j-cp, 2) >= rr )
-				locations_v.push_back({(float)i, (float)j});
-		}
+			locations_v.push_back({(float)i, (float)j});
 	
 	// define some constants
 	const int num_edges = edge_array_v.size();
@@ -263,10 +251,6 @@ int main(int argc, char **argv)
 	for (int i = 0; i < num_nodes; i++)
 		locations[i] = locations_v[i];
  
-/*	==============================================================
-	ENDE ÄNDERUNGEN CHRISTIAN
-	============================================================== */
-  
 	// create graph
 	mygraph_t g(num_nodes);
 	WeightMap weightmap = get(edge_weight, g);
@@ -282,16 +266,10 @@ int main(int argc, char **argv)
 		weightmap[e] = weights[j];
 	}
   
-/*	==============================================================
-	START ÄNDERUNGEN CHRISTIAN
-	(erstellt einfach einen n*n Graphen ohne Hindernisse)
-	============================================================== */
-  
-  // pick random start/goal
-//   mt19937 gen(time(0));
-//   vertex start = random_vertex(g, gen);
-//   vertex goal = random_vertex(g, gen);
-
+// 	pick random start/goal
+//	mt19937 gen(time(0));
+// 	vertex start = random_vertex(g, gen);
+// 	vertex goal = random_vertex(g, gen);
 
 	// set own start an goal
 	vertex start = 9899;
@@ -373,11 +351,6 @@ int main(int argc, char **argv)
 	delete [] locations;
 	delete [] weights;
 	delete [] edge_array;
-
-/*	==============================================================
-	ENDE ÄNDERUNGEN CHRISTIAN
-	============================================================== */
-
   
 	cout << "Didn't find a path from " << start << "to" << goal << "!" << endl;
 
