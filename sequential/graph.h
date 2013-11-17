@@ -10,8 +10,6 @@
 
 #include "edge.h"
 #include "node.h"
-#include <cmath>
-#include <random>
 
 typedef std::set<unsigned int> pNtr_v;
 typedef pNtr_v::iterator pNtr_v_it;
@@ -21,24 +19,6 @@ typedef pEdg_v::const_iterator pEdg_v_cit;
 typedef std::vector<Node*> pNode_v;
 typedef pNode_v::iterator pNode_v_it;
 typedef pNode_v::const_iterator pNode_v_cit;
-
-struct EuklidDistance {
-	EuklidDistance() {};
-	length_t get(Node* const pFrom, Node* const pTo) const
-	{
-		return std::sqrt((pTo->getX() - pFrom->getX()) * (pTo->getX() - pFrom->getX()) 
-			            +(pTo->getY() - pFrom->getY()) * (pTo->getY() - pFrom->getY()));
-	};
-};
-
-struct ManhattanDistance 
-{
-	ManhattanDistance() {};
-	length_t get(Node* const pFrom, Node* const pTo) const
-	{
-		return std::abs(pTo->getX() - pFrom->getX()) + std::abs(pTo->getY() - pFrom->getY());
-	};
-};
 
 class Graph
 {
@@ -84,22 +64,8 @@ class Graph
 
 };
 
+#include "graph.distances.h"
 #include "graph.getShortestPath.h"
-
-template<class F>
-void Graph::randomDisplaceAllNodes(double sigma, const F& dist)
-{
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::normal_distribution<> d(0., sigma);
-	for (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
-	{
-		(*it)->setX((*it)->getX() + d(gen));
-		(*it)->setY((*it)->getY() + d(gen));
-	}
-
-	for (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
-		(*it)->setDistance(dist.get((*it)->getFrom(), (*it)->getTo()));
-}
+#include "graph.randomDisplaceAllNodes.h"
 
 #endif
