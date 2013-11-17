@@ -10,16 +10,19 @@
 int main()
 {
 
+	// size
+	unsigned int n = 10000;
+
 	Testgraph tg;
 // 	Graph g = tg.getSimpleGraph(100);
 // 	Graph g = tg.getLukasOriginalGraph(100);
 // 	Graph g = tg.getSmileyGraph(100, Testgraph::dir8);
-	Graph g = tg.getCircleGraph(100, Testgraph::dir8);
-	tg.removeRandomNodes(g, 2000, 10000);
+	Graph g = tg.getCircleGraphFast(n);
+// 	tg.removeRandomNodes(g, 2000, 10000);
 	EuklidDistance ek_distance;
 
 // 	g.randomDisplaceAllNodes(0.1, ek_distance);
-	g.randomDisplaceAllNodes(0.4, ek_distance);
+// 	g.randomDisplaceAllNodes(0.4, ek_distance);
 
 	std::list<Node*> *path = new std::list<Node*>;
 //  	ManhattanDistance ek_distance;
@@ -32,7 +35,8 @@ int main()
 // 	g.getShortestPath(1, 5549, path);
 // 	g.getShortestPath(2686, 2481, path, ek_distance);	// smiley values
 // 	g.getShortestPath(1, 5000, path, ek_distance);	// smiley values
-	g.getShortestPath(1446, 20, path, ek_distance);	// smiley values
+// 	g.getShortestPath(1446, 20, path, ek_distance);	// smiley values
+	g.getShortestPath(0, n*n-1, path, ek_distance);	// circle values
 
 	// end timing
 	t_end = std::chrono::high_resolution_clock::now();

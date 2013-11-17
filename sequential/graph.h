@@ -23,8 +23,6 @@ typedef pNode_v::const_iterator pNode_v_cit;
 class Graph
 {
 	private:
-		pNode_v pNodes_v;
-		pEdg_v pEdges_v;
 
 		double newThreshold(double);
 		std::string getColor(Node::state_t) const;
@@ -33,6 +31,9 @@ class Graph
 		~Graph();
 		Graph() {};
 		Graph(std::string);
+
+		pNode_v pNodes_v;
+		pEdg_v pEdges_v;
 
 		void addNode(length_t, length_t);
  		void removeNodesEdges(pNtr_v);

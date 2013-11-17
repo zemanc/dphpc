@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 			if (i < n)
 			{
 				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
-					&& pow(i-cp, 2) + pow(j-cp, 2) >= rr )
+					&& pow(i-cp, 2) + pow(j-1-cp, 2) >= rr )
 				{
 					edge_array_v.push_back(edge(it1, it3));
 					edge_array_v.push_back(edge(it3, it1));

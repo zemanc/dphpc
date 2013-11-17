@@ -10,6 +10,7 @@ class Testgraph
 		Graph getSmileyGraph(unsigned int, edge_type) const;
 		Graph getSimpleGraph(unsigned int, edge_type) const;
 		Graph getCircleGraph(unsigned int, edge_type) const;
+		Graph getCircleGraphFast(unsigned int) const;
 
 		void removeRandomNodes(Graph&, unsigned int, unsigned int) const;
 };
