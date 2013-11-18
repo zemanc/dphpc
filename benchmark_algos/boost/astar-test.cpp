@@ -19,7 +19,7 @@
 #include <list>
 #include <iostream>
 #include <fstream>
-#include <math.h>    // for sqrte
+#include <cmath>
 #include <ctime>
 #include <string>
 #include <chrono>
@@ -127,14 +127,38 @@ class time_writer
 };
 
 
-// euclidean distance heuristic
+// manhattan distance heuristic
 template <class Graph, class CostType, class LocMap>
-class distance_heuristic : public astar_heuristic<Graph, CostType>
+class manhattan_distance : public astar_heuristic<Graph, CostType>
 {
 	public:
 		typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
 
-		distance_heuristic(LocMap l, Vertex goal)
+		manhattan_distance(LocMap l, Vertex goal)
+			: m_location(l)
+			, m_goal(goal) 
+		  {}
+
+		CostType operator()(Vertex u)
+		{
+			CostType dx = abs(m_location[m_goal].x - m_location[u].x);
+			CostType dy = abs(m_location[m_goal].y - m_location[u].y);
+			return dx + dy;
+		}
+
+	private:
+		LocMap m_location;
+		Vertex m_goal;
+};
+
+// euclidean distance heuristic
+template <class Graph, class CostType, class LocMap>
+class euklid_distance : public astar_heuristic<Graph, CostType>
+{
+	public:
+		typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
+
+		euklid_distance(LocMap l, Vertex goal)
 			: m_location(l)
 			, m_goal(goal) 
 		  {}
@@ -143,7 +167,7 @@ class distance_heuristic : public astar_heuristic<Graph, CostType>
 		{
 			CostType dx = m_location[m_goal].x - m_location[u].x;
 			CostType dy = m_location[m_goal].y - m_location[u].y;
-			return ::sqrt(dx * dx + dy * dy);
+			return std::sqrt(dx * dx + dy * dy);
 		}
 
 	private:
@@ -292,7 +316,7 @@ int main(int argc, char **argv)
 		astar_search(
 			g, 
 			start,
-			distance_heuristic<mygraph_t, cost_t, location*>
+			manhattan_distance<mygraph_t, cost_t, location*>
 				(locations, 
 				goal),
 			predecessor_map(

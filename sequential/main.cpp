@@ -11,7 +11,7 @@ int main()
 {
 
 	// size
-	unsigned int n = 10000;
+	unsigned int n = 1000;
 
 	Testgraph tg;
 // 	Graph g = tg.getSimpleGraph(100);
@@ -19,7 +19,7 @@ int main()
 // 	Graph g = tg.getSmileyGraph(100, Testgraph::dir8);
 	Graph g = tg.getCircleGraphFast(n);
 // 	tg.removeRandomNodes(g, 2000, 10000);
-	EuklidDistance ek_distance;
+	ManhattanDistance ek_distance;
 
 // 	g.randomDisplaceAllNodes(0.1, ek_distance);
 // 	g.randomDisplaceAllNodes(0.4, ek_distance);
