@@ -84,54 +84,6 @@ Graph Testgraph::getCircleGraph(unsigned int graphsize, edge_type e) const
 	return g;
 }
 
-Graph Testgraph::getCircleGraphFast(unsigned int graphsize) const
-{
-	Graph g;
-	const int gs = int(graphsize);
-	const int cp = gs/2;
-	const int r = gs/4;
-	const int rr = r*r;
-
-	// add nodes
-	for (int i = 0; i < gs; i++)
-		for (int j = 0; j < gs; j++)
-			g.pNodes_v.push_back(new Node(i, j));
-
-	// add edges
-	EuklidDistance ek_distance;
-
-	pNode_v_it it1 = g.pNodes_v.begin();
-	pNode_v_it it2 = g.pNodes_v.begin() + 1;
-	pNode_v_it it3 = g.pNodes_v.begin() + gs;
-
-	for (int i = 1; i <= gs; i++)
-		for (int j = 1; j <= gs; j++)
-		{
-			if (j < gs)
-			{
-				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
-					&& pow(i-1-cp, 2) + pow(j-cp, 2) >= rr )
-				{
-					g.pEdges_v.push_back(new Edge(*it1, *it2, ek_distance));
-					g.pEdges_v.push_back(new Edge(*it2, *it1, ek_distance));
-				}
-			}
-			if (i < gs)
-			{
-				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
-					&& pow(i-cp, 2) + pow(j-1-cp, 2) >= rr )
-				{
-					g.pEdges_v.push_back(new Edge(*it1, *it3, ek_distance));
-					g.pEdges_v.push_back(new Edge(*it3, *it1, ek_distance));
-				}
-			}
-			it1++;
-			it2++;
-			it3++;
-		}
-	return g;
-}
-
 
 Graph Testgraph::getSimpleGraph(unsigned int graphsize, edge_type e) const
 {
