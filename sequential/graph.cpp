@@ -219,17 +219,18 @@ void Graph::printGml() const
 	std::cout << '\t' << "directed 1" << std::endl;
 
 	for (unsigned int i = 0; i < pNodes_v.size(); i++)
-		std::cout << '\t' << "node [" << std::endl
-			<< "\t\tid " << pNodes_v[i]->getIndex() << std::endl
-			<< "\t\tgraphics [ " << std::endl
-			<< "\t\t\tfill \"" << 
-			getColor(pNodes_v[i]->status) << "\"" << std::endl
-			<< "\t\t\tx " << pNodes_v[i]->getX()*100 << std::endl
-			<< "\t\t\ty " << pNodes_v[i]->getY()*100 << std::endl
-			<< "\t\t\tw 60" << std::endl
-			<< "\t\t\th 60" << std::endl
-			<< "\t\t]" << std::endl
-			<< "\t]" << std::endl << std::endl;
+		if (pNodes_v[i]->adjEdges.size() > 0)
+			std::cout << '\t' << "node [" << std::endl
+				<< "\t\tid " << pNodes_v[i]->getIndex() << std::endl
+				<< "\t\tgraphics [ " << std::endl
+				<< "\t\t\tfill \"" << 
+				getColor(pNodes_v[i]->status) << "\"" << std::endl
+				<< "\t\t\tx " << pNodes_v[i]->getX()*100 << std::endl
+				<< "\t\t\ty " << pNodes_v[i]->getY()*100 << std::endl
+				<< "\t\t\tw 60" << std::endl
+				<< "\t\t\th 60" << std::endl
+				<< "\t\t]" << std::endl
+				<< "\t]" << std::endl << std::endl;
 
 	std::cout << std::endl;
 
