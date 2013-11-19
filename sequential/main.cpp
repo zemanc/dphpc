@@ -26,7 +26,7 @@ int main()
 	Graph g = tg.getGenericGraphFast(n, distance, sg);
 // 	tg.removeRandomNodes(g, 2000, 10000);
 
-// 	g.randomDisplaceAllNodes(0.1, ek_distance);
+	g.randomDisplaceAllNodes(0.3, distance);
 // 	g.randomDisplaceAllNodes(0.4, ek_distance);
 
 	std::list<Node*> *path = new std::list<Node*>;
@@ -40,14 +40,17 @@ int main()
 // 	g.getShortestPath(1, 5549, path);
 // 	g.getShortestPath(2686, 2481, path, ek_distance);	// smiley values
 // 	g.getShortestPath(1, 5000, path, ek_distance);	// smiley values
-	g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
+// 	g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
 // 	g.getShortestPath(0, n*n-1, path, distance);	// circle values
+// 	g.getShortestPath(1446, 20, path, ek_distance);	// smiley values
+	double dist = g.getShortestPath(0, n*n-1, path, distance);	// circle values
 
 	// end timing
 	t_end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> time_span =
 		std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start);
 	timeout << time_span.count() << " seconds" << std::endl;
+	timeout << "distance>: " << dist << std::endl;
 
   	g.printGml();
 

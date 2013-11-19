@@ -35,7 +35,7 @@ struct location
 	length_t y;
 };
 
-typedef float cost_t;
+typedef double cost_t;
 
 template <class LocMap, class ColorMap>
 class node_writer {
@@ -56,8 +56,8 @@ class node_writer {
 			length_t _maxx,
 			length_t _miny, 
 			length_t _maxy,
-			unsigned int _ptx, 
-			unsigned int _pty
+			length_t _ptx, 
+			length_t _pty
 		  )
 				: loc(l)
 				, sp(shortest_path)
@@ -78,8 +78,8 @@ class node_writer {
 			out << "["
 					<< "label=\" \", "
 					<< "pos=\""
-						<< static_cast<unsigned int>(ptx * px) << ","
-						<< static_cast<unsigned int>(pty * py) << "\" ,"
+						<< ptx * px << ","
+						<< pty * py << "\" ,"
 					<< "fontsize=\"11\", "
 					<< "fillcolor=\"" << getColor(v) << "\""
 				<< "]";
@@ -90,7 +90,7 @@ class node_writer {
 		list<vertex> sp;
 		ColorMap cmap;
 		length_t minx, maxx, miny, maxy;
-		unsigned int ptx, pty;
+		double ptx, pty;
 
 		template <class Vertex>
 		string getColor(const Vertex& v) const
