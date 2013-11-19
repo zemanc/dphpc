@@ -261,24 +261,7 @@ void Graph::printTgf() const
 
 double Graph::newThreshold(double oldThreshold)
 {
-	return oldThreshold + 1;
-}
-
-void Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end)
-{
-
-	Node* it = end;
-	while (it != start)
-	{
-		vals->push_front(it);
-		it->status = Node::onPath;
-		it = it->parent;
-	}
-
-	vals->push_front(start);
-	start->status = Node::onPath;
-
-	return;
+	return oldThreshold + 0.1;
 }
 
 unsigned int Graph::getNodeIndexByInternalIndex(unsigned int i)

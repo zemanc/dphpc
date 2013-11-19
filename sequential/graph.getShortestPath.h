@@ -3,7 +3,7 @@
 #define __graph__getShortestPath_h__
 
 template<class F>
-void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>* vals, const F& dist)
+double Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>* vals, const F& dist)
 {
 
 	//geht besser so als randomized... für den Moment. Später ist das wohl dann der "richtige" Index, nicht der interne!
@@ -40,7 +40,10 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 			{
 				//wenn fertig dann fertig
 				if (nl_pos == end)
-					return reconstructPath(vals, start, end);
+				{
+					delete zero_node;
+					return reconstructPath(vals, start, end, dist);
+				}
 					
 				//node schliessen
 				nl_pos->status = Node::closed;
@@ -116,6 +119,32 @@ void Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>
 
 	}
 	delete zero_node;
+
+	return 0;
+}
+
+template<class F>
+double Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end, const F& dist)
+{
+
+	double length = 0;
+
+	Node* it = end;
+	while (it != start)
+	{
+		length += dist.get(it, it->parent);
+
+		vals->push_front(it);
+		it->status = Node::onPath;
+		it = it->parent;
+
+	}
+
+	vals->push_front(start);
+
+	start->status = Node::onPath;
+
+	return length;
 }
 
 #endif

@@ -54,9 +54,10 @@ class Graph
 		unsigned int nodeCount() const { return pNodes_v.size(); };
 
 		template<class F>
-   			void getShortestPath(unsigned int, unsigned int, std::list<Node*>*, const F&);
+   			double getShortestPath(unsigned int, unsigned int, std::list<Node*>*, const F&);
 
-		void reconstructPath(std::list<Node*>* vals, Node*, Node*);
+		template<class F>
+		double reconstructPath(std::list<Node*>* vals, Node*, Node*, const F&);
 
 		unsigned int getNodeIndexByInternalIndex(unsigned int);
 
