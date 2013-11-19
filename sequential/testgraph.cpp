@@ -5,7 +5,7 @@
 
 Graph Testgraph::getLukasOriginalGraph(unsigned int graphsize) const
 {
-	Graph g = getSimpleGraph(graphsize, Testgraph::dir8);
+	Graph g = getSimpleGraph(graphsize, Graph::dir8);
 
 	for (int i = 50; i < 70; i++)
 		for (int j = 30; j < 80; j++)
@@ -33,7 +33,7 @@ void Testgraph::removeRandomNodes(Graph& g, unsigned int count, unsigned int max
 	g.removeNodesEdges(nodesToRemove);
 }
 
-Graph Testgraph::getSmileyGraph(unsigned int graphsize, edge_type e) const
+Graph Testgraph::getSmileyGraph(unsigned int graphsize, Graph::edge_type e) const
 {
 	Graph g = getSimpleGraph(graphsize, e);
 
@@ -64,7 +64,7 @@ Graph Testgraph::getSmileyGraph(unsigned int graphsize, edge_type e) const
 
 }
 
-Graph Testgraph::getCircleGraph(unsigned int graphsize, edge_type e) const
+Graph Testgraph::getCircleGraph(unsigned int graphsize, Graph::edge_type e) const
 {
 	Graph g = getSimpleGraph(graphsize, e);
 	const int gs = int(graphsize);
@@ -85,7 +85,7 @@ Graph Testgraph::getCircleGraph(unsigned int graphsize, edge_type e) const
 }
 
 
-Graph Testgraph::getSimpleGraph(unsigned int graphsize, edge_type e) const
+Graph Testgraph::getSimpleGraph(unsigned int graphsize, Graph::edge_type e) const
 {
 	Graph g;
 
@@ -93,9 +93,9 @@ Graph Testgraph::getSimpleGraph(unsigned int graphsize, edge_type e) const
 		for (unsigned int j = 0; j < graphsize; j++)
 			g.addNode(i, j);
 
-	if (e == dir4)
+	if (e == Graph::dir4)
 		g.addAllEdges4Directions(graphsize);
-	else if (e == dir8)
+	else if (e == Graph::dir8)
 		g.addAllEdges8Directions(graphsize);
 	
 	return g;

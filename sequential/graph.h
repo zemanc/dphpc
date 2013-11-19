@@ -28,6 +28,8 @@ class Graph
 		std::string getColor(Node::state_t) const;
 
 	public:
+		enum edge_type {dir4, dir8};
+
 		~Graph();
 		Graph() {};
 		Graph(std::string);
