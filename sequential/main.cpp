@@ -17,13 +17,14 @@ int main()
 
 	EuklidDistance distance;
 // 	CircleGraph cg = CircleGraph(n / 2, n / 4); 
-	SmileyGraph sg = SmileyGraph(n/2);
+// 	SmileyGraph sg = SmileyGraph(n/2);
+ 	HolyGraph hg = HolyGraph(n);
 
 	Testgraph tg;
 // 	Graph g = tg.getSimpleGraph(100);
 // 	Graph g = tg.getLukasOriginalGraph(100);
 // 	Graph g = tg.getSmileyGraph(100, Testgraph::dir8);
-	Graph g = tg.getGenericGraphFast(n, distance, sg);
+	Graph g = tg.getGenericGraphFast(n, distance, hg);
 // 	tg.removeRandomNodes(g, 2000, 10000);
 
 	g.randomDisplaceAllNodes(0.3, distance);
@@ -37,7 +38,8 @@ int main()
 	std::chrono::high_resolution_clock::time_point t_start, t_end;
 	t_start = std::chrono::high_resolution_clock::now();
 
-	double dist = g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
+	double dist = g.getShortestPath(0, n*n-1, path, distance);	// holy values
+// 	double dist = g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
 // 	g.getShortestPath(0, n*n-1, path, distance);	// circle values
 // 	double dist = g.getShortestPath(0, n*n-1, path, distance);	// circle values
 
