@@ -7,6 +7,8 @@
 // #include <ratio>
 #include "testgraph.h"
 
+#include "../benchmark_algos/boost/astar.h"
+
 int main()
 {
 
@@ -48,7 +50,7 @@ int main()
 
   	g.printGml();
 
-	g.save("out.graph");
+	boost_shortestPath_ek(g, 0, n*n-1);
 
 	delete path;
 
