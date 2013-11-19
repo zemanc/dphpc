@@ -11,48 +11,50 @@
 
 int main()
 {
-
-	// size
-	unsigned int n = 100;
-
-	EuklidDistance distance;
-// 	CircleGraph cg = CircleGraph(n / 2, n / 4); 
-// 	SmileyGraph sg = SmileyGraph(n/2);
- 	HolyGraph hg = HolyGraph(n);
-
-	Testgraph tg;
-// 	Graph g = tg.getSimpleGraph(100);
-// 	Graph g = tg.getLukasOriginalGraph(100);
-// 	Graph g = tg.getSmileyGraph(100, Testgraph::dir8);
-	Graph g = tg.getGenericGraphFast(n, distance, hg);
-// 	tg.removeRandomNodes(g, 2000, 10000);
-
-	g.randomDisplaceAllNodes(0.3, distance);
-// 	g.randomDisplaceAllNodes(0.4, ek_distance);
-
-	std::list<Node*> *path = new std::list<Node*>;
-//  	ManhattanDistance ek_distance;
-
-	// start timing
+	// timing stuff
 	std::ofstream timeout("time.out", std::ios::out);
+	timeout << "n" << "\t" << "n*n" << "\t" << "i" << "\t"
+			<< "time [s]" << "\t" << "distance" << std::endl;
 	std::chrono::high_resolution_clock::time_point t_start, t_end;
-	t_start = std::chrono::high_resolution_clock::now();
 
-	double dist = g.getShortestPath(0, n*n-1, path, distance);	// holy values
-// 	double dist = g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
-// 	g.getShortestPath(0, n*n-1, path, distance);	// circle values
-// 	double dist = g.getShortestPath(0, n*n-1, path, distance);	// circle values
+	// initial graph stuff
+	EuklidDistance distance;
+	Testgraph tg;
+	Graph g;
+	std::list<Node*> *path = new std::list<Node*>;
+	double dist;
 
-	// end timing
-	t_end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double> time_span =
-		std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start);
-	timeout << time_span.count() << " seconds" << std::endl;
-	timeout << "distance>: " << dist << std::endl;
+	// benchmarking
+	for (unsigned int n = 10; n <= 100; n+=10)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+// 			CircleGraph cg = CircleGraph(n / 2, n / 4); 
+// 			SmileyGraph sg = SmileyGraph(n/2);
+	 		HolyGraph hg = HolyGraph(n);
+			g = tg.getGenericGraphFast(n, distance, hg);
+			g.randomDisplaceAllNodes(0.3, distance);
 
-  	g.printGml();
 
-	boost_shortestPath_ek(g, 0, n*n-1);
+			// start timing
+			t_start = std::chrono::high_resolution_clock::now();
+
+			dist = g.getShortestPath(0, n*n-1, path, distance);	// holy values
+// 			double dist = g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
+// 			double dist = g.getShortestPath(0, n*n-1, path, distance);	// circle values
+
+			// end timing and write to file
+			t_end = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> time_span =
+				std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start);
+			timeout << n << "\t" << n*n << "\t" << i << "\t"
+					<< time_span.count() << "\t" << dist << std::endl;
+
+//		  	g.printGml();
+
+// 			boost_shortestPath_ek(g, 0, n*n-1);
+		}
+	}
 
 	delete path;
 
