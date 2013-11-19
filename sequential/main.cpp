@@ -37,13 +37,9 @@ int main()
 	std::chrono::high_resolution_clock::time_point t_start, t_end;
 	t_start = std::chrono::high_resolution_clock::now();
 
-// 	g.getShortestPath(1, 5549, path);
-// 	g.getShortestPath(2686, 2481, path, ek_distance);	// smiley values
-// 	g.getShortestPath(1, 5000, path, ek_distance);	// smiley values
-// 	g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
+	double dist = g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
 // 	g.getShortestPath(0, n*n-1, path, distance);	// circle values
-// 	g.getShortestPath(1446, 20, path, ek_distance);	// smiley values
-	double dist = g.getShortestPath(0, n*n-1, path, distance);	// circle values
+// 	double dist = g.getShortestPath(0, n*n-1, path, distance);	// circle values
 
 	// end timing
 	t_end = std::chrono::high_resolution_clock::now();
