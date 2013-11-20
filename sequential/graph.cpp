@@ -110,7 +110,10 @@ void Graph::cleanup()
 		(*it)->status = Node::inactive;
 		(*it)->next = NULL;
 		(*it)->prev = NULL;
-		(*it)->parent = NULL;
+		(*it)->parent = 0;
+		(*it)->f = 0;
+		(*it)->g = 0;
+		(*it)->h = 0;
 	}
 }
 
