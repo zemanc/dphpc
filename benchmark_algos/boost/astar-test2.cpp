@@ -225,7 +225,7 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 
 	// locations
 	for (pNode_v_it it = my_g.pNodes_v.begin(); it != my_g.pNodes_v.end(); it++)
-		locations_v.push_back({(*it)->getX(), (*it)->getY()});
+		locations_v.push_back( {(*it)->getX(), (*it)->getY()} );
 	
 	// define some constants
 	const int num_edges = edge_array_v.size();
@@ -237,7 +237,7 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 	edge *edge_array = new edge[num_edges];
 	for (int i = 0; i < num_edges; i++)
 	{
-		weights[i] = 1;
+		weights[i] = my_g.pEdges_v[i]->getDistance();
 		edge_array[i] = edge_array_v[i];
 	}
 	for (int i = 0; i < num_nodes; i++)
@@ -290,7 +290,9 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 				(locations, 
 				goal),
 			predecessor_map(
-				&p[0]).distance_map(&d[0])
+				&p[0])
+				.weight_map(weightmap)
+				.distance_map(&d[0])
 				.visitor(astar_goal_visitor<vertex>(goal))
 				.color_map(cmap)
 		);
