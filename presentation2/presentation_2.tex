@@ -133,17 +133,6 @@ What we have done so far:\\\quad\\
 \end{itemize}
 \end{frame}
 
-
-\begin{frame}
-\frametitle{Project Status}
-What we still have to do:\\\quad\\
-\begin{itemize}
-\item Implement parallel version
-\item Benchmarking (strong/weak scaling)
-\item Threshold fine-tuning
-\item Write report
-\end{itemize}
-\end{frame}
 %------------------------------------------------
 
 
@@ -182,6 +171,8 @@ What we still have to do:\\\quad\\
 \item Runtime vs. A* from Boost Graph Library
 \item Using "cross graph" and 400 - 10'000 nodes
 \item Threshold += 1
+\item 20 runs per size
+\item Intel Core 2 P9600 @ 2.53 GHZ
 \end{itemize}
 \begin{center}
 	\includegraphics[height=184pt]{boxplot.png}
@@ -194,20 +185,25 @@ What we still have to do:\\\quad\\
 \item Runtime vs. A* from Boost Graph Library
 \item Using "cross graph" and 400 - 10'000 nodes
 \item Threshold += 1
+\item 20 runs per size
+\item Intel Core 2 P9600 @ 2.53 GHZ
 \end{itemize}
+\end{frame}
+\begin{frame}
+\frametitle{Benchmark path length}
 \begin{center}
-    \begin{tabular}{ | r | c | c | c |}
+    \begin{tabular}{ | r | c | c | c | c | }
     \hline
-\# \textbf{Nodes}	&	\textbf{A-Star}	&	\textbf{Fringe}	&	\textbf{Difference} \\ \hline
-400		&	69.731	&	70.6903	&	0.9593 \\ \hline
-900		&	101.071	&	102.638	&	1.567 \\ \hline
-1600		&	133.304	&	136.326	&	3.022 \\ \hline
-2500		&	165.47	&	167.891	&	2.421 \\ \hline
-3600		&	195.363	&	198.115	&	2.752 \\ \hline
-4900		&	227.957	&	231.554	&	3.597 \\ \hline
-6400		&	258.5	&	261.49	&	2.99 \\ \hline
-8100		&	288.961	&	293.483	&	4.522 \\ \hline
-10000	&	321.263	&	325.853	&	4.59 \\ \hline
+\# \textbf{Nodes}	&	\textbf{A-Star}	&	\textbf{Fringe}	&	\textbf{Difference} & \textbf{Difference in \%} \\ \hline
+400		&	69.731	&	70.6903	&	0.9593 & 1.37 \% \\ \hline
+900		&	101.071	&	102.638	&	1.567  & 1.55 \%\\ \hline
+1600		&	133.304	&	136.326	&	3.022 & 2.27 \% \\ \hline
+2500		&	165.47	&	167.891	&	2.421 & 1.46 \% \\ \hline
+3600		&	195.363	&	198.115	&	2.752 & 1.41 \% \\ \hline
+4900		&	227.957	&	231.554	&	3.597 & 1.58 \% \\ \hline
+6400		&	258.5	&	261.49	&	2.99  & 1.16 \% \\ \hline
+8100		&	288.961	&	293.483	&	4.522 & 1.56 \% \\ \hline
+10000	&	321.263	&	325.853	&	4.59  & 1.43 \% \\ \hline
     \end{tabular}
 \end{center}
 
@@ -215,6 +211,17 @@ What we still have to do:\\\quad\\
 \end{frame}
 
 
+
+\begin{frame}
+\frametitle{Project Status}
+What we still have to do:\\\quad\\
+\begin{itemize}
+\item Implement parallel version
+\item Benchmarking (strong/weak scaling)
+\item Threshold fine-tuning
+\item Write report
+\end{itemize}
+\end{frame}
 %------------------------------------------------
 
 \begin{frame}
