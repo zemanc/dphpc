@@ -26,20 +26,21 @@ int main()
 	double dist;
 
 	// benchmarking
-	for (unsigned int n = 100; n <= 110; n+=10)
+	for (unsigned int n = 10; n <= 100; n+=10)
 	{
-		for (int i = 0; i < 1; i++)
+		Graph g;
+
+	 	HolyGraph hg = HolyGraph(n);
+//		CircleGraph cg = CircleGraph(n / 2, n / 4); 
+//		SmileyGraph sg = SmileyGraph(n/2);
+
+		tg.getGenericGraphFast(n, distance, hg, g);
+		g.randomDisplaceAllNodes(0.3, distance);
+		
+		for (int i = 0; i < 5; i++)
 		{
 			Node::max_index = 0;
-			Graph g;
-
-// 			CircleGraph cg = CircleGraph(n / 2, n / 4); 
-// 			SmileyGraph sg = SmileyGraph(n/2);
-	 		HolyGraph hg = HolyGraph(n);
-		
-			tg.getGenericGraphFast(n, distance, hg, g);
-			g.randomDisplaceAllNodes(0.3, distance);
-
+			g.cleanup();
 
 			// start timing
 			t_start = std::chrono::high_resolution_clock::now();

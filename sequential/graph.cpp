@@ -2,6 +2,15 @@
 #include <iostream>
 #include <fstream>
 
+Graph::~Graph()
+{
+	for  (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
+		delete *it;
+
+	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+		delete *it;
+}
+
 void Graph::addNode(length_t xPos, length_t yPos)
 {
 	pNodes_v.push_back(new Node(xPos, yPos));
@@ -72,15 +81,6 @@ void Graph::addAllEdges4Directions(unsigned int graphsize)
 		}
 }
 
-Node* Graph::getNode(unsigned int index)
-{
-	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
-		if ((*it)->getIndex() == index)
-			return *it;
-
-	return 0;
-}
-
 bool Graph::addEdge(unsigned int from, unsigned int to)
 {
 	EuklidDistance ek_distance;
@@ -94,13 +94,24 @@ bool Graph::addEdge(unsigned int from, unsigned int to)
 	}
 }
 
-Graph::~Graph()
+Node* Graph::getNode(unsigned int index)
 {
-	for  (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
-		delete *it;
-
 	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
-		delete *it;
+		if ((*it)->getIndex() == index)
+			return *it;
+
+	return 0;
+}
+
+void Graph::cleanup()
+{
+	for (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+	{
+		(*it)->status = Node::inactive;
+		(*it)->next = NULL;
+		(*it)->prev = NULL;
+		(*it)->parent = NULL;
+	}
 }
 
 std::string Graph::getColor(Node::state_t s) const
@@ -119,6 +130,7 @@ std::string Graph::getColor(Node::state_t s) const
 			return "#000000";
 	}
 }
+
 void Graph::printGml() const
 {
 	std::cout << "graph [" << std::endl;

@@ -31,7 +31,7 @@ class Graph
 
 		~Graph();
 		Graph() {};
-		Graph(std::string); //nicht fertig
+		Graph(std::string);		// noch nicht fertig
 
 		pNode_v pNodes_v;
 		pEdg_v pEdges_v;
@@ -41,6 +41,8 @@ class Graph
 		void addAllEdges4Directions(unsigned int);
 		bool addEdge(unsigned int, unsigned int);
 		Node* getNode(unsigned int);
+
+		void cleanup();
 
 		void printTgf() const;
 		void printGml() const;
