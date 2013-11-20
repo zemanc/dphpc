@@ -26,6 +26,7 @@ class Node
 		length_t getX() const;
 		length_t getY() const;
 		unsigned int getIndex() const;
+		void removeEdge(Edge*);
 
 		void print() const;
 

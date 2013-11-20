@@ -26,7 +26,7 @@ int main()
 	double dist;
 
 	// benchmarking
-	for (unsigned int n = 20; n <= 100; n+=10)
+	for (unsigned int n = 100; n <= 100; n+=10)
 	{
 		Node::max_index = 0;
 		Graph g;
@@ -36,8 +36,9 @@ int main()
 
 		tg.getGenericGraphFast(n, distance, hg, g);
 		g.randomDisplaceAllNodes(0.3, distance);
+//         tg.removeRandomNodes(g, 2000, 10000);
 		
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			g.cleanup();
 
@@ -56,7 +57,7 @@ int main()
 					<< time_span.count() << "\t" << dist << std::endl;
 
 			boost_shortestPath_ek(g, 0, n*n-1);
-// 			g.printGml();
+			g.printGml();
 
 		}
 	}

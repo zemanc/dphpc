@@ -50,6 +50,20 @@ void Node::addEdge(Edge* pnewEdge)
 	adjEdges.push_back(pnewEdge);
 }
 
+void Node::removeEdge(Edge* e)
+{
+	for (pEdg_v::iterator it = adjEdges.begin(); it != adjEdges.end(); it++)
+	{
+		if (*it == e) 
+		{
+			adjEdges.erase(it);
+			return;
+		}
+	}
+	return;
+}
+
+
 void Node::print() const
 {
 	std::cout << index << " " << xPos << " " << yPos << " " << status << std::endl;

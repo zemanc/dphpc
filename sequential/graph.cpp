@@ -94,6 +94,47 @@ bool Graph::addEdge(unsigned int from, unsigned int to)
 	}
 }
 
+void Graph::removeNodesEdges(pNtr_v nodesToRemove)
+{
+	pNode_v_it it_node = pNodes_v.begin();
+	pEdg_v_it it_edg = pEdges_v.begin();
+	pNtr_v_it it_ntrFrom;
+	pNtr_v_it it_ntrTo;
+
+	// remove edges
+	while (it_edg != pEdges_v.end())
+	{
+		it_ntrFrom = nodesToRemove.find((*it_edg)->getFrom()->getIndex());
+		it_ntrTo = nodesToRemove.find((*it_edg)->getTo()->getIndex());
+		if ( it_ntrFrom != nodesToRemove.end() || it_ntrTo != nodesToRemove.end() )
+		{
+			(*it_edg)->getFrom()->removeEdge(*it_edg);
+			(*it_edg)->getTo()->removeEdge(*it_edg);
+			delete *it_edg;
+			it_edg = pEdges_v.erase(it_edg);
+		}
+		else 
+		{
+			it_edg++;
+		}
+	}
+
+	// remove nodes
+	it_node = pNodes_v.begin();
+	while (it_node != pNodes_v.end() )
+	{
+		if (nodesToRemove.find((*it_node)->getIndex()) != nodesToRemove.end())
+		{
+			delete *it_node;
+			it_node = pNodes_v.erase(it_node);
+		}
+		else
+		{
+			it_node++;
+		}
+	}
+}
+
 Node* Graph::getNode(unsigned int index)
 {
 	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)

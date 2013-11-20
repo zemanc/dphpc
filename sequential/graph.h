@@ -39,6 +39,7 @@ class Graph
 		void addAllEdges8Directions(unsigned int);
 		void addAllEdges4Directions(unsigned int);
 		bool addEdge(unsigned int, unsigned int);
+		void removeNodesEdges(pNtr_v);
 		Node* getNode(unsigned int);
 
 		void cleanup();
