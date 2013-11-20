@@ -13,11 +13,8 @@ class Testgraph
 		Graph getSimpleGraph(unsigned int, Graph::edge_type) const;
 		Graph getCircleGraph(unsigned int, Graph::edge_type) const;
 
-		template<class F>
-		Graph getCircleGraphFast(unsigned int, const F&) const;
-
 		template<class F, class G>
-		Graph getGenericGraphFast(unsigned int, const F&, const G&) const;
+		void getGenericGraphFast(unsigned int, const F&, const G&, Graph&) const;
 
 		void removeRandomNodes(Graph&, unsigned int, unsigned int) const;
 };

@@ -3,11 +3,10 @@
 #define __testgraph_getGenericGraphFast_h__
 
 template<class F, class G>
-Graph Testgraph::getGenericGraphFast(unsigned int graphsize, const F& dist, 
-									 const G& isEdge) const
+void Testgraph::getGenericGraphFast(unsigned int graphsize, const F& dist, 
+									 const G& isEdge, Graph& g) const
 {
-	Graph g;
-	const int gs = int(graphsize);
+	const int gs = static_cast<int>(graphsize);
 
 	// add nodes
 	for (int i = 0; i < gs; i++)
@@ -68,7 +67,6 @@ Graph Testgraph::getGenericGraphFast(unsigned int graphsize, const F& dist,
 			it4++;
 		}
 
-	return g;
 }
 
 #endif

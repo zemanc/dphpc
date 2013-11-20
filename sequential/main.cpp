@@ -20,7 +20,6 @@ int main()
 	// initial graph stuff
 	EuklidDistance distance;
 	Testgraph tg;
-	Graph g;
 	std::list<Node*> *path = new std::list<Node*>;
 	double dist;
 
@@ -29,10 +28,13 @@ int main()
 	{
 		for (int i = 0; i < 10; i++)
 		{
+			Graph g;
+
 // 			CircleGraph cg = CircleGraph(n / 2, n / 4); 
 // 			SmileyGraph sg = SmileyGraph(n/2);
 	 		HolyGraph hg = HolyGraph(n);
-			g = tg.getGenericGraphFast(n, distance, hg);
+		
+			tg.getGenericGraphFast(n, distance, hg, g);
 			g.randomDisplaceAllNodes(0.3, distance);
 
 
