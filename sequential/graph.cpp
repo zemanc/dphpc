@@ -261,7 +261,7 @@ void Graph::printTgf() const
 
 double Graph::newThreshold(double oldThreshold)
 {
-	return oldThreshold + 0.1;
+	return oldThreshold + 3;
 }
 
 unsigned int Graph::getNodeIndexByInternalIndex(unsigned int i)

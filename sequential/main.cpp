@@ -13,8 +13,10 @@ int main()
 {
 	// timing stuff
 	std::ofstream timeout("time.out", std::ios::out);
+	std::ofstream tbout("time_boost.out", std::ios::out);
 	timeout << "n" << "\t" << "n*n" << "\t" << "i" << "\t"
 			<< "time [s]" << "\t" << "distance" << std::endl;
+	tbout << "time [s]" << "\t" << "distance" << std::endl;
 	std::chrono::high_resolution_clock::time_point t_start, t_end;
 
 	// initial graph stuff

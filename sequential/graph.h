@@ -38,9 +38,9 @@ class Graph
 		pEdg_v pEdges_v;
 
 		void addNode(length_t, length_t);
- 		void removeNodesEdges(pNtr_v);
 		void addAllEdges8Directions(unsigned int);
 		void addAllEdges4Directions(unsigned int);
+ 		void removeNodesEdges(pNtr_v);					// do not use
 		bool addEdge(unsigned int, unsigned int);		// do not use
 		void removeNode(unsigned int);					// do not use
 		bool removeEdge(unsigned int, unsigned int);	// do not use
