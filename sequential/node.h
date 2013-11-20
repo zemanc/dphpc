@@ -34,19 +34,14 @@ class Node
 		pEdg_v adjEdges;
 
 		void addEdge(Edge*);
-		void removeEdge(Edge*);
 
 		//states für shortest Path
 		enum state_t {closed, open, inactive, onPath};
 		Node* parent; 
-
-		//does it make a difference when those are private with an 
-		//additional function (getF / getG / ...)
 		state_t status;
-		double f; //heuristic cost from start to end through this node
-		double g; //effective cost from start to this node
-		double h; //heuristic cost from this node to end
-
+		length_t f;	//heuristic cost from start to end through this node
+		length_t g;	//effective cost from start to this node
+		length_t h;	//heuristic cost from this node to end
 
 		//"nowlater"-list
 		Node* next;

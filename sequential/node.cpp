@@ -44,22 +44,10 @@ unsigned int Node::getIndex() const
 {
 	return index;
 }
+
 void Node::addEdge(Edge* pnewEdge)
 {
 	adjEdges.push_back(pnewEdge);
-}
-
-void Node::removeEdge(Edge* e)
-{
-	for (pEdg_v::iterator it = adjEdges.begin(); it != adjEdges.end(); it++)
-	{
-		if (*it == e) 
-		{
-			adjEdges.erase(it);
-			return;
-		}
-	}
-	return;
 }
 
 void Node::print() const

@@ -3,7 +3,6 @@
 #define __graph_h__
 
 #include <vector>
-//#include <unordered_set>
 #include <set>
 #include <list>
 #include <string>
@@ -24,7 +23,7 @@ class Graph
 {
 	private:
 
-		double newThreshold(double);
+		length_t newThreshold(length_t);
 		std::string getColor(Node::state_t) const;
 
 	public:
@@ -40,12 +39,7 @@ class Graph
 		void addNode(length_t, length_t);
 		void addAllEdges8Directions(unsigned int);
 		void addAllEdges4Directions(unsigned int);
- 		void removeNodesEdges(pNtr_v);					// do not use
-		bool addEdge(unsigned int, unsigned int);		// do not use
-		void removeNode(unsigned int);					// do not use
-		bool removeEdge(unsigned int, unsigned int);	// do not use
-		void removeEdge(unsigned int);					// do not use
-		void removeEdge(pEdg_v_it&);					// do not use
+		bool addEdge(unsigned int, unsigned int);
 		Node* getNode(unsigned int);
 
 		void printTgf() const;

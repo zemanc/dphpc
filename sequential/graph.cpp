@@ -8,48 +8,6 @@ void Graph::addNode(length_t xPos, length_t yPos)
 	return;
 }
 
-void Graph::removeNodesEdges(pNtr_v nodesToRemove)
-{
-	pNode_v_it it_node = pNodes_v.begin();
-	pEdg_v_it it_edg = pEdges_v.begin();
-	pNtr_v_it it_ntrFrom;
-	pNtr_v_it it_ntrTo;
-
-	// remove edges
-	while (it_edg != pEdges_v.end())
-	{
-		it_ntrFrom = nodesToRemove.find((*it_edg)->getFrom()->getIndex());
-		it_ntrTo = nodesToRemove.find((*it_edg)->getTo()->getIndex());
-		if ( it_ntrFrom != nodesToRemove.end() || it_ntrTo != nodesToRemove.end() )
-		{
-			(*it_edg)->getFrom()->removeEdge(*it_edg);
-			(*it_edg)->getTo()->removeEdge(*it_edg);
-			delete *it_edg;
-			it_edg = pEdges_v.erase(it_edg);
-		}
-		else 
-		{
-			it_edg++;
-		}
-	}
-
-	// remove nodes
-	it_node = pNodes_v.begin();
-	while (it_node != pNodes_v.end() )
-	{
-		if (nodesToRemove.find((*it_node)->getIndex()) != nodesToRemove.end())
-		{
-			delete *it_node;
-			it_node = pNodes_v.erase(it_node);
-		}
-		else
-		{
-			it_node++;
-		}
-
-	}
-}
-
 void Graph::addAllEdges8Directions(unsigned int graphsize)
 {
 
@@ -114,30 +72,6 @@ void Graph::addAllEdges4Directions(unsigned int graphsize)
 		}
 }
 
-void Graph::removeNode(unsigned int index)
-{
-
-	pEdg_v_it it_edg = pEdges_v.begin();
-	while (it_edg != pEdges_v.end() )
-	{
-		if ( ( (*it_edg)->getFrom()->getIndex() == index)
-				|| ( (*it_edg)->getTo()->getIndex() == index))
-			removeEdge(it_edg);
-		else
-			it_edg++;
-	}
-
-	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
-		if ((*it)->getIndex() == index)
-		{
-			delete *it;
-			pNodes_v.erase(it);
-			return;
-		}
-
-	return;
-
-}
 Node* Graph::getNode(unsigned int index)
 {
 	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
@@ -145,34 +79,6 @@ Node* Graph::getNode(unsigned int index)
 			return *it;
 
 	return 0;
-}
-
-void Graph::removeEdge(pEdg_v_it& it)
-{
-	(*it)->getFrom()->removeEdge(*it);
-	delete *it;
-	it = pEdges_v.erase(it);
-}
-void Graph::removeEdge(unsigned int index)
-{
-	pEdges_v[index]->getFrom()->removeEdge(pEdges_v[index]);
-	delete pEdges_v[index];
-	pEdges_v.erase(pEdges_v.begin() + index);
-}
-bool Graph::removeEdge(unsigned int from, unsigned int to)
-{
-	for  (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
-	{
-		if (((*it)->getFrom()->getIndex() == from)
-				&& (*it)->getTo()->getIndex() == to)
-		{	
-			removeEdge(it);
-			return true;
-		}
-	}
-
-	return false;
-
 }
 
 bool Graph::addEdge(unsigned int from, unsigned int to)
@@ -259,7 +165,7 @@ void Graph::printTgf() const
 	return;
 }
 
-double Graph::newThreshold(double oldThreshold)
+length_t Graph::newThreshold(length_t oldThreshold)
 {
 	return oldThreshold + 3;
 }

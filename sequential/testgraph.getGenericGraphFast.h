@@ -19,9 +19,6 @@ void Testgraph::getGenericGraphFast(unsigned int graphsize, const F& dist,
 	pNode_v_it it3 = g.pNodes_v.begin() + gs;
 	pNode_v_it it4 = g.pNodes_v.begin() + gs + 1;
 
-	//pNodes_v[0] = 0 / 0
-	//pNodes_v[1] = 0 / 1
-	//pNodes_v[2] = 0 / 2
 	for (int i = 0; i < gs; i++)
 		for (int j = 0; j < gs; j++)
 		{
