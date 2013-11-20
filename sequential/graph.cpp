@@ -223,7 +223,7 @@ void Graph::printTgf() const
 
 length_t Graph::newThreshold(length_t oldThreshold)
 {
-	return oldThreshold + 3;
+	return oldThreshold + 1;
 }
 
 unsigned int Graph::getNodeIndexByInternalIndex(unsigned int i)

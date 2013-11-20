@@ -26,28 +26,27 @@ int main()
 	double dist;
 
 	// benchmarking
-	for (unsigned int n = 100; n <= 100; n+=10)
+	for (unsigned int n = 20; n <= 100; n+=10)
 	{
 		Node::max_index = 0;
 		Graph g;
 	 	HolyGraph hg = HolyGraph(n);
-//		CircleGraph cg = CircleGraph(n / 2, n / 4); 
-//		SmileyGraph sg = SmileyGraph(n/2);
+// 		CircleGraph cg = CircleGraph(n / 2, n / 4); 
+// 		SmileyGraph sg = SmileyGraph(n/2);
 
 		tg.getGenericGraphFast(n, distance, hg, g);
 		g.randomDisplaceAllNodes(0.3, distance);
-//         tg.removeRandomNodes(g, 2000, 10000);
+// 		tg.removeRandomNodes(g, 2000, 10000);
 		
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 20; i++)
 		{
 			g.cleanup();
 
 			// start timing
 			t_start = std::chrono::high_resolution_clock::now();
 
-			dist = g.getShortestPath(0, n*n-1, path, distance);	// holy values
-// 			double dist = g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
-// 			double dist = g.getShortestPath(0, n*n-1, path, distance);	// circle values
+			dist = g.getShortestPath(0, n*n-1, path, distance);	// holy values / circle values
+// 			dist = g.getShortestPath(n/4*n-6*n/7, 3*n/4*n-n/7, path, distance);	// smiley values
 
 			// end timing and write to file
 			t_end = std::chrono::high_resolution_clock::now();
@@ -57,7 +56,7 @@ int main()
 					<< time_span.count() << "\t" << dist << std::endl;
 
 			boost_shortestPath_ek(g, 0, n*n-1);
-			g.printGml();
+// 			g.printGml();
 
 		}
 	}

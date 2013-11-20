@@ -1,0 +1,226 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass{beamer}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage[utf8]{inputenc} % Umlaut
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title[Parallel Fringe Search]{Parallel Fringe Search} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Christian Zeman \& Lukas Mosimann} % Your name
+\institute[ETH] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+ETH Zürich \\ % Your institution for the title page
+\medskip
+\textit{Design of Parallel and High-Performance Computing} % Your email address
+}
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Overview} % Table of contents slide, comment this block out to remove it
+%\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+%\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION SLIDES
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+\section{Algorithm} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Fringe Search}
+\includegraphics[height=165pt]{fringe7.pdf}
+\end{frame}
+
+%------------------------------------------------
+\section{Project Status}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Project Status}
+What we have done so far:\\\quad\\
+\begin{itemize}
+\item Serial fringe search implemented
+\item Benchmarked against A* from Boost Graph Library
+\item Ran it with different thresholds
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Project Status}
+What we still have to do:\\\quad\\
+\begin{itemize}
+\item Implement parallel version
+\item Benchmarking (strong/weak scaling)
+\item Threshold fine-tuning
+\item Write report
+\end{itemize}
+\end{frame}
+%------------------------------------------------
+
+
+%------------------------------------------------
+\section{Some benchmark graphs}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Some benchmark graphs...}
+\begin{center}
+	\includegraphics[height=210pt]{holy.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Some benchmark graphs...}
+\begin{center}
+	\includegraphics[height=210pt]{circle.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Some benchmark graphs...}
+\begin{center}
+	\includegraphics[height=210pt]{smiley.png}
+\end{center}
+\end{frame}
+
+%------------------------------------------------
+\section{Benchmark}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Benchmark runtime}
+\begin{itemize}
+\item Runtime vs. A* from Boost Graph Library
+\item Using "cross graph" and 400 - 10'000 nodes
+\item Threshold += 1
+\end{itemize}
+\begin{center}
+	\includegraphics[height=184pt]{boxplot.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Benchmark path length}
+\begin{itemize}
+\item Runtime vs. A* from Boost Graph Library
+\item Using "cross graph" and 400 - 10'000 nodes
+\item Threshold += 1
+\end{itemize}
+\begin{center}
+    \begin{tabular}{ | r | c | c | c |}
+    \hline
+\# \textbf{Nodes}	&	\textbf{A-Star}	&	\textbf{Fringe}	&	\textbf{Difference} \\ \hline
+400		&	69.731	&	70.6903	&	0.9593 \\ \hline
+900		&	101.071	&	102.638	&	1.567 \\ \hline
+1600		&	133.304	&	136.326	&	3.022 \\ \hline
+2500		&	165.47	&	167.891	&	2.421 \\ \hline
+3600		&	195.363	&	198.115	&	2.752 \\ \hline
+4900		&	227.957	&	231.554	&	3.597 \\ \hline
+6400		&	258.5	&	261.49	&	2.99 \\ \hline
+8100		&	288.961	&	293.483	&	4.522 \\ \hline
+10000	&	321.263	&	325.853	&	4.59 \\ \hline
+    \end{tabular}
+\end{center}
+
+
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}
+\Huge{\centerline{The End}}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\end{document} 

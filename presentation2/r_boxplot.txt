@@ -1,0 +1,9 @@
+mydata = read.csv("data.csv")
+
+boxplot(mydata
+,ylab ="time [s]"
+, las = 2
+, names = c("Fringe (400)","A-Star (400)","Fringe (900)","A-Star (900)","Fringe (1600)","A-Star (1600)","Fringe (2500)","A-Star (2500)","Fringe (3600)","A-Star (3600)","Fringe (4900)","A-Star (4900)","Fringe (6400)","A-Star (6400)","Fringe (8100)","A-Star (8100)","Fringe (10000)","A-Star (10000)")
+, par(mar = c(12, 5, 4, 2)+ 0.1)
+, col=(c("red","blue")))
+
