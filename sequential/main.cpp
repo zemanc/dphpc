@@ -26,10 +26,10 @@ int main()
 	double dist;
 
 	// benchmarking
-	for (unsigned int n = 10; n <= 10; n+=10)
+	for (unsigned int n = 20; n <= 100; n+=10)
 	{
+		Node::max_index = 0;
 		Graph g;
-
 	 	HolyGraph hg = HolyGraph(n);
 //		CircleGraph cg = CircleGraph(n / 2, n / 4); 
 //		SmileyGraph sg = SmileyGraph(n/2);
@@ -39,7 +39,6 @@ int main()
 		
 		for (int i = 0; i < 5; i++)
 		{
-			Node::max_index = 0;
 			g.cleanup();
 
 			// start timing
@@ -57,7 +56,7 @@ int main()
 					<< time_span.count() << "\t" << dist << std::endl;
 
 			boost_shortestPath_ek(g, 0, n*n-1);
-			g.printGml();
+// 			g.printGml();
 
 		}
 	}
