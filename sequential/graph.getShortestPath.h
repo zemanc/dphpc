@@ -120,7 +120,7 @@ double Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node
 	}
 	delete zero_node;
 
-	return 0;
+	return -1;
 }
 
 template<class F>
