@@ -342,6 +342,10 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 					  400,
 					  400));
 
+		delete [] locations;
+		delete [] weights;
+		delete [] edge_array;
+
 		return;
 
 	}
@@ -351,6 +355,6 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 	delete [] weights;
 	delete [] edge_array;
   
-	timeout << "Didn't find a path from " << start << "to" << goal << "!" << endl;
+	timeout << "Didn't find a path from " << start << " to " << goal << "!" << endl;
 
 }

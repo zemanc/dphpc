@@ -10,13 +10,13 @@ class Edge;
 class Node
 {
 	private:
-		static unsigned int max_index; //kein index wird doppelt vergeben
-
 		unsigned int index;
 		length_t xPos;
 		length_t yPos;
 
 	public:
+		static unsigned int max_index; //kein index wird doppelt vergeben
+
 		Node(length_t, length_t);
 		~Node();
 

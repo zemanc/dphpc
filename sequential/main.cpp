@@ -20,8 +20,8 @@ int main()
 	std::chrono::high_resolution_clock::time_point t_start, t_end;
 
 	// initial graph stuff
-	EuklidDistance distance;
 	Testgraph tg;
+	EuklidDistance distance;
 	std::list<Node*> *path = new std::list<Node*>;
 	double dist;
 
@@ -30,6 +30,7 @@ int main()
 	{
 		for (int i = 0; i < 1; i++)
 		{
+			Node::max_index = 0;
 			Graph g;
 
 // 			CircleGraph cg = CircleGraph(n / 2, n / 4); 
