@@ -24,9 +24,9 @@ int main()
 	double dist;
 
 	// benchmarking
-	for (unsigned int n = 10; n <= 100; n+=10)
+	for (unsigned int n = 100; n <= 100; n+=10)
 	{
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			Graph g;
 
@@ -52,9 +52,7 @@ int main()
 			timeout << n << "\t" << n*n << "\t" << i << "\t"
 					<< time_span.count() << "\t" << dist << std::endl;
 
-//		  	g.printGml();
-
-// 			boost_shortestPath_ek(g, 0, n*n-1);
+			boost_shortestPath_ek(g, 0, n*n-1);
 		}
 	}
 
