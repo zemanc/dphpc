@@ -31,7 +31,6 @@ class Graph
 
 		~Graph();
 		Graph() {};
-		Graph(std::string);		// noch nicht fertig
 
 		pNode_v pNodes_v;
 		pEdg_v pEdges_v;

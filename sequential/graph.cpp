@@ -190,24 +190,3 @@ unsigned int Graph::getNodeIndexByInternalIndex(unsigned int i)
 	return pNodes_v[i]->getIndex();
 }
 
-void Graph::save(std::string fn) const
-{
-	std::ofstream outfile(fn);
-	for (pNode_v_cit it = pNodes_v.begin(); it != pNodes_v.end(); it++)
-		outfile << (*it)->getIndex() << " " 
-				<< (*it)->getX() << " " 
-			    << (*it)->getY() << std::endl;
-	
-	outfile << std::endl;
-
-	for (pEdg_v_cit it = pEdges_v.begin(); it != pEdges_v.end(); it++)
-		outfile << (*it)->getFrom()->getIndex() << " " 
-				<< (*it)->getTo()->getIndex() << " "
-				<< (*it)->getDistance() << std::endl;
-
-}
-
-Graph::Graph(std::string fn)
-{
-
-}
