@@ -12,12 +12,12 @@ optimized: fringe
 profile: CC += -pg
 profile: fringe
 
-fringe: main.o testgraph.o graph.o edge.o node.o astar-test2.o
+fringe: main.o graph.o edge.o node.o astar-test2.o
 	$(CC) $(LFLAGS) -o $@ $^
 main.o: main.cpp graph.h testgraph.h node.h edge.h testgraph.genericGraphs.h testgraph.getGenericGraphFast.h ../benchmark_algos/boost/astar.h
 	$(CC) $(CFLAGS) $<
-testgraph.o: testgraph.cpp testgraph.h testgraph.genericGraphs.h testgraph.getGenericGraphFast.h graph.h node.h edge.h graph.distances.h graph.getShortestPath.h
-	$(CC) $(CFLAGS) $<
+# testgraph.o: testgraph.cpp testgraph.h testgraph.genericGraphs.h testgraph.getGenericGraphFast.h graph.h node.h edge.h graph.distances.h graph.getShortestPath.h
+#	$(CC) $(CFLAGS) $<
 graph.o: graph.cpp graph.h node.h edge.h graph.distances.h graph.getShortestPath.h
 	$(CC) $(CFLAGS) $<
 edge.o: edge.cpp edge.h node.h
