@@ -7,7 +7,7 @@
 
 struct EuklidDistance {
 	EuklidDistance() {};
-	length_t get(Node* const pFrom, Node* const pTo) const
+	length_t operator()(Node* const pFrom, Node* const pTo) const
 	{
 		return std::sqrt((pTo->getX() - pFrom->getX()) * (pTo->getX() - pFrom->getX()) 
 			            +(pTo->getY() - pFrom->getY()) * (pTo->getY() - pFrom->getY()));
@@ -19,7 +19,7 @@ struct EuklidDistance {
 struct ManhattanDistance 
 {
 	ManhattanDistance() {};
-	length_t get(Node* const pFrom, Node* const pTo) const
+	length_t operator()(Node* const pFrom, Node* const pTo) const
 	{
 		return std::abs(pTo->getX() - pFrom->getX()) + std::abs(pTo->getY() - pFrom->getY());
 	};

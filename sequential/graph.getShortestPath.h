@@ -12,7 +12,7 @@ double Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node
 
 	//start heuristische funktion initialisieren
 	start->g = 0;
-	start->h = dist.get(start, end);
+	start->h = dist(start, end);
 	start->f = start->g + start->h;
 
 	double threshold = start->f; //start with shortest possible paths
@@ -60,7 +60,7 @@ double Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node
 
 						//berechne heuristische Beträge
 						edge_to->g = nl_pos->g + (*edge_it)->getDistance();
-						edge_to->h = dist.get(edge_to, end);
+						edge_to->h = dist(edge_to, end);
 						edge_to->f = edge_to->g + edge_to->h;
 
 						//für backtracking, damit wir wissen woher wir gekommen sind
@@ -132,7 +132,7 @@ double Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end, co
 	Node* it = end;
 	while (it != start)
 	{
-		length += dist.get(it, it->parent);
+		length += dist(it, it->parent);
 
 		vals->push_front(it);
 		it->status = Node::onPath;

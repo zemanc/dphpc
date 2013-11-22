@@ -30,7 +30,7 @@ Edge::Edge(Node* pFrom, Node* pTo, const F& distance)
 											, to(pTo)
 {
 	pFrom->addEdge(this);
-	this->dist = distance.get(pFrom, pTo);
+	this->dist = distance(pFrom, pTo);
 }
 	
 

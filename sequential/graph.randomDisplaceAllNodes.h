@@ -17,7 +17,7 @@ void Graph::randomDisplaceAllNodes(double sigma, const F& dist)
 	}
 
 	for (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
-		(*it)->setDistance(dist.get((*it)->getFrom(), (*it)->getTo()));
+		(*it)->setDistance(dist((*it)->getFrom(), (*it)->getTo()));
 }
 
 #endif
