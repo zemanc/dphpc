@@ -3,22 +3,22 @@
 #define __graph__getShortestPath_h__
 
 template<class F>
-double Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node*>* vals, const F& dist)
+length_t Graph::getShortestPath(index_t from, index_t to, std::list<Node*>* vals, const F& dist)
 {
 
 	//geht besser so als randomized... für den Moment. Später ist das wohl dann der "richtige" Index, nicht der interne!
-	Node* start = pNodes_v[from];
-	Node* end = pNodes_v[to];
+	Node* start = pNodes[from];
+	Node* end = pNodes[to];
 
 	//start heuristische funktion initialisieren
 	start->g = 0;
-	start->h = dist.get(start, end);
+	start->h = dist(start, end);
 	start->f = start->g + start->h;
 
 	double threshold = start->f; //start with shortest possible paths
 
 	//init list
-	Node* zero_node = new Node(0, 0);
+	Node* zero_node = new Node(0, 0, 0);
 	zero_node->prev = zero_node;
 	zero_node->next = zero_node;
 
@@ -49,18 +49,18 @@ double Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node
 				nl_pos->status = Node::closed;
 
 				//for each neighbor
-				for (Node::pEdg_v::iterator edge_it = nl_pos->adjEdges.begin(); 
+				for (Node::edges_it_t edge_it = nl_pos->adjEdges.begin(); 
 					 edge_it != nl_pos->adjEdges.end(); edge_it++)
 				{
-					Node* edge_to = (*edge_it)->getTo();
+					Node* edge_to = (*edge_it).first;
 
 					if (edge_to->status == Node::inactive)
 					{
 						//neuer Node!
 
 						//berechne heuristische Beträge
-						edge_to->g = nl_pos->g + (*edge_it)->getDistance();
-						edge_to->h = dist.get(edge_to, end);
+						edge_to->g = nl_pos->g + (*edge_it).second;
+						edge_to->h = dist(edge_to, end);
 						edge_to->f = edge_to->g + edge_to->h;
 
 						//für backtracking, damit wir wissen woher wir gekommen sind
@@ -77,7 +77,7 @@ double Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node
 					} else if (edge_to->status == Node::open) {
 						
 						//wenn distanz besser ist
-						double newDist = nl_pos->g + (*edge_it)->getDistance();
+						double newDist = nl_pos->g + (*edge_it).second;
 						if (edge_to->g > newDist)
 						{
 							//heuristische Beträge berechnen
@@ -124,7 +124,7 @@ double Graph::getShortestPath(unsigned int from, unsigned int to, std::list<Node
 }
 
 template<class F>
-double Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end, const F& dist)
+length_t Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end, const F& dist)
 {
 
 	double length = 0;
@@ -132,7 +132,7 @@ double Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end, co
 	Node* it = end;
 	while (it != start)
 	{
-		length += dist.get(it, it->parent);
+		length += dist(it, it->parent);
 
 		vals->push_front(it);
 		it->status = Node::onPath;

@@ -1,11 +1,11 @@
-#include "edge.h"
+#include "node.h"
 #include <climits>
 #include <iostream>
 #include <cmath>
 
-unsigned int Node::max_index = 0;
-
-Node::Node(length_t xP, length_t yP) : xPos(xP)
+Node::Node(length_t xP, length_t yP, index_t i) 
+									 : index(i)
+									 , xPos(xP)
 									 , yPos(yP)
 									 , parent(0)
 									 , status(inactive)
@@ -15,11 +15,9 @@ Node::Node(length_t xP, length_t yP) : xPos(xP)
 									 , next(NULL)
 									 , prev(NULL)
 {
-	index = max_index++;
 }
 Node::~Node()
 {
-//	max_index--; das wäre ja gar nicht gut! :-) der Index muss einmalig sein!
 }
 
 void Node::setX(length_t x) 
@@ -45,16 +43,26 @@ unsigned int Node::getIndex() const
 	return index;
 }
 
-void Node::addEdge(Edge* pnewEdge)
+void Node::addEdge(Node* dest, length_t dist)
 {
-	adjEdges.push_back(pnewEdge);
+	adjEdges.push_back(std::make_pair(dest, dist));
+}
+void Node::addEdge(edge_t e)
+{
+	adjEdges.push_back(e);
 }
 
-void Node::removeEdge(Edge* e)
+void Node::print() const
 {
-	for (pEdg_v::iterator it = adjEdges.begin(); it != adjEdges.end(); it++)
+	std::cout << index << " " << xPos << " " << yPos << " " << status << std::endl;
+	return;
+}
+
+void Node::removeEdge(Node* dest) 
+{
+	for (edges_t::iterator it = adjEdges.begin(); it != adjEdges.end(); it++)
 	{
-		if (*it == e) 
+		if ((*it).first == dest) 
 		{
 			adjEdges.erase(it);
 			return;
@@ -63,9 +71,3 @@ void Node::removeEdge(Edge* e)
 	return;
 }
 
-
-void Node::print() const
-{
-	std::cout << index << " " << xPos << " " << yPos << " " << status << std::endl;
-	return;
-}

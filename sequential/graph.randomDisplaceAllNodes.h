@@ -5,19 +5,22 @@
 #include <random>
 
 template<class F>
-void Graph::randomDisplaceAllNodes(double sigma, const F& dist)
+void Graph::randomDisplaceAllNodes(length_t sigma, const F& dist)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::normal_distribution<> d(0., sigma);
-	for (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+	for (pNode_v_it it = pNodes.begin(); it != pNodes.end(); it++)
 	{
 		(*it)->setX((*it)->getX() + d(gen));
 		(*it)->setY((*it)->getY() + d(gen));
 	}
 
-	for (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
-		(*it)->setDistance(dist.get((*it)->getFrom(), (*it)->getTo()));
+	for (pNode_v_it nit = pNodes.begin(); nit != pNodes.end(); nit++)
+		for (Node::edges_it_t eit = (*nit)->adjEdges.begin(); 
+             eit != (*nit)->adjEdges.end(); eit++)
+			(*eit).second = dist(*nit, (*eit).first);
+
 }
 
 #endif

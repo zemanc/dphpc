@@ -4,48 +4,45 @@
 
 Graph::~Graph()
 {
-	for  (pEdg_v_it it = pEdges_v.begin(); it != pEdges_v.end(); it++)
-		delete *it;
-
-	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+	for  (pNode_v_it it = pNodes.begin(); it != pNodes.end(); it++)
 		delete *it;
 }
 
 void Graph::addNode(length_t xPos, length_t yPos)
 {
-	pNodes_v.push_back(new Node(xPos, yPos));
+	pNodes.push_back(new Node(xPos, yPos, pNodes.size()));
 	return;
 }
 
-void Graph::addAllEdges8Directions(unsigned int graphsize)
+void Graph::addAllEdges8Directions(graphsize_t graphsize)
 {
 
 	EuklidDistance ek_distance;	
 
-	pNode_v_it it1 = pNodes_v.begin();
-	pNode_v_it it2 = pNodes_v.begin() + 1;
-	pNode_v_it it3 = pNodes_v.begin() + graphsize;
-	pNode_v_it it4 = pNodes_v.begin() + graphsize + 1;
+	pNode_v_it it1 = pNodes.begin();
+	pNode_v_it it2 = pNodes.begin() + 1;
+	pNode_v_it it3 = pNodes.begin() + graphsize;
+	pNode_v_it it4 = pNodes.begin() + graphsize + 1;
 
-	for (unsigned int i = 1; i <= graphsize; i++)
-		for (unsigned int j = 1; j <= graphsize; j++)
+	for (index_t i = 1; i <= graphsize; i++)
+		for (index_t j = 1; j <= graphsize; j++)
 		{
 			if (j < graphsize)
 			{
-				pEdges_v.push_back(new Edge(*it1, *it2, ek_distance));
-				pEdges_v.push_back(new Edge(*it2, *it1, ek_distance));
+				addEdge(*it1, *it2, ek_distance);
+				addEdge(*it2, *it1, ek_distance);
 			}
 			if (i < graphsize)
 			{
-				pEdges_v.push_back(new Edge(*it1, *it3, ek_distance));
-				pEdges_v.push_back(new Edge(*it3, *it1, ek_distance));
+				addEdge(*it1, *it3, ek_distance);
+				addEdge(*it3, *it1, ek_distance);
 			}
 			if (i < graphsize && j < graphsize)
 			{
-				pEdges_v.push_back(new Edge(*it1, *it4, ek_distance));
-				pEdges_v.push_back(new Edge(*it4, *it1, ek_distance));
-				pEdges_v.push_back(new Edge(*it2, *it3, ek_distance));
-				pEdges_v.push_back(new Edge(*it3, *it2, ek_distance));
+				addEdge(*it1, *it4, ek_distance);
+				addEdge(*it4, *it1, ek_distance);
+				addEdge(*it2, *it2, ek_distance);
+				addEdge(*it3, *it3, ek_distance);
 			}
 			it1++;
 			it2++;
@@ -54,26 +51,26 @@ void Graph::addAllEdges8Directions(unsigned int graphsize)
 		}
 }
 
-void Graph::addAllEdges4Directions(unsigned int graphsize)
+void Graph::addAllEdges4Directions(graphsize_t graphsize)
 {
 	ManhattanDistance mh_distance;
 
-	pNode_v_it it1 = pNodes_v.begin();
-	pNode_v_it it2 = pNodes_v.begin() + 1;
-	pNode_v_it it3 = pNodes_v.begin() + graphsize;
+	pNode_v_it it1 = pNodes.begin();
+	pNode_v_it it2 = pNodes.begin() + 1;
+	pNode_v_it it3 = pNodes.begin() + graphsize;
 
-	for (unsigned int i = 1; i <= graphsize; i++)
-		for (unsigned int j = 1; j <= graphsize; j++)
+	for (index_t i = 1; i <= graphsize; i++)
+		for (index_t j = 1; j <= graphsize; j++)
 		{
 			if (j < graphsize)
 			{
-				pEdges_v.push_back(new Edge(*it1, *it2, mh_distance));
-				pEdges_v.push_back(new Edge(*it2, *it1, mh_distance));
+				addEdge(*it1, *it2, mh_distance);
+				addEdge(*it2, *it1, mh_distance);
 			}
 			if (i < graphsize)
 			{
-				pEdges_v.push_back(new Edge(*it1, *it3, mh_distance));
-				pEdges_v.push_back(new Edge(*it3, *it1, mh_distance));
+				addEdge(*it1, *it3, mh_distance);
+				addEdge(*it3, *it1, mh_distance);
 			}
 			it1++;
 			it2++;
@@ -81,77 +78,38 @@ void Graph::addAllEdges4Directions(unsigned int graphsize)
 		}
 }
 
-bool Graph::addEdge(unsigned int from, unsigned int to)
-{
-	EuklidDistance ek_distance;
-	if ((from < pNodes_v.size()) && (to < pNodes_v.size()))
-	{
-		pEdges_v.push_back(new Edge(getNode(from), getNode(to), 
-					ek_distance));
-		return true;
-	} else {
-		return false;
-	}
-}
-
 void Graph::removeNodesEdges(pNtr_v nodesToRemove)
 {
-	pNode_v_it it_node = pNodes_v.begin();
-	pEdg_v_it it_edg = pEdges_v.begin();
-	pNtr_v_it it_ntrFrom;
-	pNtr_v_it it_ntrTo;
+	typedef pNtr_v::iterator pNtr_v_it;
 
-	// remove edges
-	while (it_edg != pEdges_v.end())
+	// Nodes mal leeren
+	for (pNtr_v_it it = nodesToRemove.begin(); it != nodesToRemove.end(); it++)
+		pNodes[(*it)]->adjEdges.clear();
+
+	for (pNode_v_it nit = pNodes.begin(); nit != pNodes.end(); nit++)
 	{
-		it_ntrFrom = nodesToRemove.find((*it_edg)->getFrom()->getIndex());
-		it_ntrTo = nodesToRemove.find((*it_edg)->getTo()->getIndex());
-		if ( it_ntrFrom != nodesToRemove.end() || it_ntrTo != nodesToRemove.end() )
+		Node::edges_it_t eit = (*nit)->adjEdges.begin();
+
+		while (eit != (*nit)->adjEdges.end())
 		{
-			(*it_edg)->getFrom()->removeEdge(*it_edg);
-			(*it_edg)->getTo()->removeEdge(*it_edg);
-			delete *it_edg;
-			it_edg = pEdges_v.erase(it_edg);
-		}
-		else 
-		{
-			it_edg++;
+			pNtr_v_it it_ntrTo = nodesToRemove.find
+							((*eit).first->getIndex());
+			if ( it_ntrTo != nodesToRemove.end() )
+				eit = (*nit)->adjEdges.erase(eit);
+			else 
+				eit++;
 		}
 	}
-
-	// remove nodes
-	it_node = pNodes_v.begin();
-	while (it_node != pNodes_v.end() )
-	{
-		if (nodesToRemove.find((*it_node)->getIndex()) != nodesToRemove.end())
-		{
-			delete *it_node;
-			it_node = pNodes_v.erase(it_node);
-		}
-		else
-		{
-			it_node++;
-		}
-	}
-}
-
-Node* Graph::getNode(unsigned int index)
-{
-	for  (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
-		if ((*it)->getIndex() == index)
-			return *it;
-
-	return 0;
 }
 
 void Graph::cleanup()
 {
-	for (pNode_v_it it = pNodes_v.begin(); it != pNodes_v.end(); it++)
+	for (pNode_v_it it = pNodes.begin(); it != pNodes.end(); it++)
 	{
 		(*it)->status = Node::inactive;
 		(*it)->next = NULL;
 		(*it)->prev = NULL;
-		(*it)->parent = 0;
+		(*it)->parent = NULL;
 		(*it)->f = 0;
 		(*it)->g = 0;
 		(*it)->h = 0;
@@ -180,15 +138,15 @@ void Graph::printGml() const
 	std::cout << "graph [" << std::endl;
 	std::cout << '\t' << "directed 1" << std::endl;
 
-	for (unsigned int i = 0; i < pNodes_v.size(); i++)
-		if (pNodes_v[i]->adjEdges.size() > 0)
+	for (pNode_v_cit it = pNodes.begin(); it != pNodes.end(); it++)
+		if ((*it)->adjEdges.size() > 0)
 			std::cout << '\t' << "node [" << std::endl
-				<< "\t\tid " << pNodes_v[i]->getIndex() << std::endl
+				<< "\t\tid " << (*it)->getIndex() << std::endl
 				<< "\t\tgraphics [ " << std::endl
 				<< "\t\t\tfill \"" << 
-				getColor(pNodes_v[i]->status) << "\"" << std::endl
-				<< "\t\t\tx " << pNodes_v[i]->getX()*100 << std::endl
-				<< "\t\t\ty " << pNodes_v[i]->getY()*100 << std::endl
+				getColor((*it)->status) << "\"" << std::endl
+				<< "\t\t\tx " << (*it)->getX()*100 << std::endl
+				<< "\t\t\ty " << (*it)->getY()*100 << std::endl
 				<< "\t\t\tw 60" << std::endl
 				<< "\t\t\th 60" << std::endl
 				<< "\t\t]" << std::endl
@@ -196,38 +154,44 @@ void Graph::printGml() const
 
 	std::cout << std::endl;
 
-	for (unsigned int i = 0; i < pEdges_v.size(); i++)
-		std::cout << "\tedge [" << std::endl
-			<< "\t\tsource " << pEdges_v[i]->getFrom()->getIndex() << std::endl
-			<< "\t\ttarget " << pEdges_v[i]->getTo()->getIndex() << std::endl
-			<< "\t]" << std::endl << std::endl;
+	for (pNode_v_cit nit = pNodes.begin(); nit != pNodes.end(); nit++)
+		for (Node::edges_t::const_iterator eit = (*nit)->adjEdges.begin();
+				eit != (*nit)->adjEdges.end(); eit++)
+			std::cout << "\tedge [" << std::endl
+				<< "\t\tsource " << (*nit)->getIndex() << std::endl
+				<< "\t\ttarget " << (*eit).first->getIndex() << std::endl
+				<< "\t]" << std::endl << std::endl;
 
 	std::cout << "]" << std::endl;
-
-	return;
 }
 void Graph::printTgf() const
 {
-	for (unsigned int i = 0; i < pNodes_v.size(); i++)
-		std::cout << pNodes_v[i]->getIndex() << 
-			" " << pNodes_v[i]->getIndex() << std::endl;
+	for (pNode_v_cit it = pNodes.begin(); it != pNodes.end(); it++)
+		std::cout << (*it)->getX() << 
+			" " << (*it)->getY() << std::endl;
 
 	std::cout << "#" << std::endl;
 
-	for (unsigned int i = 0; i < pEdges_v.size(); i++)
-		std::cout << pEdges_v[i]->getFrom()->getIndex() << " " 
-			<< pEdges_v[i]->getTo()->getIndex() << std::endl;
+	for (pNode_v_cit nit = pNodes.begin(); nit != pNodes.end(); nit++)
+		for (Node::edges_t::const_iterator eit = (*nit)->adjEdges.begin();
+				eit != (*nit)->adjEdges.end(); eit++)
+			std::cout << (*nit)->getIndex() << " " 
+				<< (*eit).first->getIndex() << std::endl;
 
 	return;
 }
 
-length_t Graph::newThreshold(length_t oldThreshold)
+length_t Graph::newThreshold(length_t oldThreshold) const
 {
 	return oldThreshold + 1;
 }
 
-unsigned int Graph::getNodeIndexByInternalIndex(unsigned int i)
+void Graph::addEdge(Node* from, Node* to, length_t dist)
 {
-	return pNodes_v[i]->getIndex();
+	from->addEdge(to, dist);
+}
+void Graph::addEdge(index_t from, index_t to, length_t dist)
+{
+	addEdge(pNodes[from], pNodes[to], dist);
 }
 

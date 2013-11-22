@@ -2,7 +2,7 @@
 
 void Testgraph::removeRandomNodes(Graph& g, unsigned int count, unsigned int max) const
 {
-	pNtr_v nodesToRemove;
+	Graph::pNtr_v nodesToRemove;
 	for (unsigned int i = 0; i < count; i++)
 	{
 		unsigned int num;

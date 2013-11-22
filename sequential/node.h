@@ -4,8 +4,10 @@
 
 #include <vector>
 #include <list>
+#include <utility>
 
-class Edge;
+typedef double length_t;
+typedef unsigned int index_t;
 
 class Node
 {
@@ -15,9 +17,12 @@ class Node
 		length_t yPos;
 
 	public:
-		static unsigned int max_index; //kein index wird doppelt vergeben
 
-		Node(length_t, length_t);
+		typedef std::pair<Node*, length_t> edge_t;
+		typedef std::vector<edge_t> edges_t;
+		typedef std::vector<edge_t>::iterator edges_it_t;
+
+		Node(length_t, length_t, index_t);
 		~Node();
 
 		//allgemeine funktionen
@@ -26,15 +31,15 @@ class Node
 		length_t getX() const;
 		length_t getY() const;
 		unsigned int getIndex() const;
-		void removeEdge(Edge*);
+
+		void addEdge(Node*, length_t);
+		void addEdge(edge_t);
+		void removeEdge(Node*);
 
 		void print() const;
 
 		//Nachbarn
-		typedef std::vector<Edge*> pEdg_v;
-		pEdg_v adjEdges;
-
-		void addEdge(Edge*);
+		edges_t adjEdges;
 
 		//states für shortest Path
 		enum state_t {closed, open, inactive, onPath};

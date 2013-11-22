@@ -218,14 +218,22 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 	// vectors
 	std::vector<location> locations_v;
 	std::vector<edge> edge_array_v;
+	std::vector<double> distance_v;
 
-	// edges
-	for (pEdg_v_it it = my_g.pEdges_v.begin(); it != my_g.pEdges_v.end(); it++)
-		edge_array_v.push_back(edge((*it)->getFrom()->getIndex(), (*it)->getTo()->getIndex()));
-
-	// locations
-	for (pNode_v_it it = my_g.pNodes_v.begin(); it != my_g.pNodes_v.end(); it++)
-		locations_v.push_back( {(*it)->getX(), (*it)->getY()} );
+	// locations / edges
+	for (Graph::pNode_v_it nit = my_g.pNodes.begin(); 
+			nit != my_g.pNodes.end(); nit++)
+	{
+		locations_v.push_back({(*nit)->getX(), (*nit)->getY()} );
+		for (Node::edges_it_t eit = (*nit)->adjEdges.begin(); 
+				eit != (*nit)->adjEdges.end(); eit++)
+		{
+			edge_array_v.push_back(edge((*nit)->getIndex(), 
+								        (*eit).first->getIndex()));
+			distance_v.push_back((*eit).second);
+			std::cout << (*eit).second << std::endl;
+		}
+	}
 	
 	// define some constants
 	const int num_edges = edge_array_v.size();
@@ -237,7 +245,7 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 	edge *edge_array = new edge[num_edges];
 	for (int i = 0; i < num_edges; i++)
 	{
-		weights[i] = my_g.pEdges_v[i]->getDistance();
+		weights[i] = distance_v[i];
 		edge_array[i] = edge_array_v[i];
 	}
 	for (int i = 0; i < num_nodes; i++)
