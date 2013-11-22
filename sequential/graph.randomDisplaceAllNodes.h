@@ -20,7 +20,6 @@ void Graph::randomDisplaceAllNodes(length_t sigma, const F& dist)
 		for (Node::edges_it_t eit = (*nit)->adjEdges.begin(); 
              eit != (*nit)->adjEdges.end(); eit++)
 			(*eit).second = dist(*nit, (*eit).first);
-
 }
 
 #endif
