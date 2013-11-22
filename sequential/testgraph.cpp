@@ -1,6 +1,6 @@
 #include "testgraph.h"
 
-void Testgraph::removeRandomNodes(Graph& g, unsigned int count, unsigned int max) const
+void Testgraph::removeRandomNodes(Graph& g, Graph::graphsize_t count, Graph::graphsize_t max) const
 {
 	Graph::pNtr_v nodesToRemove;
 	for (unsigned int i = 0; i < count; i++)

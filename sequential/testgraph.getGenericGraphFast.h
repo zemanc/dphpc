@@ -3,7 +3,7 @@
 #define __testgraph_getGenericGraphFast_h__
 
 template<class F, class G>
-void Testgraph::getGenericGraphFast(unsigned int graphsize, const F& dist, 
+void Testgraph::getGenericGraphFast(Graph::graphsize_t graphsize, const F& dist, 
 									 const G& isEdge, Graph& g) const
 {
 	const int gs = static_cast<int>(graphsize);

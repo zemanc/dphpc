@@ -30,11 +30,11 @@ class Node
 		void setY(length_t);
 		length_t getX() const;
 		length_t getY() const;
-		unsigned int getIndex() const;
+		index_t getIndex() const;
 
 		void addEdge(Node*, length_t);
-		void addEdge(edge_t);
-		void removeEdge(Node*);
+// 		void addEdge(edge_t);
+// 		void removeEdge(Node*);
 
 		void print() const;
 

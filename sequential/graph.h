@@ -39,8 +39,8 @@ class Graph
 
 		//graph.cpp
 		void addNode(length_t, length_t);
-		void addAllEdges8Directions(graphsize_t);
-		void addAllEdges4Directions(graphsize_t);
+// 		void addAllEdges8Directions(graphsize_t);
+// 		void addAllEdges4Directions(graphsize_t);
 		void removeNodesEdges(pNtr_v);
 
 		//graph.addEdges.h
