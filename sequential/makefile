@@ -12,17 +12,18 @@ optimized: fringe
 profile: CC += -pg
 profile: fringe
 
+graph_headers = graph.h graph.addEdges.h graph.getShortestPath.h graph.distances.h graph.randomDisplaceAllNodes.h
+testgraph_headers = testgraph.h testgraph.getGenericGraphFast.h testgraph.genericGraphs.h
+
 fringe: main.o graph.o node.o astar-test.o testgraph.o testgraph.o
 	$(CC) $(LFLAGS) -o $@ $^
-main.o: main.cpp graph.h graph.addEdges.h graph.distances.h graph.getShortestPath.h graph.randomDisplaceAllNodes.h testgraph.h node.h testgraph.genericGraphs.h testgraph.getGenericGraphFast.h ../benchmark_algos/boost/astar.h
+main.o: main.cpp $(graph_headers) $(testgraph_headers) node.h ../benchmark_algos/boost/astar.h
 	$(CC) $(CFLAGS) $<
-testgraph.o: testgraph.cpp testgraph.h testgraph.genericGraphs.h testgraph.getGenericGraphFast.h graph.h node.h graph.distances.h graph.getShortestPath.h graph.randomDisplaceAllNodes.h graph.addEdges.h
+testgraph.o: testgraph.cpp $(testgraph_headers) $(graph_headers) node.h 
 	$(CC) $(CFLAGS) $<
-graph.o: graph.cpp graph.h node.h graph.distances.h graph.getShortestPath.h graph.randomDisplaceAllNodes.h graph.addEdges.h
+graph.o: graph.cpp $(graph_headers) node.h
 	$(CC) $(CFLAGS) $<
-#edge.o: edge.cpp edge.h node.h
-#	$(CC) $(CFLAGS) $<
-astar-test.o: ../benchmark_algos/boost/astar-test.cpp ../benchmark_algos/boost/astar.h testgraph.h
+astar-test.o: ../benchmark_algos/boost/astar-test.cpp ../benchmark_algos/boost/astar.h $(testgraph_headers) $(graph_headers) node.h
 	$(CC) $(CFLAGS) $<
 node.o: node.cpp node.h
 	$(CC) $(CFLAGS) $<
