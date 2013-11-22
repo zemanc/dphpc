@@ -54,7 +54,7 @@ int main()
 			timeout << n << "\t" << n*n << "\t" << i << "\t"
 					<< time_span.count() << "\t" << dist << std::endl;
 
-// 			boost_shortestPath_ek(g, 0, n*n-1);
+			boost_shortestPath_ek(g, 0, n*n-1);
 // 			g.printGml();
 
 		}

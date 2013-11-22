@@ -200,7 +200,7 @@ class astar_goal_visitor : public boost::default_astar_visitor
 void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n)
 {
   
-  // specify some types
+	// specify some types
 	typedef adjacency_list<
 		listS, 
 		vecS, 
@@ -215,62 +215,32 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 	typedef mygraph_t::vertex_iterator vertex_iterator;
 	typedef std::pair<int, int> edge;
 
-	// vectors
-	std::vector<location> locations_v;
-	std::vector<edge> edge_array_v;
-	std::vector<double> distance_v;
+
+	const int num_nodes = my_g.nodeCount();
+	location *locations = new location[num_nodes];
+	
+	mygraph_t g(num_nodes);
+	WeightMap weightmap = get(edge_weight, g);
+	ColorMap cmap = get(vertex_color, g);
 
 	// locations / edges
 	for (Graph::pNode_v_it nit = my_g.pNodes.begin(); 
 			nit != my_g.pNodes.end(); nit++)
 	{
-		locations_v.push_back({(*nit)->getX(), (*nit)->getY()} );
+		locations[(*nit)->getIndex()] = {(*nit)->getX(), (*nit)->getY()};
+
 		for (Node::edges_it_t eit = (*nit)->adjEdges.begin(); 
 				eit != (*nit)->adjEdges.end(); eit++)
 		{
-			edge_array_v.push_back(edge((*nit)->getIndex(), 
-								        (*eit).first->getIndex()));
-			distance_v.push_back((*eit).second);
-			std::cout << (*eit).second << std::endl;
+			edge_descriptor e;
+			bool inserted;
+			tie(e, inserted) = add_edge((*nit)->getIndex(), 
+									    (*eit).first->getIndex(),
+										g);
+			weightmap[e] = (*eit).second;
 		}
 	}
 	
-	// define some constants
-	const int num_edges = edge_array_v.size();
-	const int num_nodes = locations_v.size();
-
-	// copy values of vectors into arrays
-	cost_t *weights = new cost_t[num_edges];
-	location *locations = new location[num_nodes];
-	edge *edge_array = new edge[num_edges];
-	for (int i = 0; i < num_edges; i++)
-	{
-		weights[i] = distance_v[i];
-		edge_array[i] = edge_array_v[i];
-	}
-	for (int i = 0; i < num_nodes; i++)
-		locations[i] = locations_v[i];
- 
-	// create graph
-	mygraph_t g(num_nodes);
-	WeightMap weightmap = get(edge_weight, g);
-	ColorMap cmap = get(vertex_color, g);
-
-	for(int j = 0; j < num_edges; ++j) 
-	{
-		edge_descriptor e; bool inserted;
-		tie(e, inserted) = add_edge(edge_array[j].first,
-									edge_array[j].second, 
-									g);
-
-		weightmap[e] = weights[j];
-	}
-  
-// 	pick random start/goal
-//	mt19937 gen(time(0));
-// 	vertex start = random_vertex(g, gen);
-// 	vertex goal = random_vertex(g, gen);
-
 	// set own start an goal
 	vertex start = start_n;
 	vertex goal = end_n;
@@ -351,8 +321,6 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 					  400));
 
 		delete [] locations;
-		delete [] weights;
-		delete [] edge_array;
 
 		return;
 
@@ -360,8 +328,6 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 
 	// clean up
 	delete [] locations;
-	delete [] weights;
-	delete [] edge_array;
   
 	timeout << "Didn't find a path from " << start << " to " << goal << "!" << endl;
 
