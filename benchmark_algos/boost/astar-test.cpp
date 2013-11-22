@@ -8,6 +8,7 @@
 //=======================================================================
 //
 
+#include "astar.h"
 
 #include <boost/graph/astar_search.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -30,11 +31,11 @@ using namespace std;
 // auxiliary types
 struct location
 {
-	float x;
-	float y;
+	length_t x;
+	length_t y;
 };
 
-typedef float cost_t;
+typedef double cost_t;
 
 template <class LocMap, class ColorMap>
 class node_writer {
@@ -51,12 +52,12 @@ class node_writer {
 			LocMap l, 
 			list<vertex> shortest_path, 
 			ColorMap cm,
-			float _minx, 
-			float _maxx,
-			float _miny, 
-			float _maxy,
-			unsigned int _ptx, 
-			unsigned int _pty
+			length_t _minx, 
+			length_t _maxx,
+			length_t _miny, 
+			length_t _maxy,
+			length_t _ptx, 
+			length_t _pty
 		  )
 				: loc(l)
 				, sp(shortest_path)
@@ -72,13 +73,13 @@ class node_writer {
 		template <class Vertex>
 		void operator()(ostream& out, const Vertex& v) const 
 		{
-			float px = 1 - (loc[v].x - minx) / (maxx - minx);
-			float py = (loc[v].y - miny) / (maxy - miny);
+			length_t px = 1 - (loc[v].x - minx) / (maxx - minx);
+			length_t py = (loc[v].y - miny) / (maxy - miny);
 			out << "["
 					<< "label=\" \", "
 					<< "pos=\""
-						<< static_cast<unsigned int>(ptx * px) << ","
-						<< static_cast<unsigned int>(pty * py) << "\" ,"
+						<< ptx * px << ","
+						<< pty * py << "\" ,"
 					<< "fontsize=\"11\", "
 					<< "fillcolor=\"" << getColor(v) << "\""
 				<< "]";
@@ -88,8 +89,8 @@ class node_writer {
 		LocMap loc;
 		list<vertex> sp;
 		ColorMap cmap;
-		float minx, maxx, miny, maxy;
-		unsigned int ptx, pty;
+		length_t minx, maxx, miny, maxy;
+		double ptx, pty;
 
 		template <class Vertex>
 		string getColor(const Vertex& v) const
@@ -196,7 +197,7 @@ class astar_goal_visitor : public boost::default_astar_visitor
 };
 
 
-int main(int argc, char **argv)
+void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n)
 {
   
   // specify some types
@@ -217,47 +218,22 @@ int main(int argc, char **argv)
 	// vectors
 	std::vector<location> locations_v;
 	std::vector<edge> edge_array_v;
+	std::vector<double> distance_v;
 
-	const int n = 100;
-	// no nodes in the middle (circle graph)
-	const int cp = n/2;
-	const int r = n/4;
-	const int rr = r*r;
- 
-	// edges
-	int it1 = 0;
-	int it2 = 1;
-	int it3 = n;
-	for (int i = 1; i <= n; i++)
-		for (int j = 1; j <= n; j++)
+	// locations / edges
+	for (Graph::pNode_v_it nit = my_g.pNodes.begin(); 
+			nit != my_g.pNodes.end(); nit++)
+	{
+		locations_v.push_back({(*nit)->getX(), (*nit)->getY()} );
+		for (Node::edges_it_t eit = (*nit)->adjEdges.begin(); 
+				eit != (*nit)->adjEdges.end(); eit++)
 		{
-			if (j < n)
-			{
-				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
-					&& pow(i-1-cp, 2) + pow(j-cp, 2) >= rr )
-				{
-					edge_array_v.push_back(edge(it1, it2));
-					edge_array_v.push_back(edge(it2, it1));
-				}
-			}
-			if (i < n)
-			{
-				if ( pow(i-1-cp, 2) + pow(j-1-cp, 2) >= rr
-					&& pow(i-cp, 2) + pow(j-1-cp, 2) >= rr )
-				{
-					edge_array_v.push_back(edge(it1, it3));
-					edge_array_v.push_back(edge(it3, it1));
-				}
-			}
-			it1++;
-			it2++;
-			it3++;
+			edge_array_v.push_back(edge((*nit)->getIndex(), 
+								        (*eit).first->getIndex()));
+			distance_v.push_back((*eit).second);
+			std::cout << (*eit).second << std::endl;
 		}
-
-	// locations
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < n; j++)
-			locations_v.push_back({(float)i, (float)j});
+	}
 	
 	// define some constants
 	const int num_edges = edge_array_v.size();
@@ -269,7 +245,7 @@ int main(int argc, char **argv)
 	edge *edge_array = new edge[num_edges];
 	for (int i = 0; i < num_edges; i++)
 	{
-		weights[i] = 1;
+		weights[i] = distance_v[i];
 		edge_array[i] = edge_array_v[i];
 	}
 	for (int i = 0; i < num_nodes; i++)
@@ -296,11 +272,14 @@ int main(int argc, char **argv)
 // 	vertex goal = random_vertex(g, gen);
 
 	// set own start an goal
-	vertex start = 9899;
-	vertex goal = 504;
-  
-	cout << "Start vertex: " << start << endl;
-	cout << "Goal vertex: " << goal << endl;
+	vertex start = start_n;
+	vertex goal = end_n;
+	std::ofstream pathout("path_boost.out", std::ios::out);
+  	std::ofstream timeout("time_boost.out", std::ios::app);
+
+
+	pathout << "Start vertex: " << start << endl;
+	pathout << "Goal vertex: " << goal << endl;
   
 	// timing
 	std::chrono::high_resolution_clock::time_point t_start, t_end;  
@@ -316,11 +295,13 @@ int main(int argc, char **argv)
 		astar_search(
 			g, 
 			start,
-			manhattan_distance<mygraph_t, cost_t, location*>
+			euklid_distance<mygraph_t, cost_t, location*>
 				(locations, 
 				goal),
 			predecessor_map(
-				&p[0]).distance_map(&d[0])
+				&p[0])
+				.weight_map(weightmap)
+				.distance_map(&d[0])
 				.visitor(astar_goal_visitor<vertex>(goal))
 				.color_map(cmap)
 		);
@@ -344,19 +325,20 @@ int main(int argc, char **argv)
 
 		}
 
-		cout << "Shortest path from " << start << " to " << goal << ": ";
+		pathout << "Shortest path from " << start << " to " << goal << ": ";
 
 		list<vertex>::iterator spi = shortest_path.begin();
-		cout << start;
+		pathout << start;
 
 		for(++spi; spi != shortest_path.end(); ++spi)
-			cout << " -> " << *spi;
-
-		cout << endl << "Total travel time: " << d[goal] << endl;
-		cout << endl << "CPU time: " << time_span.count() << " seconds" << endl;
+			pathout << " -> " << *spi;
+		
+		timeout << time_span.count() << "\t" << d[goal] << endl;
+// 		timeout << endl << "Total travel time: " << d[goal] << endl;
+// 		timeout << endl << "CPU time: " << time_span.count() << " seconds" << endl;
 
 		ofstream dotfile;
-		dotfile.open("test_graph.dot");
+		dotfile.open("output_boost.dot");
 		write_graphviz(dotfile, g, node_writer<location*, ColorMap>
 					 (locations, 
 					  shortest_path, 
@@ -368,7 +350,12 @@ int main(int argc, char **argv)
 					  400,
 					  400));
 
-		return 0;
+		delete [] locations;
+		delete [] weights;
+		delete [] edge_array;
+
+		return;
+
 	}
 
 	// clean up
@@ -376,8 +363,6 @@ int main(int argc, char **argv)
 	delete [] weights;
 	delete [] edge_array;
   
-	cout << "Didn't find a path from " << start << "to" << goal << "!" << endl;
+	timeout << "Didn't find a path from " << start << " to " << goal << "!" << endl;
 
-	return 0;
-  
 }
