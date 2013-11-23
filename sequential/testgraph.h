@@ -10,7 +10,8 @@ class Testgraph
 
 		template<class F, class G>
 		void getGenericGraphFast(Graph::graphsize_t, const F&, const G&, Graph&) const;
-		void removeRandomNodes(Graph&, Graph::graphsize_t, Graph::graphsize_t) const;
+		void removeRandomNodes(Graph&, Graph::graphsize_t) const;
+		void removeRandomEdges(Graph&, Graph::graphsize_t) const;
 };
 
 #include "testgraph.getGenericGraphFast.h"
