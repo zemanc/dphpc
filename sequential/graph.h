@@ -22,6 +22,7 @@ class Graph
 
 	public:
 
+	  //typedefs
 		typedef std::set<index_t> pNtr_v; // for removeNodesEdges
 
 		typedef std::vector<Node*> pNode_v_t;
@@ -32,15 +33,16 @@ class Graph
 		
 		enum graph_type {dir4, dir8};
 
+	  //Daten
+		pNode_v_t pNodes;
+
+	  //Funktionen
+
 		~Graph();
 		Graph() {};
 
-		pNode_v_t pNodes;
-
 		//graph.cpp
 		void addNode(length_t, length_t);
-// 		void addAllEdges8Directions(graphsize_t);
-// 		void addAllEdges4Directions(graphsize_t);
 		void removeNodesEdges(pNtr_v);
 
 		//graph.addEdges.h
@@ -51,24 +53,23 @@ class Graph
 		void addEdge(Node*, Node*, length_t);
 		void addEdge(index_t, index_t, length_t);
 
-
 		graphsize_t nodeCount() const { return pNodes.size(); };
 
-		void cleanup();
+		void cleanup(); //nur Status und so
+		void clear();   //alle Edges / Nodes / ...
 
 		void printTgf() const;
 		void printGml() const;
 
+		//graph.getShortestPath.h
 		template<class F>
    			length_t getShortestPath(index_t, index_t, std::list<Node*>*, const F&);
-
 		template<class F>
 		length_t reconstructPath(std::list<Node*>* vals, Node*, Node*, const F&);
 
+		//graph.randomDisplaceAllNodes.h
 		template<class F>
 		void randomDisplaceAllNodes(length_t, const F&);
-
-
 
 };
 
