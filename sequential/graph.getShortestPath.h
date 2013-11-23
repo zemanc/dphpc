@@ -19,8 +19,8 @@ length_t Graph::getShortestPath(index_t from, index_t to, std::list<Node*>* vals
 
 	//init list
 	Node* zero_node = new Node(0, 0, 0);
-	zero_node->prev = zero_node;
-	zero_node->next = zero_node;
+// 	zero_node->prev = zero_node;
+// 	zero_node->next = zero_node;
 
 	//insert start into list
 	zero_node->next = zero_node->prev = start;
