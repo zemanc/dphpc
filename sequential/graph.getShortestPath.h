@@ -57,7 +57,8 @@ length_t Graph::getShortestPath(index_t from, index_t to, std::list<Node*>* vals
 
 					//berechne heuristische Beträge
 					edge_to->g = nl_pos->g + (*edge_it).second;
-					edge_to->f = edge_to->g + dist(edge_to, end);
+					edge_to->h = dist(edge_to, end);
+					edge_to->f = edge_to->g + edge_to->h;
 
 					//für backtracking, damit wir wissen woher wir gekommen sind
 					edge_to->parent = nl_pos;
