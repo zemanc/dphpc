@@ -274,6 +274,11 @@ s.unlock();
 							//diesen dürfen wir nicht zwingend locken!
 							//aber wir versuchen es einmal, wenn es geht, dann gut:)
 							bool edge_to_locked = edge_to->lock.try_lock();
+#ifdef DEBUG
+s.lock();
+if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
+s.unlock();
+#endif
 
 							if (edge_to_locked)
 							{
@@ -289,6 +294,11 @@ s.unlock();
 									edge_to->parent = nl_pos;
 								}
 								edge_to->lock.unlock();
+#ifdef DEBUG
+s.lock();
+std::cout << "thread " << nr << " unlocked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
+s.unlock();
+#endif
 							}
 							//keine Statusänderung...
 
