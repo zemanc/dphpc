@@ -187,25 +187,6 @@ s.unlock();
 									//edge_to ist nun in der openlist...
 									edge_to->status = open_state;
 
-					//DIESEN LOCK DÜRFEN WIR NICHT EINFACH NEHMEN!!!!
-		// 						} else if (edge_to->status == open_state)
-		// 						{
-		// 							//den lock haben wir, also einfach f anpassen, wenn nötig
-		// 
-		// 							//wenn distanz besser ist
-		// 							double newDist = nl_pos->g + (*edge_it).second;
-		// 							if (edge_to->g > newDist)
-		// 							{
-		// 								//heuristische Beträge berechnen
-		// 								edge_to->g =  newDist;
-		// 								edge_to->f = newDist + edge_to->h;
-		// 
-		// 								//backtracking anpassen
-		// 								edge_to->parent = nl_pos;
-		// 							}
-		// 
-									//status müssen wir nicht ändern, da edge_to eh open
-
 								} else if (edge_to->status == later_state)
 								{
 
@@ -288,6 +269,29 @@ s.unlock();
 	#endif
 							} //END IF (edge_to_locked)
 							
+						} else if (edge_to->status == open_state)
+						{
+							//diesen dürfen wir nicht zwingend locken!
+							//aber wir versuchen es einmal, wenn es geht, dann gut:)
+							bool edge_to_locked = edge_to->lock.try_lock();
+
+							if (edge_to_locked)
+							{
+								//wenn distanz besser ist
+								double newDist = nl_pos->g + (*edge_it).second;
+								if (edge_to->g > newDist)
+								{
+									//heuristische Beträge berechnen
+									edge_to->g =  newDist;
+									edge_to->f = newDist + edge_to->h;
+
+									//backtracking anpassen
+									edge_to->parent = nl_pos;
+								}
+								edge_to->lock.unlock();
+							}
+							//keine Statusänderung...
+
 						} // END IF ( (edge_to->status == Node::inactive) || (edge_to->status == later_state))
 						
 					} //END FOR
@@ -354,9 +358,6 @@ s.lock();
 std::cout << nr << " hat einen Node in open_state > threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
 #endif
-
-					//TODO: Wo fügen wir es ein? Das müssen ja eig nicht alle am gleichen
-					//      Ort machen...
 
 #ifdef DEBUG
 s.lock();
