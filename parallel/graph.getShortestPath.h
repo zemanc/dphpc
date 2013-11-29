@@ -54,6 +54,7 @@ std::mutex s;
 
 	//beginne bei erstem Node, diese Liste ist sicher nicht leer
 	Node* nl_pos = nowlist->next;
+	Node* last_later_node = laterlist;
 
 	#pragma omp barrier
 
@@ -401,7 +402,24 @@ s.unlock();
 					//da laterlist immer in der laterlist bleibt, ist das ganz
 					//unkompliziert, aber eigentlich trotzdem katastrophal :)
 
-					laterlist->lock.lock();
+					if (last_later_node->status == later_state)
+					{
+						if (last_later_node->lock.try_lock())
+						{
+							if (last_later_node->status != later_state)
+							{
+								last_later_node->lock.unlock();
+								last_later_node = laterlist;
+								last_later_node->lock.lock();
+							}
+						} else {
+							last_later_node = laterlist;
+							last_later_node->lock.lock();
+						}
+					} else {
+						last_later_node = laterlist;
+						last_later_node->lock.lock();
+					}
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " locked laterlist" << " status: " << laterlist->status << std::endl;
@@ -409,15 +427,18 @@ s.unlock();
 #endif
 
 					//einfügen
-					laterlist->next->prev = nl_pos;
-					nl_pos->next = laterlist->next;
-					laterlist->next = nl_pos;
-					nl_pos->prev = laterlist;
+					last_later_node->next->prev = nl_pos;
+					nl_pos->next = last_later_node->next;
+					last_later_node->next = nl_pos;
+					nl_pos->prev = last_later_node;
 					
 					//den Status nicht vergessen anzupassen!
 					nl_pos->status = later_state;
 
-					laterlist->lock.unlock();
+					last_later_node->lock.unlock();
+
+					last_later_node = nl_pos;
+
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked laterlist" << " status: " << laterlist->status << std::endl;
@@ -517,6 +538,7 @@ std::cout << std::endl << "###" << " open state: " << open_state
 
 			//und wir beginnen nun wieder von vorne
 			nl_pos = nowlist->next;
+			last_later_node = laterlist;
 
 			//warte nochmals auf alle
 			#pragma omp barrier
