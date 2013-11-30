@@ -3,6 +3,7 @@
 #define __graph__getShortestPath_h__
 
 // #define DEBUG
+// #define DEBUG2
 
 #include <climits>
 
@@ -104,7 +105,7 @@ s.unlock();
 
 #ifdef DEBUG2
 s.lock();
-std::cout << nr << " hat einen Node in open_state <= threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
+std::cout << "thread " << nr << " hat einen Node in open_state <= threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
 #endif
 					//in diesem Fall müssen wir vieles machen...
@@ -141,9 +142,12 @@ s.unlock();
 
 						//closed dürfen wir von Beginn weg ausschliessen, denn die kommen
 						//eh nie zurück :-((
-						//open schliessen wir aus, da sie deadlocks verursachen
+						//open schliessen wir aus, da sie deadlocks verursachen //Im Moment aber nicht :)
+
+						//node schliessen
+						nl_pos->status = Node::closed;
 						
-						if ( (edge_to->status == Node::inactive) || (edge_to->status == later_state))
+						if (edge_to->status != Node::closed)
 						{
 							//nun brauchen wir sicher mal den lock, da wir in jedem Fall
 							//f vergleichen und evtl. anpassen müssen
@@ -157,7 +161,7 @@ std::cout << "thread " << nr << " tries to get lock on " << edge_to->getIndex() 
 s.unlock();
 #endif
 							bool edge_to_locked = false;
-							while ((edge_to->status == Node::inactive || edge_to->status == later_state)
+							while ((edge_to->status != Node::closed)
 								&& (!(edge_to_locked = edge_to->lock.try_lock())));
 #ifdef DEBUG
 s.lock();
@@ -169,6 +173,22 @@ s.unlock();
 							//TODO: Welches ist das wahrscheinlichste?
 							if (edge_to_locked)
 							{
+								if (edge_to->status == open_state)
+								{
+									//wenn distanz besser ist
+									double newDist = nl_pos->g + (*edge_it).second;
+									if (edge_to->g > newDist)
+									{
+										//heuristische Beträge berechnen
+										edge_to->g =  newDist;
+										edge_to->f = newDist + edge_to->h;
+
+										//backtracking anpassen
+										edge_to->parent = nl_pos;
+									}
+
+									//keine Statusänderung
+								}
 								if (edge_to->status == Node::inactive)
 								{
 									//neuer Node!
@@ -274,38 +294,38 @@ s.unlock();
 #endif
 							} //END IF (edge_to_locked)
 							
-						} else if (edge_to->status == open_state)
-						{
-							//diesen dürfen wir nicht zwingend locken!
-							//aber wir versuchen es einmal, wenn es geht, dann gut:)
-							bool edge_to_locked = edge_to->lock.try_lock();
-#ifdef DEBUG
-s.lock();
-if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
-s.unlock();
-#endif
-
-							if (edge_to_locked)
-							{
-								//wenn distanz besser ist
-								double newDist = nl_pos->g + (*edge_it).second;
-								if (edge_to->g > newDist)
-								{
-									//heuristische Beträge berechnen
-									edge_to->g =  newDist;
-									edge_to->f = newDist + edge_to->h;
-
-									//backtracking anpassen
-									edge_to->parent = nl_pos;
-								}
-								edge_to->lock.unlock();
-#ifdef DEBUG
-s.lock();
-std::cout << "thread " << nr << " unlocked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
-s.unlock();
-#endif
-							}
-							//keine Statusänderung...
+// 						} else if (edge_to->status == open_state)
+// 						{
+// 							//diesen dürfen wir nicht zwingend locken!
+// 							//aber wir versuchen es einmal, wenn es geht, dann gut:)
+// 							bool edge_to_locked = edge_to->lock.try_lock();
+// #ifdef DEBUG
+// s.lock();
+// if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
+// s.unlock();
+// #endif
+// 
+// 							if (edge_to_locked)
+// 							{
+// 								//wenn distanz besser ist
+// 								double newDist = nl_pos->g + (*edge_it).second;
+// 								if (edge_to->g > newDist)
+// 								{
+// 									//heuristische Beträge berechnen
+// 									edge_to->g =  newDist;
+// 									edge_to->f = newDist + edge_to->h;
+// 
+// 									//backtracking anpassen
+// 									edge_to->parent = nl_pos;
+// 								}
+// 								edge_to->lock.unlock();
+// #ifdef DEBUG
+// s.lock();
+// std::cout << "thread " << nr << " unlocked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
+// s.unlock();
+// #endif
+// 							}
+// 							//keine Statusänderung...
 
 						} // END IF ( (edge_to->status == Node::inactive) || (edge_to->status == later_state))
 						
@@ -313,9 +333,6 @@ s.unlock();
 
 					//lösche nl_pos aus nowlist
 					//nl_pos ist schon gelockt, also müssen wir noch den Vorgänger locken
-
-					//node schliessen
-					nl_pos->status = Node::closed;
 
 					//auch hier müssen wir nach dem locken immer schauen, ob wir wirklich
 					//den richtigen hatten
@@ -394,7 +411,7 @@ s.unlock();
 					//d.h. in later_list kopieren
 #ifdef DEBUG2
 s.lock();
-std::cout << nr << " hat einen Node in open_state > threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
+std::cout << "thread " << nr << " hat einen Node in open_state > threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
 #endif
 
@@ -405,6 +422,9 @@ s.unlock();
 #endif
 
 					//locke zuerst Vorgänger, dieser kann nie nach hinten geschoben werden
+					//wir closen in temporär
+					nl_pos->status = Node::closed;
+
 					bool nl_pos_prev_locked = false;
 					Node* nl_pos_prev;
 					do
@@ -500,7 +520,7 @@ s.unlock();
 			} else if (nl_pos->status == Node::closed) {
 #ifdef DEBUG2
 s.lock();
-std::cout << nr << " hat einen Node in closed state (Node " << nl_pos->getIndex() << ")" << std::endl;
+std::cout << "thread " << nr << " hat einen Node in closed state (Node " << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
 #endif
 				//nun kann der Status halt auf closed gewechselt haben, dann gehen
@@ -517,7 +537,7 @@ s.unlock();
 			} else {
 #ifdef DEBUG2
 s.lock();
-std::cout << nr << " hat einen Node in later state (Node " << nl_pos->getIndex() << ")" << std::endl;
+std::cout << "thread " << nr << " hat einen Node in later state (Node " << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
 #endif
 				//sonst sind wir eh in der later-list gelandet, dann müssen wir nur
