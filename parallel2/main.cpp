@@ -7,7 +7,7 @@
 // #include <ratio>
 #include "testgraph.h"
 
-#include "../benchmark_algos/boost/astar.h"
+// #include "../benchmark_algos/boost/astar.h"
 
 int main()
 {
@@ -55,7 +55,7 @@ int main()
 					<< time_span.count() << "\t" << dist << std::endl;
 
 // 			boost_shortestPath_ek(g, 0, n*n-1);
-// 			g.printGml();
+//  			g.printGml();
 
 		}
 	}
