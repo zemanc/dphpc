@@ -2,7 +2,7 @@
 
 #define __graph__getShortestPath_h__
 
-//#define DEBUG
+// #define DEBUG
 
 #include <climits>
 
@@ -29,8 +29,8 @@ std::mutex s;
 	double threshold = start->f; //start with shortest possible paths
 
 	//init list
-	Node* nowlist = new Node(0, 0, 0); 
-	Node* laterlist= new Node(0, 0, 0); //kein Node <= Threshold!!
+	Node* nowlist = new Node(0, 0, UINT_MAX); 
+	Node* laterlist= new Node(0, 0, UINT_MAX); //kein Node <= Threshold!!
 // 	zero_node->prev = zero_node;
 // 	zero_node->next = zero_node;
 
@@ -44,9 +44,13 @@ std::mutex s;
 	//definiere erster open_state
 	Node::state_t open_state = Node::open1;
 	Node::state_t later_state = Node::open2;
+
 	start->status = open_state;
+	nowlist->status = open_state;
+	laterlist->status = later_state;
 
 	bool found = false;
+	bool not_found = false;
 
 	//solange nicht beide leer sind
 	#pragma omp parallel default(shared)
@@ -57,13 +61,14 @@ std::mutex s;
 	Node* last_later_node = laterlist;
 
 	#pragma omp barrier
-
-	while (((nowlist->next != nowlist)
-		|| (laterlist->next != laterlist)) && !found)
-	{
 #ifdef DEBUG
 int nr = omp_get_thread_num();
 #endif
+
+	//wir können hier nicht einfach testen, ob die Listen beide leer sind
+	//denn während wir dies testen, kann sich das schon wieder ändern!
+	while (!found && !not_found)
+	{
 
 		bool nl_pos_locked = false;
 
@@ -74,7 +79,7 @@ int nr = omp_get_thread_num();
 		//Er kann nicht inactive sein, da wir ihn sonst nicht hätten locken können
 		//bzw er käme als nl_pos nicht in Frage!
 
-#ifdef DEBUG
+#ifdef DEBUG2
 s.lock();
 std::cout << "thread " << nr <<  " tries to get lock on " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
 s.unlock();
@@ -97,7 +102,7 @@ s.unlock();
 				if (nl_pos->f <= threshold)
 				{
 
-#ifdef DEBUG
+#ifdef DEBUG2
 s.lock();
 std::cout << nr << " hat einen Node in open_state <= threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
@@ -110,11 +115,11 @@ s.unlock();
 					{
 						//hier müssen wir noch den einen lock freigeben!
 						nl_pos->lock.unlock();
-	#ifdef DEBUG
-	s.lock();
-	if (nl_pos_locked) std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
-	s.unlock();
-	#endif
+#ifdef DEBUG
+s.lock();
+if (nl_pos_locked) std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
+s.unlock();
+#endif
 
 						found = true;
 						break;
@@ -146,19 +151,19 @@ s.unlock();
 							//das ist aber nicht tragisch, denn FALLS wir den lock bekommen, geben wir
 							//ihn einfach unverrichteter Dinge wieder zurück
 
-	#ifdef DEBUG
-	s.lock();
-	std::cout << "thread " << nr << " tries to get lock on " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
-	s.unlock();
-	#endif
+#ifdef DEBUG
+s.lock();
+std::cout << "thread " << nr << " tries to get lock on " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
+s.unlock();
+#endif
 							bool edge_to_locked = false;
 							while ((edge_to->status == Node::inactive || edge_to->status == later_state)
 								&& (!(edge_to_locked = edge_to->lock.try_lock())));
-	#ifdef DEBUG
-	s.lock();
-	if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
-	s.unlock();
-	#endif
+#ifdef DEBUG
+s.lock();
+if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
+s.unlock();
+#endif
 
 							//nun dürfen wir definitiv die Fallunterscheidung machen
 							//TODO: Welches ist das wahrscheinlichste?
@@ -227,11 +232,11 @@ s.unlock();
 												edge_to_prev->lock.try_lock();
 										} while ((!edge_to_prev_locked)
 											  || (edge_to->prev != edge_to_prev));
-		#ifdef DEBUG
-		s.lock();
-		if (edge_to_prev_locked) std::cout << "thread " << nr << " locked " << edge_to_prev->getIndex() << " (edge_to_prev)" << " status: " << edge_to_prev->status << std::endl;
-		s.unlock();
-		#endif
+#ifdef DEBUG
+s.lock();
+if (edge_to_prev_locked) std::cout << "thread " << nr << " locked " << edge_to_prev->getIndex() << " (edge_to_prev)" << " status: " << edge_to_prev->status << std::endl;
+s.unlock();
+#endif
 
 										//Nun können wir ja endlich handeln
 
@@ -241,11 +246,11 @@ s.unlock();
 
 										//edge_to_prev können wir wieder freigeben!
 										edge_to_prev->lock.unlock();
-		#ifdef DEBUG
-		s.lock();
-		if (edge_to_prev_locked) std::cout << "thread " << nr << " unlocked " << edge_to_prev->getIndex() << " (edge_to_prev)" << " status: " << edge_to_prev->status << std::endl;
-		s.unlock();
-		#endif
+#ifdef DEBUG
+s.lock();
+if (edge_to_prev_locked) std::cout << "thread " << nr << " unlocked " << edge_to_prev->getIndex() << " (edge_to_prev)" << " status: " << edge_to_prev->status << std::endl;
+s.unlock();
+#endif
 
 										//insert
 										edge_to->next = nl_pos->next;
@@ -262,11 +267,11 @@ s.unlock();
 								
 								//nun wieder unlocken
 								edge_to->lock.unlock();
-	#ifdef DEBUG
-	s.lock();
-	std::cout << "thread " << nr << " unlocked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
-	s.unlock();
-	#endif
+#ifdef DEBUG
+s.lock();
+std::cout << "thread " << nr << " unlocked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
+s.unlock();
+#endif
 							} //END IF (edge_to_locked)
 							
 						} else if (edge_to->status == open_state)
@@ -360,10 +365,34 @@ s.unlock();
 					//nun gehen wir mal zum nächsten
 					nl_pos = nl_pos->next;
 
+					//hier besteht nun eine kleine Chance, dass beide Listen leer sind
+					//deshalb überprüfen wir das genau hier! nowlist kann nur hier
+					//leer werden, da der letzte Node in der nowlist hier entfernt
+					//wird!
+					//wir testen zuerst ohne Locks, dann versuchen wir zu locken,
+					//und wenn wir beide kriegen, schauen wir, ob wir recht haben.
+					if ((nowlist->next == nowlist) && (laterlist->next == laterlist))
+					{
+						if (nowlist->lock.try_lock())
+						{
+							if (laterlist->lock.try_lock())
+							{
+								//wenn es nun noch zutrifft, dann sind wir definitiv
+								//am Ende!
+								if ((nowlist->next == nowlist)
+									  &&(laterlist->next == laterlist))
+									not_found = true;
+
+								laterlist->lock.unlock();
+							}
+							nowlist->lock.unlock();
+						}
+					}
+
 				} else {
 					//In diesem Fall sind wir in der open_list und > threshold
 					//d.h. in later_list kopieren
-#ifdef DEBUG
+#ifdef DEBUG2
 s.lock();
 std::cout << nr << " hat einen Node in open_state > threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
@@ -433,7 +462,7 @@ s.unlock();
 					}
 #ifdef DEBUG
 s.lock();
-std::cout << "thread " << nr << " locked laterlist" << " status: " << laterlist->status << std::endl;
+std::cout << "thread " << nr << " locked " << last_later_node->getIndex() << " status: " << laterlist->status << std::endl;
 s.unlock();
 #endif
 
@@ -447,14 +476,14 @@ s.unlock();
 					nl_pos->status = later_state;
 
 					last_later_node->lock.unlock();
+#ifdef DEBUG
+s.lock();
+std::cout << "thread " << nr << " unlocked " << last_later_node->getIndex() << " status: " << laterlist->status << std::endl;
+s.unlock();
+#endif
 
 					last_later_node = nl_pos;
 
-#ifdef DEBUG
-s.lock();
-std::cout << "thread " << nr << " unlocked laterlist" << " status: " << laterlist->status << std::endl;
-s.unlock();
-	#endif
 					//nl_pos muss noch freigegeben werden
 					nl_pos->lock.unlock();
 #ifdef DEBUG
@@ -469,7 +498,7 @@ s.unlock();
 				}
 					
 			} else if (nl_pos->status == Node::closed) {
-#ifdef DEBUG
+#ifdef DEBUG2
 s.lock();
 std::cout << nr << " hat einen Node in closed state (Node " << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
@@ -486,7 +515,7 @@ s.unlock();
 				nl_pos = nl_pos->next;
 
 			} else {
-#ifdef DEBUG
+#ifdef DEBUG2
 s.lock();
 std::cout << nr << " hat einen Node in later state (Node " << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
@@ -539,11 +568,6 @@ s.unlock();
 				Node::state_t tmps = open_state;
 				open_state = later_state;
 				later_state = tmps;
-#ifdef DEBUG
-std::cout << std::endl << "###" << " open state: " << open_state 
-	 << std::endl << "    later state: " << later_state
-	 << std::endl;
-#endif
 
 			} //IMPLICIT BARRIER
 
@@ -553,7 +577,9 @@ std::cout << std::endl << "###" << " open state: " << open_state
 
 			//warte nochmals auf alle
 			#pragma omp barrier
+
 		} // END IF (nowlist == nowlist->next)
+
 #ifdef DEBUG
 s.lock();
 std::cout << std::endl;
@@ -562,6 +588,12 @@ s.unlock();
 
 
 	} // END WHILE
+
+#ifdef DEBUG
+s.lock();
+std::cout << "I'm thread " << nr << " and I got out of the while! Shame on me!" << std::endl;
+s.unlock();
+#endif
 
 	}//END PRAGMA OMP PARALLEL
 
