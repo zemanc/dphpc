@@ -164,12 +164,9 @@ s.unlock();
 							bool edge_to_locked = false;
 // 							while ((edge_to->status == Node::inactive || edge_to->status == later_state)
 // 								&& (!(edge_to_locked = edge_to->lock.try_lock())));
+							while ((edge_to->status == Node::inactive || edge_to->status == later_state)
+								&& (!(edge_to_locked = omp_test_lock(&edge_to->lock))));
 							// warten auf lock
-							omp_set_lock(&edge_to->lock);
-							if (!(edge_to->status == Node::inactive || edge_to->status == later_state))
-								omp_unset_lock(&edge_to->lock);
-							else
-								edge_to_locked = true;
 #ifdef DEBUG
 s.lock();
 if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
