@@ -37,9 +37,12 @@ int main()
 // 		g.randomDisplaceAllNodes(0.3, distance);
 // 		tg.removeRandomNodes(g, 2000, 10000);
 		
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 8; i++)
 		{
 			g.cleanup();
+
+			omp_set_dynamic(0);
+			omp_set_num_threads(i);
 
 			// start timing
 			t_start = std::chrono::high_resolution_clock::now();

@@ -53,9 +53,6 @@ std::mutex s;
 	bool not_found = false;
 
 	//solange nicht beide leer sind
-	omp_set_dynamic(0); 
-	omp_set_num_threads(2);
-	
 	#pragma omp parallel default(shared)
 	{
 
@@ -64,9 +61,7 @@ std::mutex s;
 	Node* last_later_node = laterlist;
 
 	#pragma omp barrier
-#ifdef DEBUG
-int nr = omp_get_thread_num();
-#endif
+	int nr = omp_get_thread_num();
 
 	//wir können hier nicht einfach testen, ob die Listen beide leer sind
 	//denn während wir dies testen, kann sich das schon wieder ändern!
@@ -570,7 +565,9 @@ s.unlock();
 			//wenn wir hier sind, wurde also nl_pos aus irgendeinem Grund nicht
 			//gelockt, vermutlich, weil grad wer anders an so einem Ort probiert
 			//also einfach weitergehen...
-			nl_pos = nl_pos->next;
+			//int n = rand() % 5 + 1;
+			for (int i = 0; i < nr; i++)
+				nl_pos = nl_pos->next;
 
 		} //END IF (nl_pos_locked)
 
@@ -606,8 +603,10 @@ s.unlock();
 			} //IMPLICIT BARRIER
 
 			//und wir beginnen nun wieder von vorne
-			nl_pos = nowlist->next;
+			nl_pos = last_later_node;
 			last_later_node = laterlist;
+			if (nl_pos->status == later_state || nl_pos == nowlist)
+				nl_pos = nowlist->next;
 
 			//warte nochmals auf alle
 			#pragma omp barrier
