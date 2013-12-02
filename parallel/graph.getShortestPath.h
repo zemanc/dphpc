@@ -3,7 +3,6 @@
 #define __graph__getShortestPath_h__
 
 // #define DEBUG
-// #define DEBUG2
 
 #include <climits>
 
@@ -54,8 +53,6 @@ std::mutex s;
 	bool not_found = false;
 
 	//solange nicht beide leer sind
-	omp_set_dynamic(0); 
-	omp_set_num_threads(2);
 	#pragma omp parallel default(shared)
 	{
 
@@ -64,9 +61,7 @@ std::mutex s;
 	Node* last_later_node = laterlist;
 
 	#pragma omp barrier
-#ifdef DEBUG
-int nr = omp_get_thread_num();
-#endif
+	int nr = omp_get_thread_num();
 
 	//wir können hier nicht einfach testen, ob die Listen beide leer sind
 	//denn während wir dies testen, kann sich das schon wieder ändern!
@@ -79,16 +74,15 @@ int nr = omp_get_thread_num();
 		//- closed sein, falls er gerade eben entfernt wurde
 		//- open sein, wenn alles gut ist
 		//- later sein, wenn er soeben verschoben wurde
-		//Er kann nicht inactive sein, da wir ihn sonst nicht hätten locken können
-		//bzw er käme als nl_pos nicht in Frage!
+		//Er kann nicht inactive sein - er käme als nl_pos nicht in Frage!
 
 #ifdef DEBUG2
 s.lock();
 std::cout << "thread " << nr <<  " tries to get lock on " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
 s.unlock();
 #endif
-		
-		nl_pos_locked = nl_pos->lock.try_lock();
+		nl_pos_locked = omp_test_lock(&nl_pos->lock);
+
 #ifdef DEBUG
 s.lock();
 if (nl_pos_locked) std::cout << "thread " << nr <<  " locked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
@@ -117,7 +111,8 @@ s.unlock();
 					if (nl_pos == end)
 					{
 						//hier müssen wir noch den einen lock freigeben!
-						nl_pos->lock.unlock();
+						omp_unset_lock(&nl_pos->lock);
+
 #ifdef DEBUG
 s.lock();
 if (nl_pos_locked) std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
@@ -191,7 +186,7 @@ s.unlock();
 
 									//keine Statusänderung
 								}
-								if (edge_to->status == Node::inactive)
+								else if (edge_to->status == Node::inactive)
 								{
 									//neuer Node!
 
@@ -246,12 +241,12 @@ s.unlock();
 										do
 										{
 											//nun haben wir wohl den falschen gekriegt :)
-											if (edge_to_prev_locked) 
-												edge_to_prev->lock.unlock();
+											if (edge_to_prev_locked)
+												omp_unset_lock(&edge_to_prev->lock); 
 
 											edge_to_prev = edge_to->prev;
 											edge_to_prev_locked = 
-												edge_to_prev->lock.try_lock();
+												omp_test_lock(&edge_to_prev->lock) ;
 										} while ((!edge_to_prev_locked)
 											  || (edge_to->prev != edge_to_prev));
 #ifdef DEBUG
@@ -267,7 +262,7 @@ s.unlock();
 										edge_to->next->prev = edge_to->prev;
 
 										//edge_to_prev können wir wieder freigeben!
-										edge_to_prev->lock.unlock();
+										omp_unset_lock(&edge_to_prev->lock);
 #ifdef DEBUG
 s.lock();
 if (edge_to_prev_locked) std::cout << "thread " << nr << " unlocked " << edge_to_prev->getIndex() << " (edge_to_prev)" << " status: " << edge_to_prev->status << std::endl;
@@ -288,7 +283,7 @@ s.unlock();
 								} //END IF (edge_to->status == ??)
 								
 								//nun wieder unlocken
-								edge_to->lock.unlock();
+								omp_unset_lock(&edge_to->lock);
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
@@ -296,39 +291,6 @@ s.unlock();
 #endif
 							} //END IF (edge_to_locked)
 							
-// 						} else if (edge_to->status == open_state)
-// 						{
-// 							//diesen dürfen wir nicht zwingend locken!
-// 							//aber wir versuchen es einmal, wenn es geht, dann gut:)
-// 							bool edge_to_locked = edge_to->lock.try_lock();
-// #ifdef DEBUG
-// s.lock();
-// if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
-// s.unlock();
-// #endif
-// 
-// 							if (edge_to_locked)
-// 							{
-// 								//wenn distanz besser ist
-// 								double newDist = nl_pos->g + (*edge_it).second;
-// 								if (edge_to->g > newDist)
-// 								{
-// 									//heuristische Beträge berechnen
-// 									edge_to->g =  newDist;
-// 									edge_to->f = newDist + edge_to->h;
-// 
-// 									//backtracking anpassen
-// 									edge_to->parent = nl_pos;
-// 								}
-// 								edge_to->lock.unlock();
-// #ifdef DEBUG
-// s.lock();
-// std::cout << "thread " << nr << " unlocked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
-// s.unlock();
-// #endif
-// 							}
-// 							//keine Statusänderung...
-
 						} // END IF ( (edge_to->status == Node::inactive) || (edge_to->status == later_state))
 						
 					} //END FOR
@@ -344,11 +306,11 @@ s.unlock();
 					{
 						//nun haben wir wohl den falschen gekriegt :)
 						if (nl_pos_prev_locked)
-							nl_pos_prev->lock.unlock();
+							omp_unset_lock(&nl_pos_prev->lock);
 
 						nl_pos_prev = nl_pos->prev;
 
-						nl_pos_prev_locked = nl_pos_prev->lock.try_lock();
+						nl_pos_prev_locked = omp_test_lock(&nl_pos_prev->lock);
 
 					} while ((!nl_pos_prev_locked)
 						  || (nl_pos->prev != nl_pos_prev));
@@ -365,7 +327,7 @@ s.unlock();
 	// 				nl_pos->next = NULL; //dies legen wir natürlich nicht fest
 
 					//den lock müssen wir natürlich wieder freigeben :)
-					nl_pos_prev->lock.unlock();
+					omp_unset_lock(&nl_pos_prev->lock);
 	#ifdef DEBUG
 	s.lock();
 	std::cout << "thread " << nr << " unlocked " << nl_pos_prev->getIndex() << " (nl_pos_prev)" << " status: " << nl_pos_prev->status << std::endl;
@@ -373,7 +335,7 @@ s.unlock();
 	#endif
 
 					//nl_pos muss auch mal frei werden :)
-					nl_pos->lock.unlock();
+					omp_unset_lock(&nl_pos->lock);
 	#ifdef DEBUG
 	s.lock();
 	std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
@@ -392,9 +354,9 @@ s.unlock();
 					//und wenn wir beide kriegen, schauen wir, ob wir recht haben.
 					if ((nowlist->next == nowlist) && (laterlist->next == laterlist))
 					{
-						if (nowlist->lock.try_lock())
+						if (omp_test_lock(&nowlist->lock))
 						{
-							if (laterlist->lock.try_lock())
+							if (omp_test_lock(&laterlist->lock))
 							{
 								//wenn es nun noch zutrifft, dann sind wir definitiv
 								//am Ende!
@@ -402,9 +364,9 @@ s.unlock();
 									  &&(laterlist->next == laterlist))
 									not_found = true;
 
-								laterlist->lock.unlock();
+								omp_unset_lock(&laterlist->lock);
 							}
-							nowlist->lock.unlock();
+							omp_unset_lock(&nowlist->lock);
 						}
 					}
 
@@ -433,11 +395,11 @@ s.unlock();
 					{
 						//nun haben wir wohl den falschen gekriegt :)
 						if (nl_pos_prev_locked)
-							nl_pos_prev->lock.unlock();
+							omp_unset_lock(&nl_pos_prev->lock);
 
 						nl_pos_prev = nl_pos->prev;
 
-						nl_pos_prev_locked = nl_pos_prev->lock.try_lock();
+						nl_pos_prev_locked = omp_test_lock(&nl_pos_prev->lock);
 
 					} while ((!nl_pos_prev_locked) 
 						 || (nl_pos->prev != nl_pos_prev));
@@ -453,7 +415,7 @@ s.unlock();
 					nl_pos->next->prev = nl_pos->prev;
 
 					//und schon wieder freigeben :)
-					nl_pos->prev->lock.unlock();
+					omp_unset_lock(&nl_pos->prev->lock);
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << nl_pos_prev->getIndex() << " (nl_pos_prev)" << " status: " << nl_pos_prev->status << std::endl;
@@ -466,21 +428,21 @@ s.unlock();
 
 					if (last_later_node->status == later_state)
 					{
-						if (last_later_node->lock.try_lock())
+						if (omp_test_lock(&last_later_node->lock))
 						{
 							if (last_later_node->status != later_state)
 							{
-								last_later_node->lock.unlock();
+								omp_unset_lock(&last_later_node->lock);
 								last_later_node = laterlist;
-								last_later_node->lock.lock();
+								omp_set_lock(&last_later_node->lock);
 							}
 						} else {
 							last_later_node = laterlist;
-							last_later_node->lock.lock();
+							omp_set_lock(&last_later_node->lock);
 						}
 					} else {
 						last_later_node = laterlist;
-						last_later_node->lock.lock();
+						omp_set_lock(&last_later_node->lock);
 					}
 #ifdef DEBUG
 s.lock();
@@ -497,7 +459,7 @@ s.unlock();
 					//den Status nicht vergessen anzupassen!
 					nl_pos->status = later_state;
 
-					last_later_node->lock.unlock();
+					omp_unset_lock(&last_later_node->lock);
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << last_later_node->getIndex() << " status: " << laterlist->status << std::endl;
@@ -507,7 +469,7 @@ s.unlock();
 					last_later_node = nl_pos;
 
 					//nl_pos muss noch freigegeben werden
-					nl_pos->lock.unlock();
+					omp_unset_lock(&nl_pos->lock);
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
@@ -528,7 +490,7 @@ s.unlock();
 				//nun kann der Status halt auf closed gewechselt haben, dann gehen
 				//wir einfach weiter, denn der Pointer stimmt noch
 				
-				nl_pos->lock.unlock();
+				omp_unset_lock(&nl_pos->lock);
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
@@ -539,13 +501,13 @@ s.unlock();
 			} else {
 #ifdef DEBUG2
 s.lock();
-std::cout << "thread " << nr << " hat einen Node in later state (Node " << nl_pos->getIndex() << ")" << std::endl;
+std::cout << nr << " hat einen Node in later state (Node " << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
 #endif
 				//sonst sind wir eh in der later-list gelandet, dann müssen wir nur
 				//noch den lock freigeben, da wir in der laterlist sind, kriegen wir
 				//eh einen neuen Node...
-				nl_pos->lock.unlock();
+				omp_unset_lock(&nl_pos->lock);
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
@@ -558,7 +520,9 @@ s.unlock();
 			//wenn wir hier sind, wurde also nl_pos aus irgendeinem Grund nicht
 			//gelockt, vermutlich, weil grad wer anders an so einem Ort probiert
 			//also einfach weitergehen...
-			nl_pos = nl_pos->next;
+			//int n = rand() % 5 + 1;
+			for (int i = 0; i < nr; i++)
+				nl_pos = nl_pos->next;
 
 		} //END IF (nl_pos_locked)
 
@@ -594,8 +558,10 @@ s.unlock();
 			} //IMPLICIT BARRIER
 
 			//und wir beginnen nun wieder von vorne
-			nl_pos = nowlist->next;
+			nl_pos = last_later_node;
 			last_later_node = laterlist;
+			if (nl_pos->status == later_state || nl_pos == nowlist)
+				nl_pos = nowlist->next;
 
 			//warte nochmals auf alle
 			#pragma omp barrier
