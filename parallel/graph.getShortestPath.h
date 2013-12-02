@@ -16,7 +16,6 @@ length_t Graph::getShortestPath(index_t from, index_t to, std::list<Node*>* vals
 #ifdef DEBUG
 std::mutex s;
 #endif
-std::mutex s;
 
 	//geht besser so als randomized... für den Moment. Später ist das wohl dann der "richtige" Index, nicht der interne!
 	Node* start = pNodes[from];
@@ -63,7 +62,6 @@ std::mutex s;
 
 	#pragma omp barrier
 	int nr = omp_get_thread_num();
-int i = 0; int j = 0; int k = 0;
 
 	//wir können hier nicht einfach testen, ob die Listen beide leer sind
 	//denn während wir dies testen, kann sich das schon wieder ändern!
@@ -175,7 +173,6 @@ s.unlock();
 								if (edge_to->status == open_state)
 								{
 
-i++;
 									//wenn distanz besser ist
 									double newDist = nl_pos->g + (*edge_it).second;
 									if (edge_to->g > newDist)
@@ -192,7 +189,6 @@ i++;
 								}
 								else if (edge_to->status == Node::inactive)
 								{
-j++;
 									//neuer Node!
 
 									//berechne heuristische Beträge
@@ -216,7 +212,6 @@ j++;
 
 								} else if (edge_to->status == later_state)
 								{
-k++;
 
 									//nun sind wir im later_state, da schauen wir zuerst mal
 									//ob überhaupt handlungsbedarf besteht ...
@@ -527,7 +522,7 @@ s.unlock();
 			//gelockt, vermutlich, weil grad wer anders an so einem Ort probiert
 			//also einfach weitergehen...
 			//int n = rand() % 5 + 1;
-			for (int i = 0; i <= nr; i++)
+			for (int i = 0; i <= a; i++)
 				nl_pos = nl_pos->next;
 
 		} //END IF (nl_pos_locked)
