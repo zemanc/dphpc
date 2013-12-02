@@ -522,7 +522,7 @@ s.unlock();
 			//gelockt, vermutlich, weil grad wer anders an so einem Ort probiert
 			//also einfach weitergehen...
 			//int n = rand() % 5 + 1;
-			for (int i = 0; i <= a; i++)
+			for (int i = 0; i <= nr; i++)
 				nl_pos = nl_pos->next;
 
 		} //END IF (nl_pos_locked)
@@ -583,11 +583,7 @@ s.lock();
 std::cout << "I'm thread " << nr << " and I got out of the while! Shame on me!" << std::endl;
 s.unlock();
 #endif
-s.lock();
-std::cout << i << " " << j << " " << k << std::endl;
-s.unlock();
 	}//END PRAGMA OMP PARALLEL
-std::cout << std::endl << std::endl;
 	//bisschen aufräumen
 	delete nowlist;
 	delete laterlist;
