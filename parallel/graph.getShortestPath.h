@@ -16,6 +16,7 @@ length_t Graph::getShortestPath(index_t from, index_t to, std::list<Node*>* vals
 #ifdef DEBUG
 std::mutex s;
 #endif
+std::mutex s;
 
 	//geht besser so als randomized... für den Moment. Später ist das wohl dann der "richtige" Index, nicht der interne!
 	Node* start = pNodes[from];
@@ -62,6 +63,7 @@ std::mutex s;
 
 	#pragma omp barrier
 	int nr = omp_get_thread_num();
+int i = 0; int j = 0; int k = 0;
 
 	//wir können hier nicht einfach testen, ob die Listen beide leer sind
 	//denn während wir dies testen, kann sich das schon wieder ändern!
@@ -159,7 +161,7 @@ s.unlock();
 #endif
 							bool edge_to_locked = false;
 							while ((edge_to->status != Node::closed)
-								&& (!(edge_to_locked = edge_to->lock.try_lock())));
+								&& (!(edge_to_locked = omp_test_lock(&edge_to->lock))));
 #ifdef DEBUG
 s.lock();
 if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
@@ -172,6 +174,8 @@ s.unlock();
 							{
 								if (edge_to->status == open_state)
 								{
+
+i++;
 									//wenn distanz besser ist
 									double newDist = nl_pos->g + (*edge_it).second;
 									if (edge_to->g > newDist)
@@ -188,6 +192,7 @@ s.unlock();
 								}
 								else if (edge_to->status == Node::inactive)
 								{
+j++;
 									//neuer Node!
 
 									//berechne heuristische Beträge
@@ -211,6 +216,7 @@ s.unlock();
 
 								} else if (edge_to->status == later_state)
 								{
+k++;
 
 									//nun sind wir im later_state, da schauen wir zuerst mal
 									//ob überhaupt handlungsbedarf besteht ...
@@ -521,7 +527,7 @@ s.unlock();
 			//gelockt, vermutlich, weil grad wer anders an so einem Ort probiert
 			//also einfach weitergehen...
 			//int n = rand() % 5 + 1;
-			for (int i = 0; i < nr; i++)
+			for (int i = 0; i <= nr; i++)
 				nl_pos = nl_pos->next;
 
 		} //END IF (nl_pos_locked)
@@ -582,9 +588,11 @@ s.lock();
 std::cout << "I'm thread " << nr << " and I got out of the while! Shame on me!" << std::endl;
 s.unlock();
 #endif
-
+s.lock();
+std::cout << i << " " << j << " " << k << std::endl;
+s.unlock();
 	}//END PRAGMA OMP PARALLEL
-
+std::cout << std::endl << std::endl;
 	//bisschen aufräumen
 	delete nowlist;
 	delete laterlist;
@@ -599,6 +607,7 @@ s.unlock();
 template<class F>
 length_t Graph::reconstructPath(std::list<Node*>* vals, Node* start, Node* end, const F& dist)
 {
+
 
 	double length = 0;
 

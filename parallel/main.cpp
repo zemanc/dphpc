@@ -29,15 +29,15 @@ int main()
 	for (unsigned int n = 3000; n <= 3000; n+=10)
 	{
 		Graph g;
-// 	 	HolyGraph hg = HolyGraph(n);
-		CircleGraph cg = CircleGraph(n / 2, n / 4); 
+	 	HolyGraph hg = HolyGraph(n);
+// 		CircleGraph cg = CircleGraph(n / 2, n / 4); 
 // 		SmileyGraph sg = SmileyGraph(n/2);
 
-		tg.getGenericGraphFast(n, distance, cg, g);
+		tg.getGenericGraphFast(n, distance, hg, g);
 // 		g.randomDisplaceAllNodes(0.3, distance);
 // 		tg.removeRandomNodes(g, 2000, 10000);
 		
-		for (int i = 0; i < 8; i++)
+		for (int i = 1; i < 9; i++)
 		{
 			g.cleanup();
 
@@ -58,7 +58,7 @@ int main()
 					<< time_span.count() << "\t" << dist << std::endl;
 
 // 			boost_shortestPath_ek(g, 0, n*n-1);
-//  			g.printGml();
+//   			g.printGml();
 
 		}
 	}
