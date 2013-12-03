@@ -158,8 +158,8 @@ class OMP_Lock
 		omp_lock_t l;
 	
 	public:
-		Omp_Lock() { omp_init_lock(&l); };
-		~Omp_Lock() { omp_destroy_lock(&l); };
+		OMP_Lock() { omp_init_lock(&l); };
+		~OMP_Lock() { omp_destroy_lock(&l); };
 
 		inline void lock() {
 			omp_set_lock(&l);
@@ -174,7 +174,7 @@ class OMP_Lock
 		};
 };
 
-typedef OMP_Lock lock_t;
+typedef TAS_EXP_Lock lock_t;
 
 
 #endif
