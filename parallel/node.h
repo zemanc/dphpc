@@ -5,8 +5,8 @@
 #include <vector>
 #include <list>
 #include <utility>
-// #include <mutex>
-# include <omp.h>
+
+#include "lock.h"
 
 typedef double length_t;
 typedef unsigned int index_t;
@@ -24,8 +24,7 @@ class Node
 		typedef std::vector<edge_t> edges_t;
 		typedef std::vector<edge_t>::iterator edges_it_t;
 
-		omp_lock_t lock;
-// 		std::mutex lock;
+		lock_t lock;
 
 		Node(length_t, length_t, index_t);
 		~Node();

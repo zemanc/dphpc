@@ -15,11 +15,9 @@ Node::Node(length_t xP, length_t yP, index_t i)
 									 , next(NULL)
 									 , prev(NULL)
 {
-	omp_init_lock(&lock);
 }
 Node::~Node()
 {
-	omp_destroy_lock(&lock);
 }
 
 void Node::setX(length_t x) 
