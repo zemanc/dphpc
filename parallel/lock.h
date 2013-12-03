@@ -6,7 +6,7 @@
 class Own_Lock
 {
 	private:
-		volatile int l;
+		volatile char l;
 
 	public:
 
@@ -14,34 +14,34 @@ class Own_Lock
 		~Own_Lock() {};
 
 		inline void lock() {
-			register unsigned char res = 1;
+			unsigned char res = 1;
 			while (res != 0)
 			{
 				__asm__ __volatile__(
 					"xchg %0,%1"
-					: "+q" (res), "+m" (l)
-					:
+					: "+q" (res)
+					: "m" (l)
 					: );
 			}
 		};
 
 		inline bool try_lock() { 
-			register unsigned char res = 1;
+			unsigned char res = 1;
 			__asm__ __volatile__(
 				"xchg %0,%1"
-				: "+q" (res), "+m" (l)
-				:
+				: "+q" (res)
+				: "m" (l)
 				: );
-			return !static_cast<bool>(res);
+			return !(res);
 		};
 
 		inline void unlock() { 
 			l = 0;
 		    __asm__ __volatile__(
-				"mfence" 
+				"" 
 				:
 				:
-				:);
+				: "memory" );
 		};
 };
 
@@ -67,7 +67,7 @@ class Omp_Lock
 		};
 };
 
-typedef Omp_Lock lock_t;
+typedef Own_Lock lock_t;
 
 
 #endif
