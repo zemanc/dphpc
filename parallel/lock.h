@@ -15,10 +15,11 @@ class Own_Lock
 
 		inline void lock() {
 			unsigned char res = 1;
+			while (l != 0);
 			while (res != 0)
 			{
 				__asm__ __volatile__(
-					"xchg %0,%1"
+					"xchgb %0,%1"
 					: "+q" (res)
 					: "m" (l)
 					: );
@@ -28,7 +29,7 @@ class Own_Lock
 		inline bool try_lock() { 
 			unsigned char res = 1;
 			__asm__ __volatile__(
-				"xchg %0,%1"
+				"xchgb %0,%1"
 				: "+q" (res)
 				: "m" (l)
 				: );
