@@ -6,8 +6,6 @@
 #include <climits>
 
 #include <iostream>
-#include <mutex>
-#include <omp.h>
 #include "lock.h"
 
 template<class F>
