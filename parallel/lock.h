@@ -25,7 +25,7 @@ class TAS_EXP_Lock
 					"xchg %0,%1"
 					: "+q" (_res)
 					: "m" (l)
-					: "memory");
+					: );
 				if (_res == 1) {
 					time *= 2;
 					for (int i=0; i<time; i++) {
