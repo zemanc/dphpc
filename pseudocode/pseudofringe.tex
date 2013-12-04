@@ -1,0 +1,57 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage[ruled,vlined]{algorithm2e}
+
+\title{\textbf{Pseudocode}}
+\author{$10^6$}
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Pseudocode}
+
+\footnotesize
+\begin{algorithm}[H]
+ \SetLine % For v3.9
+ %\SetAlgoLined % For previous releases [?]
+ %\KwData{this text}
+ %\KwResult{how to write algorithm with \LaTeX2e }
+ %initialization\;
+ create $nowlist$\;
+ create $laterlist$\;
+ add $start$ to $nowlist$\;
+ \nlset{start parallel}
+ 
+ $x \leftarrow start$\;
+ \nlset{barrier}
+ 
+ \While{both lists not empty}{
+  try lock($x$)\;
+  \eIf{lock successful}{
+   \If{$state = open$}{
+    \If{$x.f \leq threshold$}{
+     \If(\tcp*[f]{we are done :)}){$x = end$}{
+      unlock($x$)\;
+      break\;
+     }
+     \For{each neighbour $nb$}{
+      \If{$nb.state = inactive \parallel later$}{
+       \While{$nb.state = inactive \parallel later$}{
+       aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+       }
+      }
+     }
+    }
+   }
+   go to next section\;
+   current section becomes this one\;
+   }{
+   go back to the beginning of current section\;
+  }
+ }
+ \caption{Fringe Search}
+\end{algorithm}
+\normalsize
+
+\end{document}
