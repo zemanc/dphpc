@@ -6,8 +6,7 @@ LFLAGS = -Wall -fopenmp
 # make
 all: fringe
 # make optimized
-#optimized: CC += -O0 -fauto-inc-dec -fcompare-elim -fcprop-registers -fdce -fdefer-pop -fdelayed-branch -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion -fipa-pure-const -fipa-profile -fipa-reference -fmerge-constants -fsplit-wide-types -ftree-bit-ccp -ftree-builtin-call-dce -ftree-ccp -ftree-ch -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre -ftree-sra -ftree-pta -ftree-ter -funit-at-a-time
-optimized: CC += -O2
+optimized: CC += -O3 -fno-tree-pre
 
 optimized: fringe
 # make profile
