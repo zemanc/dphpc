@@ -15,11 +15,10 @@ length_t Graph::getShortestPath(index_t from, index_t to, std::list<Node*>* vals
 lock_t s;
 #endif
 
-	//geht besser so als randomized... für den Moment. Später ist das wohl dann der "richtige" Index, nicht der interne!
 	Node* start = pNodes[from];
 	Node* end = pNodes[to];
 
-	//start heuristische funktion initialisieren
+	//start heuristische Funktion initialisieren
 	start->g = 0;
 	start->h = dist(start, end);
 	start->f = start->g + start->h;
@@ -29,8 +28,6 @@ lock_t s;
 	//init list
 	Node* nowlist = new Node(0, 0, UINT_MAX); 
 	Node* laterlist= new Node(0, 0, UINT_MAX); //kein Node <= Threshold!!
-// 	zero_node->prev = zero_node;
-// 	zero_node->next = zero_node;
 
 	//insert start into nowlist
 	nowlist->next = nowlist->prev = start;
@@ -43,14 +40,14 @@ lock_t s;
 	Node::state_t open_state = Node::open1;
 	Node::state_t later_state = Node::open2;
 
+	//start und nowlist sind open, laterlist ist later
 	start->status = open_state;
 	nowlist->status = open_state;
 	laterlist->status = later_state;
 
-	bool found = false;
-	bool not_found = false;
+	bool found = false; //wenn found=true, dann haben wir das Ziel gefunden
+	bool not_found = false; //wenn not_found=true, dann ist die Suche zwecklos
 
-	//solange nicht beide leer sind
 	#pragma omp parallel default(shared)
 	{
 
@@ -58,11 +55,14 @@ lock_t s;
 	Node* nl_pos = nowlist->next;
 	Node* last_later_node = laterlist;
 
+	//hier müssen wir nochmals aufeinander warten, da sonst ein Node z.B.
+	//nowlist kriegen könnte, da nowlist->next bereits weg ist
 	#pragma omp barrier
 	int nr = omp_get_thread_num();
 
 	//wir können hier nicht einfach testen, ob die Listen beide leer sind
 	//denn während wir dies testen, kann sich das schon wieder ändern!
+	//deshalb machen wir diese Kontrolle woanders
 	while (!found && !not_found)
 	{
 
@@ -89,6 +89,9 @@ s.unlock();
 		if (nl_pos_locked)
 		{
 
+			//wenn wir hierhin kommen, haben wir also einen Lock gekriegt auf einen Node, den
+			//wir nun definitiv bearbeiten
+
 			if (nl_pos->status == open_state)
 			{
 				//Nun ist das der "gute Fall"! Wir sind in der Nowlist, diesen Node müssen wir bearbeiten
@@ -105,7 +108,6 @@ s.unlock();
 					//in diesem Fall müssen wir vieles machen...
 						
 					//wenn fertig dann fertig
-					//diesen Punkt erreichen alle Nodes irgendwann wieder
 					if (nl_pos == end)
 					{
 						//hier müssen wir noch den einen lock freigeben!
@@ -117,29 +119,36 @@ if (nl_pos_locked) std::cout << "thread " << nr << " unlocked " << nl_pos->getIn
 s.unlock();
 #endif
 
+						//die anderen Threads sollten auch benachrichtigt werden...
 						found = true;
 						break;
 					}
 					
-					//for each neighbor
+					//für jede wegführende Kante
 					for (Node::edges_it_t edge_it = nl_pos->adjEdges.begin(); 
 						 edge_it != nl_pos->adjEdges.end(); edge_it++)
 					{
+						//.first ist der Node, wo die Kante edge_it hinführt
 						Node* edge_to = (*edge_it).first;
 
 						//edge_to kann 
 						// - inactive sein, dann müssen wir ihn in die Nowlist einfügen
-						// - open sein, dann lassen wir ihn mal stehen für den Moment
-						//          aber wir müssen den Wert evtl anpassen
-						//          aber das machen wir im mom nicht
+						// - open sein, dann passen wir den Wert an
 						// - later sein, dann müssen wir ihn evtl. zurückholen
 						// - closed sein, dann machen wir nichts
 
 						//closed dürfen wir von Beginn weg ausschliessen, denn die kommen
 						//eh nie zurück :-((
-						//open schliessen wir aus, da sie deadlocks verursachen //Im Moment aber nicht :)
+					
+						//BEACHTE! Es kann auch sein, dass der Node gerade in die Laterlist verschoben wird
+						//dann ist aber der Node als closed gekennzeichnet, also kann es zu keinem 
+						//Deadlock kommen! Was aber passieren kann, ist, dass der Node gerade verschoben wird
+						//wir aber in diesem Moment merken, dass eigentlich ein besserer Pfad existieren 
+						//würde. In diesem Fall ändern wir das nicht mehr, der Node landet mit der falschen
+						//Schätzung in der Laterlist. Das können wir aber nicht ändern und macht fast nichts aus
 
-						//node schliessen
+						//node schliessen, das machen wir bereits hier, damit niemand Ressourcen verschwendet
+						//auf diesen Node zu warten
 						nl_pos->status = Node::closed;
 						
 						if (edge_to->status != Node::closed)
@@ -165,17 +174,18 @@ s.unlock();
 #endif
 
 							//nun dürfen wir definitiv die Fallunterscheidung machen
-							//TODO: Welches ist das wahrscheinlichste?
 							if (edge_to_locked)
 							{
 								if (edge_to->status == open_state)
 								{
+									//wenn der Node nun open ist und wir den Lock bekommen haben
+									//dann können wir anpassen
 
 									//wenn distanz besser ist
 									double newDist = nl_pos->g + (*edge_it).second;
 									if (edge_to->g > newDist)
 									{
-										//heuristische Beträge berechnen
+										//heuristische Beträge neu berechnen
 										edge_to->g =  newDist;
 										edge_to->f = newDist + edge_to->h;
 
@@ -187,7 +197,7 @@ s.unlock();
 								}
 								else if (edge_to->status == Node::inactive)
 								{
-									//neuer Node!
+									//neuer Node! Also einfach einfügen
 
 									//berechne heuristische Beträge
 									edge_to->g = nl_pos->g + (*edge_it).second;
@@ -253,7 +263,7 @@ if (edge_to_prev_locked) std::cout << "thread " << nr << " locked " << edge_to_p
 s.unlock();
 #endif
 
-										//Nun können wir ja endlich handeln
+										//Nun können wir ja endlich handeln, also entfernen, einfügen
 
 										//remove 
 										edge_to->prev->next = edge_to->next;
@@ -350,6 +360,9 @@ s.unlock();
 					//wird!
 					//wir testen zuerst ohne Locks, dann versuchen wir zu locken,
 					//und wenn wir beide kriegen, schauen wir, ob wir recht haben.
+					//das ganze sieht recht komplex aus, aber wir versuchen hier beide Locks auf
+					//Nowlist und laterlist zu kriegen, dann kann niemand gerade versuchen
+					//dort was einzufügen, deshalb können wir uns über not_found sicher sein
 					if ((nowlist->next == nowlist) && (laterlist->next == laterlist))
 					{
 						if (nowlist->lock.try_lock())
@@ -384,7 +397,9 @@ s.unlock();
 #endif
 
 					//locke zuerst Vorgänger, dieser kann nie nach hinten geschoben werden
-					//wir closen in temporär
+					//Wir setzen ihn temporär auf closed, damit niemand zur gleichen Zeit
+					//eine Kante zu diesem Node hat (edge_to). dies würde zu einem
+					//deadlock führen. Oben genauer beschrieben mit BEACHTE!
 					nl_pos->status = Node::closed;
 
 					bool nl_pos_prev_locked = false;
