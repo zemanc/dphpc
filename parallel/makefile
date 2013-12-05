@@ -6,7 +6,9 @@ LFLAGS = -Wall -fopenmp
 # make
 all: fringe
 # make optimized
-optimized: CC += -O3
+#optimized: CC += -O0 -fauto-inc-dec -fcompare-elim -fcprop-registers -fdce -fdefer-pop -fdelayed-branch -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion -fipa-pure-const -fipa-profile -fipa-reference -fmerge-constants -fsplit-wide-types -ftree-bit-ccp -ftree-builtin-call-dce -ftree-ccp -ftree-ch -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre -ftree-sra -ftree-pta -ftree-ter -funit-at-a-time
+optimized: CC += -O2
+
 optimized: fringe
 # make profile
 profile: CC += -pg
@@ -15,7 +17,7 @@ profile: fringe
 graph_headers = graph.h graph.addEdges.h graph.getShortestPath.h graph.distances.h graph.randomDisplaceAllNodes.h lock.h
 testgraph_headers = testgraph.h testgraph.getGenericGraphFast.h testgraph.genericGraphs.h
 
-fringe: main.o graph.o node.o testgraph.o testgraph.o
+fringe: main.o graph.o node.o testgraph.o testgraph.o lock.o
 	$(CC) $(LFLAGS) -o $@ $^
 main.o: main.cpp $(graph_headers) $(testgraph_headers) node.h lock.h
 	$(CC) $(CFLAGS) $<
@@ -27,5 +29,7 @@ graph.o: graph.cpp $(graph_headers) node.h lock.h
 #	$(CC) $(CFLAGS) $<
 node.o: node.cpp node.h lock.h
 	$(CC) $(CFLAGS) $<
+lock.o: lock.cpp lock.h
+	g++ $(CFLAGS) $<
 clean: 
 	$(RM) *.o
