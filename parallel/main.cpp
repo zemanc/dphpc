@@ -37,7 +37,7 @@ int main()
 // 		g.randomDisplaceAllNodes(0.3, distance);
 // 		tg.removeRandomNodes(g, 2000, 10000);
 		
-		for (int i = 4; i < 5; i++)
+		for (int i = 1; i < 5; i++)
 		{
 			g.cleanup();
 

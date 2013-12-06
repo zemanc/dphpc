@@ -6,20 +6,56 @@
 // -------------------------------------------
 // TEST AND SET EXPONENTIAL
 // -------------------------------------------
+#pragma GCC optimize 0
 class TAS_EXP_Lock
 {
-	private:
-		volatile char l;
+        private:
+                volatile char l;
 
-	public:
+        public:
 
-		TAS_EXP_Lock() { l = 0;};
-		~TAS_EXP_Lock() {};
+                TAS_EXP_Lock() { l = 0;};
+                ~TAS_EXP_Lock() {};
 
-		void lock();
-		bool try_lock();
-		void unlock();
+                inline void lock() {
+                        int time = 1;
+                        register unsigned char _res = 1;
+                        while (_res != 0)
+                        {
+                                 __asm__ __volatile__(
+                                        "xchg %0,%1"
+                                        : "+q" (_res)
+                                        : "m" (l)
+                                        : );
+                                if (_res == 1) {
+                                        time *= 2;
+                                        for (int i=0; i<time; i++) {
+                                                __asm__ __volatile__("nop");
+                                        }
+                                }
+                        }
+                };
+
+                inline bool try_lock() {
+                        unsigned char res = 1;
+                        __asm__ __volatile__(
+                                "xchgb %0,%1"
+                                : "+q" (res)
+                                : "m" (l)
+                                : );
+                        return !(res);
+                };
+
+                inline void unlock() {
+                        l = 0;
+                 __asm__ __volatile__(
+                                ""
+                                :
+                                :
+                                : "memory" );
+                };
 };
+#pragma GCC optimize 1
 
 
 // -------------------------------------------
@@ -35,9 +71,36 @@ class TAS_Lock
 		TAS_Lock() { l = 0;};
 		~TAS_Lock() {};
 
-		void lock();
-		bool try_lock();
-		void unlock();
+		inline void lock() {
+			register unsigned char _res = 1;
+			while (_res != 0)
+			{
+				__asm__ __volatile__(
+					"xchg %0,%1"
+					: "+q" (_res)
+					: "m" (l)
+					: "memory" );
+			}
+		};
+
+		inline bool try_lock() { 
+			unsigned char res = 1;
+			__asm__ __volatile__(
+				"xchgb %0,%1"
+				: "+q" (res)
+				: "m" (l)
+				: "memory" );
+			return !(res);
+		};
+
+		inline void unlock() { 
+			l = 0;
+		    __asm__ __volatile__(
+				"" 
+				:
+				:
+				: "memory" );
+		};
 };
 
 
@@ -54,9 +117,37 @@ class TATAS_Lock
 		TATAS_Lock() { l = 0;};
 		~TATAS_Lock() {};
 
-		void lock();
-		bool try_lock();
-		void unlock();
+		inline void lock() {
+			unsigned char res = 1;
+			while (l != 0);
+			while (res != 0)
+			{
+				__asm__ __volatile__(
+					"xchgb %0,%1"
+					: "+q" (res)
+					: "m" (l)
+					: );
+			}
+		};
+
+		inline bool try_lock() { 
+			unsigned char res = 1;
+			__asm__ __volatile__(
+				"xchgb %0,%1"
+				: "+q" (res)
+				: "m" (l)
+				: );
+			return !(res);
+		};
+
+		inline void unlock() { 
+			l = 0;
+		    __asm__ __volatile__(
+				"" 
+				:
+				:
+				: "memory" );
+		};
 };
 
 
@@ -72,13 +163,20 @@ class OMP_Lock
 		OMP_Lock() { omp_init_lock(&l); };
 		~OMP_Lock() { omp_destroy_lock(&l); };
 
-		void lock();
-		bool try_lock();
-		void unlock();
+		inline void lock() {
+			omp_set_lock(&l);
+		};
+
+		inline bool try_lock() {
+			return omp_test_lock(&l);
+		};
+
+		inline void unlock() {
+			omp_unset_lock(&l);
+		};
 };
 
-// typedef OMP_Lock lock_t;
-typedef TATAS_Lock lock_t;
+typedef TAS_EXP_Lock lock_t;
 
 
 #endif
