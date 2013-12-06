@@ -78,7 +78,7 @@ class OMP_Lock
 };
 
 // typedef OMP_Lock lock_t;
-typedef TAS_EXP_Lock lock_t;
+typedef TATAS_Lock lock_t;
 
 
 #endif

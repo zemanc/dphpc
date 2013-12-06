@@ -534,7 +534,7 @@ s.unlock();
 			//gelockt, vermutlich, weil grad wer anders an so einem Ort probiert
 			//also einfach weitergehen...
 			//int n = rand() % 5 + 1;
-			for (int i = 0; i <= nr; i++)
+			for (int i = 0; i <= 5; i++)
 				nl_pos = nl_pos->next;
 
 		} //END IF (nl_pos_locked)
