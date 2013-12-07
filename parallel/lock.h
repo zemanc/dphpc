@@ -8,50 +8,50 @@
 // -------------------------------------------
 class TAS_EXP_Lock
 {
-        private:
-                volatile char l;
+	private:
+		volatile char l;
 
-        public:
+	public:
 
-                TAS_EXP_Lock() { l = 0;};
-                ~TAS_EXP_Lock() {};
+		TAS_EXP_Lock() { l = 0;};
+		~TAS_EXP_Lock() {};
 
-                inline void lock() {
-                        int time = 1;
-                        unsigned char _res = 1;
-                        while (_res != 0)
-                        {
-                                 __asm__ __volatile__(
-                                        "xchgb %b0,%1"
-                                        : "+q" (_res)
-                                        : "m" (l)
-                                        : );
-                                if (_res == 1) {
-                                        time *= 2;
-                                        for (int i=0; i<time; i++) {
-                                                __asm__ __volatile__("nop");
-                                        }
-                                }
-                        }
-                };
+		inline void lock() {
+				int time = 1;
+				unsigned char res = 1;
+				while (res != 0)
+				{
+						 __asm__ __volatile__(
+								"xchgb %b0,%1"
+								: "+q" (res)
+								: "m" (l)
+								: );
+						if (res == 1) {
+								time *= 2;
+								for (int i=0; i<time; i++) {
+										__asm__ __volatile__("nop");
+								}
+						}
+				}
+		};
 
-                inline bool try_lock() {
-						char res;
-                        __asm__ __volatile__(
-                                "xchgb %b0,%1"
-                                : "=q" (res), "=m"(l)
-                                : "0" (1)
-                                : );
-                        return !(res);
-                };
+		inline bool try_lock() {
+				unsigned char res;
+				__asm__ __volatile__(
+						"xchgb %b0,%1"
+						: "=q" (res), "=m"(l)
+						: "0" (1)
+						: );
+				return !(res);
+		};
 
-                inline void unlock() {
-                 __asm__ __volatile__(
-                                "movb $0,%0"
-                                : "=m" (l)
-                                :
-                                : "memory" );
-                };
+		inline void unlock() {
+			 __asm__ __volatile__(
+							"movb $0,%0"
+							: "=m" (l)
+							:
+							: "memory" );
+		};
 };
 
 
@@ -69,34 +69,33 @@ class TAS_Lock
 		~TAS_Lock() {};
 
 		inline void lock() {
-			register unsigned char _res = 1;
-			while (_res != 0)
+			unsigned char res = 1;
+			while (res != 0)
 			{
 				__asm__ __volatile__(
-					"xchg %0,%1"
-					: "+q" (_res)
+					"xchgb %b0,%1"
+					: "+q" (res)
 					: "m" (l)
 					: "memory" );
 			}
 		};
 
-		inline bool try_lock() { 
-			unsigned char res = 1;
-			__asm__ __volatile__(
-				"xchgb %0,%1"
-				: "+q" (res)
-				: "m" (l)
-				: "memory" );
-			return !(res);
+		inline bool try_lock() {
+				unsigned char res;
+				__asm__ __volatile__(
+						"xchgb %b0,%1"
+						: "=q" (res), "=m"(l)
+						: "0" (1)
+						: );
+				return !(res);
 		};
 
-		inline void unlock() { 
-			l = 0;
-		    __asm__ __volatile__(
-				"" 
-				:
-				:
-				: "memory" );
+		inline void unlock() {
+			 __asm__ __volatile__(
+							"movb $0,%0"
+							: "=m" (l)
+							:
+							: "memory" );
 		};
 };
 
@@ -127,23 +126,22 @@ class TATAS_Lock
 			}
 		};
 
-		inline bool try_lock() { 
-			unsigned char res = 1;
-			__asm__ __volatile__(
-				"xchgb %0,%1"
-				: "+q" (res)
-				: "m" (l)
-				: );
-			return !(res);
+		inline bool try_lock() {
+				unsigned char res;
+				__asm__ __volatile__(
+						"xchgb %b0,%1"
+						: "=q" (res), "=m"(l)
+						: "0" (1)
+						: );
+				return !(res);
 		};
 
-		inline void unlock() { 
-			l = 0;
-		    __asm__ __volatile__(
-				"" 
-				:
-				:
-				: "memory" );
+		inline void unlock() {
+			 __asm__ __volatile__(
+							"movb $0,%0"
+							: "=m" (l)
+							:
+							: "memory" );
 		};
 };
 
