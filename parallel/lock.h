@@ -19,11 +19,11 @@ class TAS_EXP_Lock
 
                 inline void lock() {
                         int time = 1;
-                        register unsigned char _res = 1;
+                        unsigned char _res = 1;
                         while (_res != 0)
                         {
                                  __asm__ __volatile__(
-                                        "xchg %0,%1"
+                                        "xchgb %b0,%1"
                                         : "+q" (_res)
                                         : "m" (l)
                                         : );
@@ -37,20 +37,19 @@ class TAS_EXP_Lock
                 };
 
                 inline bool try_lock() {
-                        unsigned char res = 1;
+						char res;
                         __asm__ __volatile__(
-                                "xchgb %0,%1"
-                                : "+q" (res)
-                                : "m" (l)
+                                "xchgb %b0,%1"
+                                : "=q" (res), "=m"(l)
+                                : "0" (1)
                                 : );
                         return !(res);
                 };
 
                 inline void unlock() {
-                        l = 0;
                  __asm__ __volatile__(
-                                ""
-                                :
+                                "movb $0,%0"
+                                : "=m" (l)
                                 :
                                 : "memory" );
                 };
