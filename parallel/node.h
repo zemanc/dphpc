@@ -30,8 +30,8 @@ class Node
 		~Node();
 
 		//allgemeine funktionen
-		void setX(length_t x) { yPos = x; };
-		void setY(length_t y) { xPos = y; };
+		void setX(length_t x) { xPos = x; };
+		void setY(length_t y) { yPos = y; };
 		length_t getX() const { return xPos; };
 		length_t getY() const { return yPos; };
 		index_t getIndex() const { return index; };

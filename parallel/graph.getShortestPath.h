@@ -124,6 +124,11 @@ s.unlock();
 						break;
 					}
 					
+					// node schliessen, das machen wir bereits hier
+					// , damit niemand Ressourcen verschwendet
+					// auf diesen Node zu warten
+					nl_pos->status = Node::closed;
+
 					//für jede wegführende Kante
 					for (Node::edges_it_t edge_it = nl_pos->adjEdges.begin(); 
 						 edge_it != nl_pos->adjEdges.end(); edge_it++)
@@ -147,9 +152,6 @@ s.unlock();
 						//würde. In diesem Fall ändern wir das nicht mehr, der Node landet mit der falschen
 						//Schätzung in der Laterlist. Das können wir aber nicht ändern und macht fast nichts aus
 
-						//node schliessen, das machen wir bereits hier, damit niemand Ressourcen verschwendet
-						//auf diesen Node zu warten
-						nl_pos->status = Node::closed;
 						
 						if (edge_to->status != Node::closed)
 						{
