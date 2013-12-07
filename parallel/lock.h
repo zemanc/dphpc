@@ -6,7 +6,6 @@
 // -------------------------------------------
 // TEST AND SET EXPONENTIAL
 // -------------------------------------------
-#pragma GCC optimize 0
 class TAS_EXP_Lock
 {
         private:
@@ -54,7 +53,6 @@ class TAS_EXP_Lock
                                 : "memory" );
                 };
 };
-#pragma GCC optimize 1
 
 
 // -------------------------------------------
