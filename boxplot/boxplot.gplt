@@ -3,6 +3,7 @@ filename_sequential = 'time_s.out'
 
 parallel_color = "#FF8C00"
 sequential_color = "#00993A"
+lwidth = 5
 
 number_of_cores = 8 
 
@@ -36,8 +37,8 @@ do for [r=7:12] {
 	set xtics (1,2,3,4,5,6,7,8)
 
 	#erste Zeile ohne Titel!
-	plot for [i=2:number_of_cores] filename_parallel using (i):(filter2(3, i, 1, grid_size, 5)) lc rgb parallel_color lw 2 notitle, \
-		filename_parallel using (1):(filter2(3, 1, 1, grid_size, 5)) lc rgb parallel_color lw 2 title 'parallel', \
-		filename_sequential using (1):(filter(1, grid_size, 4)) lc rgb sequential_color lw 2 fill solid 0.2 border lc rgb sequential_color title 'sequential'
+	plot for [i=2:number_of_cores] filename_parallel using (i):(filter2(3, i, 1, grid_size, 5)) lc rgb parallel_color lw lwidth notitle, \
+		filename_parallel using (1):(filter2(3, 1, 1, grid_size, 5)) lc rgb parallel_color lw lwidth title 'parallel', \
+		filename_sequential using (1):(filter(1, grid_size, 4)) lc rgb sequential_color lw lwidth fill solid 0.2 border lc rgb sequential_color title 'sequential'
 
 }
