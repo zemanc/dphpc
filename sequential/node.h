@@ -26,11 +26,11 @@ class Node
 		~Node();
 
 		//allgemeine funktionen
-		void setX(length_t);
-		void setY(length_t);
-		length_t getX() const;
-		length_t getY() const;
-		index_t getIndex() const;
+		void setX(length_t x) { xPos = x; };
+		void setY(length_t y) { yPos = y; };
+		length_t getX() const { return xPos; };
+		length_t getY() const { return yPos; };
+		index_t getIndex() const { return index; };
 
 		void addEdge(Node*, length_t);
 // 		void addEdge(edge_t);

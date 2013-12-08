@@ -20,29 +20,6 @@ Node::~Node()
 {
 }
 
-void Node::setX(length_t x) 
-{
-	xPos = x;
-}
-void Node::setY(length_t y)
-{
-	yPos = y;
-}
-
-length_t Node::getX() const
-{
-	return xPos;
-}
-length_t Node::getY() const
-{
-	return yPos;
-}
-
-unsigned int Node::getIndex() const
-{
-	return index;
-}
-
 void Node::addEdge(Node* dest, length_t dist)
 {
 	adjEdges.push_back(std::make_pair(dest, dist));
