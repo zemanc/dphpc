@@ -1,5 +1,5 @@
-filename_parallel = 'time_p.out'
-filename_sequential = 'time_s.out'
+filename_parallel = 'time_p_circlegraph.out'
+filename_sequential = 'time_s_circlegraph.out'
 
 parallel_color = "#FF8C00"
 sequential_color = "#00993A"
