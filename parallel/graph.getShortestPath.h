@@ -58,7 +58,9 @@ lock_t s;
 	//hier müssen wir nochmals aufeinander warten, da sonst ein Node z.B.
 	//nowlist kriegen könnte, da nowlist->next bereits weg ist
 	#pragma omp barrier
-	int nr = omp_get_thread_num();
+#ifdef DEBUG
+int nr = omp_get_thread_num();
+#endif
 
 	//wir können hier nicht einfach testen, ob die Listen beide leer sind
 	//denn während wir dies testen, kann sich das schon wieder ändern!
@@ -535,8 +537,7 @@ s.unlock();
 			//wenn wir hier sind, wurde also nl_pos aus irgendeinem Grund nicht
 			//gelockt, vermutlich, weil grad wer anders an so einem Ort probiert
 			//also einfach weitergehen...
-			//int n = rand() % 5 + 1;
-			for (int i = 0; i <= 100; i++)
+			for (int i = 0; i < 150; i++)
 				nl_pos = nl_pos->next;
 
 		} //END IF (nl_pos_locked)
