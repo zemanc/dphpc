@@ -459,8 +459,11 @@ s.unlock();
 					// node this thread worked on in the laterlist.
 					// if it's no longer there or if it is locked we will
 					// lock the zero node because this one will always be
-					// in the laterlist (although this may lead to traffic
-					// jam at the zero node)
+					// in the laterlist
+					// although this looks like it could lead to a jam after
+					// the zero node this hasn't proved to be a problem.
+					// (however, we were only able to test the code with
+					// max. 8 cores running concurrently)
 					if (last_later_node->status == later_state)
 					{
 						if (last_later_node->lock.try_lock())
@@ -570,7 +573,10 @@ s.unlock();
 
 		// if the status is later we have to somehow get our straying
 		// thread back on track :)
-		// (we would like to be in the nowlist, so let's use the zero node)
+		// we would like to be in the nowlist, so let's use the zero node.
+		// it hasn't been proven to be a problem in terms of performance
+		// that all threads use this node as a re-entry node
+		// (at least not with max. 8 threads) 
 		if (nl_pos->status == later_state)
 			nl_pos = nowlist->next;
 		else if (nl_pos == nowlist)
@@ -609,7 +615,10 @@ s.unlock();
 			// doing this we have the threads already distributed over the
 			// list and if we are lucky we still have this node in the cache.
 			// if it is no longer there or if it is the zero node we will
-			// just use the one after the zero node
+			// just use the one after the zero node.
+			// also here this might look like it might lead to some jam after
+			// the zero node. however, it hasn't been proven to be a problem,
+			// at least not with max. 8 threads
 			nl_pos = last_later_node;
 			last_later_node = laterlist;
 			if (nl_pos->status == later_state || nl_pos == nowlist)
