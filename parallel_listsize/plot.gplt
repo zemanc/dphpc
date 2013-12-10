@@ -1,0 +1,33 @@
+filename = 'size.out'
+
+#parallel_color = "#FF8C00"
+#sequential_color = "#00993A"
+lwidth = 5
+
+number_of_cores = 2 
+
+set terminal eps size 6,4
+
+set output 'listsize.eps'
+
+do for [r=7:11] {
+	
+	grid_size = 2**r
+	n = grid_size*grid_size
+
+	#functions
+	filter(col, i, retcol) = (column(col) == i ? column(retcol) : 1/0)
+	filter2(col, i, col2, j, retcol) = (column(col) == i && column(col2) == j ? column(retcol) : 1/0)
+
+	set title 'listsize '.grid_size.' x '.grid_size
+	set xlabel 'threshold updates'
+	set ylabel 'elements in list'
+
+	#set xrange[1:2000]
+
+	#set logscale xy 2
+
+	plot filename using 2:(filter(1, n, 3))
+
+}
+
