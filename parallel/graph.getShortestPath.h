@@ -283,8 +283,8 @@ s.unlock();
 #endif
 										
 										// remove node from laterlist
-										edge_to->prev->next = edge_to->next;
-										edge_to->next->prev = edge_to->prev;
+										edge_to_prev->next = edge_to->next;
+										edge_to->next->prev = edge_to_prev;
 
 										// unlock our predecessor
 										edge_to_prev->lock.unlock();
@@ -347,8 +347,8 @@ s.unlock();
 	#endif
 
 					// now we can remove it
-					nl_pos->prev->next = nl_pos->next;
-					nl_pos->next->prev = nl_pos->prev;
+					nl_pos_prev->next = nl_pos->next;
+					nl_pos->next->prev = nl_pos_prev;
 
 					// release the lock of the predecessor
 					nl_pos_prev->lock.unlock();
@@ -443,11 +443,11 @@ s.unlock();
 					Node* nl_next = nl_pos->next;
 
 					// remove nl_pos from nowlist
-					nl_pos->prev->next = nl_pos->next;
-					nl_pos->next->prev = nl_pos->prev;
+					nl_pos_prev->next = nl_pos->next;
+					nl_pos->next->prev = nl_pos_prev;
 
 					// unlock the predecessor
-					nl_pos->prev->lock.unlock();
+					nl_pos_prev->lock.unlock();
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << nl_pos_prev->getIndex() << " (nl_pos_prev)" << " status: " << nl_pos_prev->status << std::endl;
