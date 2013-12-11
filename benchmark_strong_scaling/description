@@ -1,0 +1,12 @@
+g++ -O1 -Wall -pedantic -ansi -c -std=c++0x -fopenmp main.cpp
+g++ -O1 -Wall -pedantic -ansi -c -std=c++0x -fopenmp graph.cpp
+g++ -O1 -Wall -pedantic -ansi -c -std=c++0x -fopenmp node.cpp
+g++ -O1 -Wall -pedantic -ansi -c -std=c++0x -fopenmp testgraph.cpp
+g++ -O1 -Wall -fopenmp -o fringe main.o graph.o node.o testgraph.o
+g++ -O1 -Wall -pedantic -ansi -c -std=c++0x -fopenmp benchmark.cpp
+g++ -O1 -Wall -fopenmp -o benchmark benchmark.o graph.o node.o testgraph.o
+
+sequentiell noch nicht neu gemacht!
+
+
+
