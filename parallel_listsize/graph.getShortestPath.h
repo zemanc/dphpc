@@ -18,6 +18,7 @@ lock_t s;
 ///////////
 lock_t ns;
 lock_t ls;
+const int n = to+1;
 ///////////
 
 	Node* start = pNodes[from];
@@ -61,6 +62,7 @@ lock_t ls;
 int nowsize = 3;
 int latersize = 1;
 int tmpsize;
+int thrsupd = 0;
 /////////////////
 
 
@@ -655,7 +657,8 @@ ls.lock();
 tmpsize = nowsize;
 nowsize = latersize;
 latersize = tmpsize;
-std::cout << nowsize << std::endl;
+std::cout << n << "\t" << thrsupd << "\t" << nowsize << std::endl;
+thrsupd++;
 ls.unlock();
 ns.unlock();
 ////////////////////
