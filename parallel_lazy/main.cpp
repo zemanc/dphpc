@@ -26,7 +26,7 @@ int main()
 	double dist;
 
 	// benchmarking
-	for (unsigned int n = 3000; n <= 3000; n+=10)
+	for (unsigned int n = 1000; n <= 1000; n+=10)
 	{
 		Graph g;
 	 	HolyGraph hg = HolyGraph(n);
@@ -37,7 +37,7 @@ int main()
 // 		g.randomDisplaceAllNodes(0.3, distance);
 // 		tg.removeRandomNodes(g, 2000, 10000);
 		
-		for (int i = 1; i < 9; i++)
+		for (int i = 1; i <= 3; i++)
 		{
 			g.cleanup();
 

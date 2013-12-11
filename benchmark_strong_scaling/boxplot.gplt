@@ -1,13 +1,16 @@
 filename_parallel = 'holygraph_parallel_normal.out'
-filename_parallel_lazy = 'holygraph_parallel_lazy.out'
+filename_parallel_lazy = 'holygraph_parallel_lazy2.out'
 filename_sequential = 'holygraph_sequential_normal.out'
 
 parallel_color = "#FF8C00"
-parallel_color_lazy = "#BBEE44"
+parallel_color_lazy = "#008CFF"
 sequential_color = "#00993A"
 lwidth = 2
 
 number_of_cores = 8 
+
+zahl_1 = 1.01
+zahl_2 = 0.98
 
 set terminal eps size 6,4
 
@@ -39,10 +42,10 @@ do for [r=7:12] {
 	set xtics (1,2,3,4,5,6,7,8)
 
 	#erste Zeile ohne Titel!
-	plot for [i=2:number_of_cores] filename_parallel using (i):(filter2(3, i, 1, grid_size, 5)) lc rgb parallel_color lw lwidth notitle, \
-		filename_parallel using (1):(filter2(3, 1, 1, grid_size, 5)) lc rgb parallel_color lw lwidth title 'parallel normal', \
-		for [i=2:number_of_cores] filename_parallel_lazy using (i):(filter2(3, i, 1, grid_size, 5)) lc rgb parallel_color_lazy lw lwidth fill empty border lc rgb parallel_color_lazy notitle, \
-		filename_parallel_lazy using (1):(2*filter2(3, 1, 1, grid_size, 5)) lc rgb parallel_color_lazy lw lwidth fill empty border lc rgb parallel_color_lazy title 'parallel lazy', \
+	plot for [i=2:number_of_cores] filename_parallel using (i*zahl_1):(filter2(3, i, 1, grid_size, 5)) lc rgb parallel_color lw lwidth notitle, \
+		filename_parallel using (zahl_1):(filter2(3, 1, 1, grid_size, 5)) lc rgb parallel_color lw lwidth title 'parallel normal', \
+		for [i=2:number_of_cores] filename_parallel_lazy using (i*zahl_2):(filter2(3, i, 1, grid_size, 5)) lc rgb parallel_color_lazy lw lwidth fill empty border lc rgb parallel_color_lazy notitle, \
+		filename_parallel_lazy using (zahl_2):(filter2(3, 1, 1, grid_size, 5)) lc rgb parallel_color_lazy lw lwidth fill empty border lc rgb parallel_color_lazy title 'parallel lazy', \
 		filename_sequential using (1):(filter(1, grid_size, 4)) lc rgb sequential_color lw lwidth fill empty border lc rgb sequential_color title 'sequential'
 
 }
