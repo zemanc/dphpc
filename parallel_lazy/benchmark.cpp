@@ -20,10 +20,10 @@ int main()
 	std::list<Node*> *path = new std::list<Node*>;
 	double dist;
 
-	int runcount = 20;
+	int runcount = 50;
 
 	// benchmarking
-	for (unsigned int n = 2048; n <= 2048; n*=2)
+	for (unsigned int n = 128; n <= 4096; n*=2)
 	{
 		Graph g;
 	 	HolyGraph hg = HolyGraph(n);
