@@ -1,5 +1,20 @@
-im main vo üsm algorithmus werd etz ou de boost ufgrüeft metm gliiche graph. de boost esch im mom eifach of euklid igstellt, mer chöne jo det gruusig eifach 2 fonktione mache einisch mh denn copy paste euklidisch ;)
+isch mol ziit worde das do öppis anders drin schtoht!
 
-CircleGraph ond öbrhoupt testgraphe werde etz erstellt in testgraph.genericGraphs.h. CircleGraph esch afe dinn. Es darf en beliebige Konstruktor ha (usm main usgrüeft) ond mues eifach operator() ha, et öbrgebt mr en Edge vo x1/y2 noch x2/y2 ond get wohr zrog, wenn dä erstellt werd, sösch false. es sind ou grechteti graphe so möglech.
 
+       .     .                       *** **
+                !      .           ._*.                       .
+             - -*- -       .-'-.   !  !     .
+    .    .      *       .-' .-. '-.!  !             .              .
+               ***   .-' .-'   '-. '-.!    .
+       *       ***.-' .-'         '-. '-.                   .
+       *      ***$*.-'               '-. '-.     *
+  *   ***     * ***     ___________     !-..!-.  *     *         *    *
+  *   ***    **$** *   !__!__!__!__!    !    !  ***   ***    .   *   ***
+ *** ****    * *****   !__!__!__!__!    !      .***-.-*** *     *** * #_
+**********  * ****$ *  !__!__!__!__!    !-..--'*****   # '*-..---# ***
+**** *****  * $** ***      .            !      *****     ***       ***
+************ ***** ***-..-' -.._________!     *******    ***      *****
+***********   .-#.-'           '-.-''-..!     *******   ****...     #
+  # ''-.---''                           '-....---#..--'****** ''-.---''-
+                  Merry Christmas                         # 
 
