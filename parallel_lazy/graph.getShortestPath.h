@@ -98,274 +98,242 @@ s.unlock();
 #endif
 		if (nl_pos_locked)
 		{
+
 			// if we got here we've gotten the lock and we can work
 			// with this node
-			if (nl_pos->status == open_state)
+			if (nl_pos->status == open_state && nl_pos-> f <= threshold)
 			{
-				// this is nice - we are in the nowlist 
-				// it can be > or <= threshold
-				if (nl_pos->f <= threshold)
-				{
-
+				// this is nice - we are in the nowlist  and < threshold
 #ifdef DEBUG2
 s.lock();
 std::cout << "thread " << nr << " hat einen Node in open_state <= threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
 s.unlock();
 #endif
-					// we are in the nowlist and < threshold
-					// there's a lot to do...
-						
-					// check if we are there yet
-					if (nl_pos == end)
-					{
-						// unlock the node, tell the other threads
-						// and exit the while
-						nl_pos->lock.unlock();
+				// we are in the nowlist and < threshold
+				// there's a lot to do...
+					
+				// check if we are there yet
+				if (nl_pos == end)
+				{
+					// unlock the node, tell the other threads
+					// and exit the while
+					nl_pos->lock.unlock();
 
 #ifdef DEBUG
 s.lock();
 if (nl_pos_locked) std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
 s.unlock();
 #endif
-						found = true;
-						break;
-					}
+					found = true;
+					break;
+				}
+				
+				// we set the node to closed already here so that
+				// no other thread will waste ressources with
+				// waiting on this node 
+				nl_pos->status = Node::closed;
+
+				// for each outgoing edge
+				for (Node::edges_it_t edge_it = nl_pos->adjEdges.begin(); 
+					 edge_it != nl_pos->adjEdges.end(); edge_it++)
+				{
+					// first is a pointer to the node to which the
+					// edge leads 
+					Node* edge_to = (*edge_it).first;
+
+					// this node (edge_to) can be
+					//	- inactive: we have to add it to the nowlist
+					//	- open: we maybe have to update distances
+					//	- later: we maybe have to update distances
+					//		and get it back to the nowlist
+					//	- closed: we won't do anything here
+					//		(we never look at closed nodes, they
+					//		are "good enough")
+
+					// IMPORTANT! It can also be that a node is just being
+					// moved to the laterlist. But then it is marked as
+					// closed in order to avoid deadlocks.
+					// So it can happen that a node is being moved to
+					// the laterlist but there would actually be a better
+					// path to this node but we don't update it and the
+					// node will still have the old/worse path in the
+					// laterlist. However, this cannot be avoided and has
+					// close to no influence on the result of the algorithm
 					
-					// we set the node to closed already here so that
-					// no other thread will waste ressources with
-					// waiting on this node 
-					nl_pos->status = Node::closed;
-
-					// for each outgoing edge
-					for (Node::edges_it_t edge_it = nl_pos->adjEdges.begin(); 
-						 edge_it != nl_pos->adjEdges.end(); edge_it++)
+					if (edge_to->status != Node::closed)
 					{
-						// first is a pointer to the node to which the
-						// edge leads 
-						Node* edge_to = (*edge_it).first;
-
-						// this node (edge_to) can be
-						//	- inactive: we have to add it to the nowlist
-						//	- open: we maybe have to update distances
-						//	- later: we maybe have to update distances
-						//		and get it back to the nowlist
-						//	- closed: we won't do anything here
-						//		(we never look at closed nodes, they
-						//		are "good enough")
-
-						// IMPORTANT! It can also be that a node is just being
-						// moved to the laterlist. But then it is marked as
-						// closed in order to avoid deadlocks.
-						// So it can happen that a node is being moved to
-						// the laterlist but there would actually be a better
-						// path to this node but we don't update it and the
-						// node will still have the old/worse path in the
-						// laterlist. However, this cannot be avoided and has
-						// close to no influence on the result of the algorithm
+						// it's not closed => we will work with this node
+						// => we need a lock to at least check f and
+						// maybe update it
 						
-						if (edge_to->status != Node::closed)
-						{
-							// it's not closed => we will work with this node
-							// => we need a lock to at least check f and
-							// maybe update it
-							
-							// Notice: In the meantime edge_to could have
-							// been set to closed but this is not a big issue.
-							// In this case we just do nothing and unlock again.
+						// Notice: In the meantime edge_to could have
+						// been set to closed but this is not a big issue.
+						// In this case we just do nothing and unlock again.
 
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " tries to get lock on " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
 s.unlock();
 #endif
-							// spin until we were able to lock it or 
-							// it has been closed by another thread
-							bool edge_to_locked = false;
-							while ((edge_to->status != Node::closed)
-								&& (!(edge_to_locked = edge_to->lock.try_lock())));
+						// spin until we were able to lock it or 
+						// it has been closed by another thread
+						bool edge_to_locked = false;
+						while ((edge_to->status != Node::closed)
+							&& (!(edge_to_locked = edge_to->lock.try_lock())));
 
 #ifdef DEBUG
 s.lock();
 if (edge_to_locked) std::cout << "thread " << nr << " locked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
 s.unlock();
 #endif
-							// now we can check the different cases
-							if (edge_to_locked)
+						// now we can check the different cases
+						if (edge_to_locked)
+						{
+							if (edge_to->status == open_state)
 							{
-								if (edge_to->status == open_state)
+								// the node is open and we got the lock
+								
+								// if the new distance is better
+								double newDist = nl_pos->g + (*edge_it).second;
+								if (edge_to->g > newDist)
 								{
-									// the node is open and we got the lock
+									// adjust distance and
+									// recalculate heuristic values
+									edge_to->g =  newDist;
+									edge_to->f = newDist + edge_to->h;
 									
-									// if the new distance is better
-									double newDist = nl_pos->g + (*edge_it).second;
-									if (edge_to->g > newDist)
-									{
-										// adjust distance and
-										// recalculate heuristic values
-										edge_to->g =  newDist;
-										edge_to->f = newDist + edge_to->h;
-										
-										// change parent for backtracking
-										edge_to->parent = nl_pos;
-									}
-									// there's no status change
+									// change parent for backtracking
+									edge_to->parent = nl_pos;
 								}
-								else if (edge_to->status == Node::inactive)
+								// there's no status change
+							}
+							else if (edge_to->status == Node::inactive)
+							{
+								// it's a new node we can add to the nowlist
+
+								// calculate distance and heuristics
+								edge_to->g = nl_pos->g + (*edge_it).second;
+								edge_to->h = dist(edge_to, end);
+								edge_to->f = edge_to->g + edge_to->h;
+
+								// set parent for backtracking
+								edge_to->parent = nl_pos;
+
+								// insert it right after our node in the
+								// nowlist => we need locks on nl_pos and
+								// edge_to
+								// we already have both locks, so let's go :)
+								edge_to->next = nl_pos->next;
+								nl_pos->next->prev = edge_to;
+								nl_pos->next = edge_to;
+								edge_to->prev = nl_pos;
+
+								// edge_to is now in the nowlist...
+								edge_to->status = open_state;
+
+							} else if (edge_to->status == later_state)
+							{
+								// we got the lock and the node is in
+								// the laterlist, let's see if we have
+								// to do anything...
+								// notice: this is the only thread working
+								// 	with edge_to
+
+								// if the new distance is better
+								double newDist = nl_pos->g + (*edge_it).second;
+								if (edge_to->g > newDist)
 								{
-									// it's a new node we can add to the nowlist
+									// update distance and heuristics
+									edge_to->g =  newDist;
+									edge_to->f = newDist + edge_to->h;
 
-									// calculate distance and heuristics
-									edge_to->g = nl_pos->g + (*edge_it).second;
-									edge_to->h = dist(edge_to, end);
-									edge_to->f = edge_to->g + edge_to->h;
-
-									// set parent for backtracking
+									// change parent for backtracking
 									edge_to->parent = nl_pos;
 
-									// insert it right after our node in the
-									// nowlist => we need locks on nl_pos and
-									// edge_to
-									// we already have both locks, so let's go :)
-									edge_to->next = nl_pos->next;
-									nl_pos->next->prev = edge_to;
-									nl_pos->next = edge_to;
-									edge_to->prev = nl_pos;
-
-									// edge_to is now in the nowlist...
-									edge_to->status = open_state;
-
-								} else if (edge_to->status == later_state)
-								{
-									// we got the lock and the node is in
-									// the laterlist, let's see if we have
-									// to do anything...
-									// notice: this is the only thread working
-									// 	with edge_to
-
-									// if the new distance is better
-									double newDist = nl_pos->g + (*edge_it).second;
-									if (edge_to->g > newDist)
+									// since we adjusted the disctance
+									// we will move it back to the nowlist.
+									// we will insert it just after our
+									// nl_pos. in order to remove it from
+									// the later list we first have to lock
+									// our predecessor.
+									// when we get the lock we first have to
+									// check if it is still our predecessor,
+									// because it could also have been
+									// deleted/moved in the meantime
+									bool edge_to_prev_locked = false;
+									Node* edge_to_prev;
+									do
 									{
-										// update distance and heuristics
-										edge_to->g =  newDist;
-										edge_to->f = newDist + edge_to->h;
+										// it's the wrong one :(
+										if (edge_to_prev_locked)
+											edge_to_prev->lock.unlock();
 
-										// change parent for backtracking
-										edge_to->parent = nl_pos;
-
-										// since we adjusted the disctance
-										// we will move it back to the nowlist.
-										// we will insert it just after our
-										// nl_pos. in order to remove it from
-										// the later list we first have to lock
-										// our predecessor.
-										// when we get the lock we first have to
-										// check if it is still our predecessor,
-										// because it could also have been
-										// deleted/moved in the meantime
-										bool edge_to_prev_locked = false;
-										Node* edge_to_prev;
-										do
-										{
-											// it's the wrong one :(
-											if (edge_to_prev_locked)
-												edge_to_prev->lock.unlock();
-
-											edge_to_prev = edge_to->prev;
-											edge_to_prev_locked = edge_to_prev->lock.try_lock();
-										} while ((!edge_to_prev_locked)
-											  || (edge_to->prev != edge_to_prev));
+										edge_to_prev = edge_to->prev;
+										edge_to_prev_locked = edge_to_prev->lock.try_lock();
+									} while ((!edge_to_prev_locked)
+										  || (edge_to->prev != edge_to_prev));
 
 #ifdef DEBUG
 s.lock();
 if (edge_to_prev_locked) std::cout << "thread " << nr << " locked " << edge_to_prev->getIndex() << " (edge_to_prev)" << " status: " << edge_to_prev->status << std::endl;
 s.unlock();
 #endif
-										
-										// remove node from laterlist
-										edge_to_prev->next = edge_to->next;
-										edge_to->next->prev = edge_to_prev;
+									
+									// remove node from laterlist
+									edge_to_prev->next = edge_to->next;
+									edge_to->next->prev = edge_to_prev;
 
-										// unlock our predecessor
-										edge_to_prev->lock.unlock();
+									// unlock our predecessor
+									edge_to_prev->lock.unlock();
 #ifdef DEBUG
 s.lock();
 if (edge_to_prev_locked) std::cout << "thread " << nr << " unlocked " << edge_to_prev->getIndex() << " (edge_to_prev)" << " status: " << edge_to_prev->status << std::endl;
 s.unlock();
 #endif
 
-										// insert node into nowlist
-										edge_to->next = nl_pos->next;
-										nl_pos->next->prev = edge_to;
-										nl_pos->next = edge_to;
-										edge_to->prev = nl_pos;
+									// insert node into nowlist
+									edge_to->next = nl_pos->next;
+									nl_pos->next->prev = edge_to;
+									nl_pos->next = edge_to;
+									edge_to->prev = nl_pos;
 
-										// change state to open
-										edge_to->status = open_state;
-										
-									} // END IF (edge_to->g > newDist)
+									// change state to open
+									edge_to->status = open_state;
 									
-								} // END IF (edge_to->status == ??)
+								} // END IF (edge_to->g > newDist)
 								
-								// now we can release our lock
-								edge_to->lock.unlock();
+							} // END IF (edge_to->status == ??)
+							
+							// now we can release our lock
+							edge_to->lock.unlock();
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << edge_to->getIndex() << " (edge_to)" << " status: " << edge_to->status << std::endl;
 s.unlock();
 #endif
-							} // END IF (edge_to_locked)
-							
-						} // END IF ( (edge_to->status == Node::inactive)
-							// || (edge_to->status == later_state))
+						} // END IF (edge_to_locked)
 						
-					} // END FOR
+					} // END IF ( (edge_to->status == Node::inactive)
+						// || (edge_to->status == later_state))
+					
+				} // END FOR
 
-					nl_pos->deleted = true;
+				nl_pos->deleted = true;
 
-					// release the lock of nl_pos
- 					nl_pos->lock.unlock();
-	#ifdef DEBUG
-	s.lock();
-	std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
-	s.unlock();
-	#endif
+				// do not release the lock of nl_pos
+				// because the node is closed now, we will do this later
+#ifdef DEBUG
+s.lock();
+std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
+s.unlock();
+#endif
 
-					// let's go to the next node in the nowlist
-					nl_pos = nl_pos->next;
+			}
 
-					// now here's a small chance that both lists are empty
-					// nowlist can only be empty here because the potentially
-					// last node just got removed
-					// we first test without locks and then try to lock.
-					// if we get both locks we check if it's really empty.
-					// it looks a bit complicated but we just try to get
-					// both locks on nowlist and laterlist, so that nobody
-					// can insert anything in the meantime.
-					// if both lists are empty we can be sure that the end
-					// node has not been found
-					if ((nowlist->next == nowlist) && (laterlist->next == laterlist))
-					{
-						if (nowlist->lock.try_lock())
-						{
-							if (laterlist->lock.try_lock())
-							{
-								// if both lists are empty we are done:
-								// we won't stay in the while loop
-								// because we cannot reach the end node :(
-								if ((nowlist->next == nowlist)
-									  &&(laterlist->next == laterlist))
-									not_found = true;
-
-								laterlist->lock.unlock();
-							}
-							nowlist->lock.unlock();
-						}
-					}
-
-				} else {
-					// in this case we are in the nowlist and > threshold
-					// this means we have to move the node into the laterlist
+			if (nl_pos->status == open_state && nl_pos->f > threshold)
+			{
+				// in this case we are in the nowlist and > threshold
+				// this means we have to move the node into the laterlist
 #ifdef DEBUG2
 s.lock();
 std::cout << "thread " << nr << " hat einen Node in open_state > threshold (Node" << nl_pos->getIndex() << ")" << std::endl;
@@ -377,69 +345,65 @@ s.lock();
 std::cout << "thread " << nr << " tries to get lock on " << nl_pos->prev->getIndex() << " (nl_pos_prev)" << " status: " << nl_pos->prev->status << std::endl;
 s.unlock();
 #endif
-					// first lock the node's predecessor and make sure it's
-					// still its predecessor after we got th lock
-					// we will temporary set the node to closed so that no
-					// other thread will try to access this node through an
-					// edge because this could lead to a deadlock.
-					// regarding this see also the comment further above 
-					// marked with "IMPORTANT!"
-					nl_pos->status = Node::closed;
+				// first lock the node's predecessor and make sure it's
+				// still its predecessor after we got th lock
+				// we will temporary set the node to closed so that no
+				// other thread will try to access this node through an
+				// edge because this could lead to a deadlock.
+				// regarding this see also the comment further above 
+				// marked with "IMPORTANT!"
+				nl_pos->status = Node::closed;
 
-					bool nl_pos_prev_locked = false;
-					Node* nl_pos_prev;
-					do
-					{
-						// it's the wrong one :(
-						if (nl_pos_prev_locked)
-							nl_pos_prev->lock.unlock();
+				bool nl_pos_prev_locked = false;
+				Node* nl_pos_prev;
+				do
+				{
+					// it's the wrong one :(
+					if (nl_pos_prev_locked)
+						nl_pos_prev->lock.unlock();
 
-						nl_pos_prev = nl_pos->prev;
+					nl_pos_prev = nl_pos->prev;
 
-						nl_pos_prev_locked = nl_pos_prev->lock.try_lock();
+					nl_pos_prev_locked = nl_pos_prev->lock.try_lock();
 
-					} while ((!nl_pos_prev_locked) 
-						 || (nl_pos->prev != nl_pos_prev));
+				} while ((!nl_pos_prev_locked) 
+					 || (nl_pos->prev != nl_pos_prev));
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " locked " << nl_pos_prev->getIndex() << " (nl_pos_prev)" << " status: " << nl_pos_prev->status << std::endl;
 s.unlock();
 #endif
-					Node* nl_next = nl_pos->next;
+				Node* nl_next = nl_pos->next;
 
-					// remove nl_pos from nowlist
-					nl_pos_prev->next = nl_pos->next;
-					nl_pos->next->prev = nl_pos_prev;
+				// remove nl_pos from nowlist
+				nl_pos_prev->next = nl_pos->next;
+				nl_pos->next->prev = nl_pos_prev;
 
-					// unlock the predecessor
-					nl_pos_prev->lock.unlock();
+				// unlock the predecessor
+				nl_pos_prev->lock.unlock();
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << nl_pos_prev->getIndex() << " (nl_pos_prev)" << " status: " << nl_pos_prev->status << std::endl;
 s.unlock();
 #endif
 
-					// now we have to get a lock on a node in the laterlist
-					// we will first try the last_later_node which is the last
-					// node this thread worked on in the laterlist.
-					// if it's no longer there or if it is locked we will
-					// lock the zero node because this one will always be
-					// in the laterlist
-					// although this looks like it could lead to a jam after
-					// the zero node this hasn't proved to be a problem.
-					// (however, we were only able to test the code with
-					// max. 8 cores running concurrently)
-					if (last_later_node->status == later_state)
+				// now we have to get a lock on a node in the laterlist
+				// we will first try the last_later_node which is the last
+				// node this thread worked on in the laterlist.
+				// if it's no longer there or if it is locked we will
+				// lock the zero node because this one will always be
+				// in the laterlist
+				// although this looks like it could lead to a jam after
+				// the zero node this hasn't proved to be a problem.
+				// (however, we were only able to test the code with
+				// max. 8 cores running concurrently)
+				if (last_later_node->status == later_state)
+				{
+					if (last_later_node->lock.try_lock())
 					{
-						if (last_later_node->lock.try_lock())
+						if (last_later_node->status != later_state)
 						{
-							if (last_later_node->status != later_state)
-							{
-								last_later_node->lock.unlock();
-								last_later_node = laterlist;
-								last_later_node->lock.lock();
-							}
-						} else {
+							last_later_node->lock.unlock();
 							last_later_node = laterlist;
 							last_later_node->lock.lock();
 						}
@@ -447,47 +411,51 @@ s.unlock();
 						last_later_node = laterlist;
 						last_later_node->lock.lock();
 					}
+				} else {
+					last_later_node = laterlist;
+					last_later_node->lock.lock();
+				}
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " locked " << last_later_node->getIndex() << " status: " << laterlist->status << std::endl;
 s.unlock();
 #endif
 
-					// insert the node into the laterlist
-					last_later_node->next->prev = nl_pos;
-					nl_pos->next = last_later_node->next;
-					last_later_node->next = nl_pos;
-					nl_pos->prev = last_later_node;
-					
-					// change the status to later
-					nl_pos->status = later_state;
+				// insert the node into the laterlist
+				last_later_node->next->prev = nl_pos;
+				nl_pos->next = last_later_node->next;
+				last_later_node->next = nl_pos;
+				nl_pos->prev = last_later_node;
+				
+				// change the status to later
+				nl_pos->status = later_state;
 
-					last_later_node->lock.unlock();
+				last_later_node->lock.unlock();
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << last_later_node->getIndex() << " status: " << laterlist->status << std::endl;
 s.unlock();
 #endif
 
-					// update last_later_node
-					// (the node we worked on last in the laterlist)
-					last_later_node = nl_pos;
+				// update last_later_node
+				// (the node we worked on last in the laterlist)
+				last_later_node = nl_pos;
 
-					// and unlock nl_pos since it has been moved now
-					nl_pos->lock.unlock();
+				// and unlock nl_pos since it has been moved now
+				nl_pos->lock.unlock();
 #ifdef DEBUG
 s.lock();
 std::cout << "thread " << nr << " unlocked " << nl_pos->getIndex() << " (nl_pos)" << " status: " << nl_pos->status << std::endl;
 s.unlock();
 #endif
 
-					// let's go to the next node, although we cannot be sure
-					// that this is a "good" node
-					nl_pos = nl_next;
-				
-				}
-					
-			} else if (nl_pos->status == Node::closed) {
+				// let's go to the next node, although we cannot be sure
+				// that this is a "good" node
+				nl_pos = nl_next;
+
+			} 
+
+			else if (nl_pos->status == Node::closed) {
 #ifdef DEBUG2
 s.lock();
 std::cout << "thread " << nr << " hat einen Node in closed state (Node " << nl_pos->getIndex() << ")" << std::endl;
@@ -504,7 +472,9 @@ s.unlock();
 					// it's already locked, so we have to remove its predecessor.
 					// also here we have to check if the locked node is
 					// still the predecessor of nl_pos
-					
+
+					// nl_pos is locked
+
 					Node* nl_pos_prev = nl_pos->prev;
 					bool nl_pos_prev_locked = nl_pos_prev->lock.try_lock();
 	#ifdef DEBUG
@@ -523,6 +493,36 @@ s.unlock();
 							nl_pos->next->prev = nl_pos_prev;
 
 							nl_pos->deleted = false;
+
+							// now here's a small chance that both lists are empty
+							// nowlist can only be empty here because the potentially
+							// last node just got removed
+							// we first test without locks and then try to lock.
+							// if we get both locks we check if it's really empty.
+							// it looks a bit complicated but we just try to get
+							// both locks on nowlist and laterlist, so that nobody
+							// can insert anything in the meantime.
+							// if both lists are empty we can be sure that the end
+							// node has not been found
+							if ((nowlist->next == nowlist) && (laterlist->next == laterlist))
+							{
+								if (nowlist->lock.try_lock())
+								{
+									if (laterlist->lock.try_lock())
+									{
+										// if both lists are empty we are done:
+										// we won't stay in the while loop
+										// because we cannot reach the end node :(
+										if ((nowlist->next == nowlist)
+											  &&(laterlist->next == laterlist))
+											not_found = true;
+
+										laterlist->lock.unlock();
+									}
+									nowlist->lock.unlock();
+								}
+							}
+
 						} 
 
 						// release the lock of the predecessor
@@ -544,7 +544,7 @@ s.unlock();
 #endif
 				nl_pos = nl_pos->next;
 
-			} else {
+			} else if (nl_pos->status == later_state) {
 #ifdef DEBUG2
 s.lock();
 std::cout << nr << " hat einen Node in later state (Node " << nl_pos->getIndex() << ")" << std::endl;
