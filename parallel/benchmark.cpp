@@ -24,11 +24,11 @@ int main()
 	std::list<Node*> *path = new std::list<Node*>;
 	double dist, dist2;
 
-	int runcount = 5;
-	int number_of_processor = 4;
+	int runcount = 15;
+	int number_of_processor = 8;
 
 	// benchmarking
-	for (unsigned int n = 128; n <= 2048; n*=2)
+	for (unsigned int n = 128; n <= 4096; n*=2)
 	{
 		Graph g;
 	 	HolyGraph hg = HolyGraph(n);
@@ -41,7 +41,7 @@ int main()
 
 		double exact_dist = boost_shortestPath_ek(g, 0, n*n-1);
 		
-		for (double t = 0.25; t <= 4; t*=2)
+		for (double t = 0.125; t <= 8; t*=2)
 		{
 			g.threshold = t;
 
@@ -96,7 +96,7 @@ int main()
 		}
 	}
 	// benchmarking
-	for (unsigned int n = 128; n <= 2048; n*=2)
+	for (unsigned int n = 128; n <= 4096; n*=2)
 	{
 		Graph g;
 // 	 	HolyGraph hg = HolyGraph(n);
@@ -109,7 +109,7 @@ int main()
 
 		double exact_dist = boost_shortestPath_ek(g, 0, n*n-1);
 		
-		for (double t = 0.25; t <= 4; t*=2)
+		for (double t = 0.125; t <= 8; t*=2)
 		{
 			for (int i = 1; i <= number_of_processor; i++)
 			{
@@ -163,7 +163,7 @@ int main()
 		}
 	}
 
-	for (unsigned int r = 128; r <= 1024; r*=2)
+	for (unsigned int r = 128; r <= 2048; r*=2)
 	{
 		for (int i = 1; i <= number_of_processor; i++)
 		{
@@ -180,7 +180,7 @@ int main()
 		
 			boost_shortestPath_ek(g, 0, n*n-1);
 
-			for (double t = 0.25; t <= 4; t*=2)
+			for (double t = 0.125; t <= 8; t*=2)
 			{
 				g.threshold = t;
 				for (int j = 0; j < runcount; j++)
@@ -215,7 +215,7 @@ int main()
 		}
 	}
 
-	for (unsigned int r = 128; r <= 1024; r*=2)
+	for (unsigned int r = 128; r <= 2048; r*=2)
 	{
 		for (int i = 1; i <= number_of_processor; i++)
 		{
@@ -232,7 +232,7 @@ int main()
 		
 			boost_shortestPath_ek(g, 0, n*n-1);
 
-			for (double t = 0.25; t <= 4; t*=2)
+			for (double t = 0.125; t <= 8; t*=2)
 			{
 				g.threshold = t;
 				for (int j = 0; j < runcount; j++)
