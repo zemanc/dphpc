@@ -16,7 +16,7 @@ profile: fringe benchmark
 graph_headers = graph.h graph.addEdges.h graph.getShortestPath.h graph.distances.h graph.randomDisplaceAllNodes.h graph.getShortestPathLazy.h
 testgraph_headers = testgraph.h testgraph.getGenericGraphFast.h testgraph.genericGraphs.h
 
-benchmark: benchmark.o graph.o node.o testgraph.o testgraph.o 
+benchmark: benchmark.o graph.o node.o testgraph.o testgraph.o astar-test.o
 	$(CC) $(LFLAGS) -o $@ $^
 benchmark.o: benchmark.cpp $(graph_headers) $(testgraph_headers) node.h 
 	$(CC) $(CFLAGS) $<
@@ -28,8 +28,8 @@ testgraph.o: testgraph.cpp $(testgraph_headers) $(graph_headers) node.h
 	$(CC) $(CFLAGS) $<
 graph.o: graph.cpp $(graph_headers) node.h 
 	$(CC) $(CFLAGS) $<
-#astar-test.o: ../benchmark_algos/boost/astar-test.cpp ../benchmark_algos/boost/astar.h $(testgraph_headers) $(graph_headers) node.h
-#	$(CC) $(CFLAGS) $<
+astar-test.o: ../benchmark_algos/boost/astar-test.cpp ../benchmark_algos/boost/astar.h $(testgraph_headers) $(graph_headers) node.h
+	$(CC) $(CFLAGS) $<
 node.o: node.cpp node.h 
 	$(CC) $(CFLAGS) $<
 #lock.o: lock.cpp lock.h

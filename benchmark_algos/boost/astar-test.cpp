@@ -227,7 +227,9 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 	for (Graph::pNode_v_it nit = my_g.pNodes.begin(); 
 			nit != my_g.pNodes.end(); nit++)
 	{
-		locations[(*nit)->getIndex()] = {(*nit)->getX(), (*nit)->getY()};
+		locations[(*nit)->getIndex()].x = (*nit)->getX();
+		locations[(*nit)->getIndex()].y = (*nit)->getY();
+// 		= {(*nit)->getX(), (*nit)->getY()};
 
 		for (Node::edges_it_t eit = (*nit)->adjEdges.begin(); 
 				eit != (*nit)->adjEdges.end(); eit++)
@@ -253,10 +255,8 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
   
 	// timing
 	std::chrono::high_resolution_clock::time_point t_start, t_end;  
-  
 	vector<mygraph_t::vertex_descriptor> p(num_vertices(g));
 	vector<cost_t> d(num_vertices(g));
-
 	try {
 		// start timing
 		t_start = std::chrono::high_resolution_clock::now();
