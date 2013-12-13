@@ -23,6 +23,7 @@ class Graph
 	public:
 
 	  //typedefs
+		double threshold;
 		typedef std::set<index_t> pNtr_v; // for removeNodesEdges
 
 		typedef std::vector<Node*> pNode_v_t;
@@ -63,6 +64,8 @@ class Graph
 
 		//graph.getShortestPath.h
 		template<class F>
+   			length_t getShortestPathLazy(index_t, index_t, std::list<Node*>*, const F&);
+		template<class F>
    			length_t getShortestPath(index_t, index_t, std::list<Node*>*, const F&);
 		template<class F>
 		length_t reconstructPath(std::list<Node*>* vals, Node*, Node*, const F&);
@@ -75,6 +78,7 @@ class Graph
 
 #include "graph.addEdges.h"
 #include "graph.distances.h"
+#include "graph.getShortestPathLazy.h"
 #include "graph.getShortestPath.h"
 #include "graph.randomDisplaceAllNodes.h"
 

@@ -12,7 +12,7 @@
 int main()
 {
 	// timing stuff
-	std::ofstream timeout("time.out", std::ios::out);
+	std::ofstream timeout("circlegraph_sequential_strong.out", std::ios::out);
 	std::ofstream tbout("time_boost.out", std::ios::out);
 	timeout << "n" << "\t" << "n*n" << "\t" << "i" << "\t"
 			<< "time [s]" << "\t" << "distance" << std::endl;
@@ -26,18 +26,18 @@ int main()
 	double dist;
 
 	// benchmarking
-	for (unsigned int n = 20; n <= 100; n+=10)
+	for (unsigned int n = 128; n <= 4096; n*=2)
 	{
 		Graph g;
-	 	HolyGraph hg = HolyGraph(n);
-// 		CircleGraph cg = CircleGraph(n / 2, n / 4); 
+// 	 	HolyGraph hg = HolyGraph(n);
+		CircleGraph cg = CircleGraph(n / 2, n / 4); 
 // 		SmileyGraph sg = SmileyGraph(n/2);
 
-		tg.getGenericGraphFast(n, distance, hg, g);
+		tg.getGenericGraphFast(n, distance, cg, g);
 		g.randomDisplaceAllNodes(0.3, distance);
 // 		tg.removeRandomNodes(g, 2000, 10000);
 		
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 50; i++)
 		{
 			g.cleanup();
 
@@ -54,7 +54,7 @@ int main()
 			timeout << n << "\t" << n*n << "\t" << i << "\t"
 					<< time_span.count() << "\t" << dist << std::endl;
 
-			boost_shortestPath_ek(g, 0, n*n-1);
+// 			boost_shortestPath_ek(g, 0, n*n-1);
 // 			g.printGml();
 
 		}

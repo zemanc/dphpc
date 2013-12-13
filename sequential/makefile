@@ -6,7 +6,7 @@ LFLAGS = -Wall
 # make
 all: fringe
 # make optimized
-optimized: CC += -O3
+optimized: CC += -O1
 optimized: fringe
 # make profile
 profile: CC += -pg

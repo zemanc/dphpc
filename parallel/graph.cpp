@@ -49,6 +49,7 @@ void Graph::cleanup()
 {
 	for (pNode_v_it it = pNodes.begin(); it != pNodes.end(); it++)
 	{
+		(*it)->deleted = false;
 		(*it)->status = Node::inactive;
 		(*it)->next = NULL;
 		(*it)->prev = NULL;
@@ -127,7 +128,7 @@ void Graph::printTgf() const
 
 length_t Graph::newThreshold(length_t oldThreshold) const
 {
-	return oldThreshold + 1;
+	return oldThreshold + threshold;
 }
 
 void Graph::addEdge(Node* from, Node* to, length_t dist)

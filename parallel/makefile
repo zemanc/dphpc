@@ -4,18 +4,22 @@ CFLAGS = -Wall -pedantic -ansi -c -std=c++0x -fopenmp
 LFLAGS = -Wall -fopenmp
 
 # make
-all: fringe
+all: fringe benchmark
 # make optimized
 optimized: CC += -O1
 
-optimized: fringe
+optimized: fringe benchmark
 # make profile
 profile: CC += -O1 -pg
-profile: fringe
+profile: fringe benchmark
 
-graph_headers = graph.h graph.addEdges.h graph.getShortestPath.h graph.distances.h graph.randomDisplaceAllNodes.h 
+graph_headers = graph.h graph.addEdges.h graph.getShortestPath.h graph.distances.h graph.randomDisplaceAllNodes.h graph.getShortestPathLazy.h
 testgraph_headers = testgraph.h testgraph.getGenericGraphFast.h testgraph.genericGraphs.h
 
+benchmark: benchmark.o graph.o node.o testgraph.o testgraph.o 
+	$(CC) $(LFLAGS) -o $@ $^
+benchmark.o: benchmark.cpp $(graph_headers) $(testgraph_headers) node.h 
+	$(CC) $(CFLAGS) $<
 fringe: main.o graph.o node.o testgraph.o testgraph.o 
 	$(CC) $(LFLAGS) -o $@ $^
 main.o: main.cpp $(graph_headers) $(testgraph_headers) node.h 

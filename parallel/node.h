@@ -20,6 +20,8 @@ class Node
 
 	public:
 
+		bool deleted; 
+
 		typedef std::pair<Node*, length_t> edge_t;
 		typedef std::vector<edge_t> edges_t;
 		typedef std::vector<edge_t>::iterator edges_it_t;
