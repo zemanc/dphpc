@@ -4,7 +4,7 @@
 
 #include "../../parallel/graph.h"
 
-void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n);
+double boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n);
 
 
 #endif

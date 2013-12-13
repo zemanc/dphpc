@@ -197,7 +197,7 @@ class astar_goal_visitor : public boost::default_astar_visitor
 };
 
 
-void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n)
+double boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n)
 {
   
 	// specify some types
@@ -322,7 +322,7 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 
 		delete [] locations;
 
-		return;
+		return d[goal];
 
 	}
 
@@ -330,5 +330,7 @@ void boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end_n
 	delete [] locations;
   
 	timeout << "Didn't find a path from " << start << " to " << goal << "!" << endl;
+
+	return -1;
 
 }

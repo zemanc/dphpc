@@ -28,7 +28,7 @@ int main()
 	int number_of_processor = 4;
 
 	// benchmarking
-	for (unsigned int n = 128; n <= 4096; n*=2)
+	for (unsigned int n = 128; n <= 2048; n*=2)
 	{
 		Graph g;
 	 	HolyGraph hg = HolyGraph(n);
@@ -39,13 +39,14 @@ int main()
 		g.randomDisplaceAllNodes(0.3, distance);
 // 		tg.removeRandomNodes(g, 2000, 10000);
 
-		boost_shortestPath_ek(g, 0, n*n-1);
+		double exact_dist = boost_shortestPath_ek(g, 0, n*n-1);
 		
-		for (int i = 1; i <= number_of_processor; i++)
+		for (double t = 0.25; t <= 4; t*=2)
 		{
-			for (double t = 0.25; t <= 4; t*=2)
+			g.threshold = t;
+
+			for (int i = 1; i <= number_of_processor; i++)
 			{
-				g.threshold = t;
 				for (int j = 0; j < runcount; j++)
 				{
 					g.cleanup();
@@ -75,10 +76,27 @@ int main()
 							<< time_spanl.count() << "\t" << dist2 <<  std::endl;
 				}
 			}
+
+			for (int j = 0; j < runcount; j++)
+			{
+				g.cleanup();
+
+				t_start = std::chrono::high_resolution_clock::now();
+				dist = g.getShortestPathSeq(0, n*n-1, path, distance);	// holy values / circle values
+				t_end = std::chrono::high_resolution_clock::now();
+				std::chrono::duration<double> time_span =
+					std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start);
+
+				// end timing and write to file
+				timeout << "1 " << "\t" << t << "\t"
+						<< n << "\t" << n*n << "\t" << "-1" << "\t" << j << "\t"
+						<< time_span.count() << "\t" << dist  << "\t"
+						<< "\t" << exact_dist << std::endl;
+			}
 		}
 	}
 	// benchmarking
-	for (unsigned int n = 128; n <= 4096; n*=2)
+	for (unsigned int n = 128; n <= 2048; n*=2)
 	{
 		Graph g;
 // 	 	HolyGraph hg = HolyGraph(n);
@@ -89,11 +107,11 @@ int main()
 		g.randomDisplaceAllNodes(0.3, distance);
 // 		tg.removeRandomNodes(g, 2000, 10000);
 
-		boost_shortestPath_ek(g, 0, n*n-1);
+		double exact_dist = boost_shortestPath_ek(g, 0, n*n-1);
 		
-		for (int i = 1; i <= number_of_processor; i++)
+		for (double t = 0.25; t <= 4; t*=2)
 		{
-			for (double t = 0.25; t <= 4; t*=2)
+			for (int i = 1; i <= number_of_processor; i++)
 			{
 				g.threshold = t;
 				for (int j = 0; j < runcount; j++)
@@ -125,10 +143,27 @@ int main()
 							<< time_spanl.count() << "\t" << dist2 <<  std::endl;
 				}
 			}
+			for (int j = 0; j < runcount; j++)
+			{
+				g.cleanup();
+
+				t_start = std::chrono::high_resolution_clock::now();
+				dist = g.getShortestPathSeq(0, n*n-1, path, distance);	// holy values / circle values
+				t_end = std::chrono::high_resolution_clock::now();
+				std::chrono::duration<double> time_span =
+					std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start);
+
+				// end timing and write to file
+				timeout << "2 " << "\t" << t << "\t"
+						<< n << "\t" << n*n << "\t" << "-1" << "\t" << j << "\t"
+						<< time_span.count() << "\t" << dist  << "\t"
+						<< "\t" << exact_dist << std::endl;
+				
+			}
 		}
 	}
 
-	for (unsigned int r = 128; r <= 2048; r*=2)
+	for (unsigned int r = 128; r <= 1024; r*=2)
 	{
 		for (int i = 1; i <= number_of_processor; i++)
 		{
@@ -180,7 +215,7 @@ int main()
 		}
 	}
 
-	for (unsigned int r = 128; r <= 2048; r*=2)
+	for (unsigned int r = 128; r <= 1024; r*=2)
 	{
 		for (int i = 1; i <= number_of_processor; i++)
 		{
