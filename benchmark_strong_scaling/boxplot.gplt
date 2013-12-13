@@ -1,6 +1,7 @@
-filename_parallel = 'holygraph_parallel_normal.out'
-filename_parallel_lazy = 'holygraph_parallel_lazy2.out'
-filename_sequential = 'holygraph_sequential_normal.out'
+type = 'holygraph'
+filename_parallel = type.'_parallel_normal.out'
+filename_parallel_lazy = type.'_parallel_lazy.out'
+filename_sequential = type.'_sequential.out'
 
 parallel_color = "#FF8C00"
 parallel_color_lazy = "#008CFF"
