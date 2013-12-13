@@ -8,5 +8,5 @@ g++ -O1 -Wall -fopenmp -o benchmark benchmark.o graph.o node.o testgraph.o
 
 sequentiell noch nicht neu gemacht!
 
-
+diese plots sind mit randomDisplacement 0.3
 
