@@ -1,0 +1,44 @@
+type = 'holygraph'
+
+filename_parallel = type.'_parallel_normal.out'
+filename_parallel_lazy = type.'_parallel_lazy.out'
+
+parallel_color = "#FF8C00"
+parallel_color_lazy = "#008CFF"
+lwidth = 2
+
+number_of_cores = 8 
+
+zahl_1 = 1.01
+zahl_2 = 0.98
+
+set terminal eps size 6,4
+
+set output 'out.eps'
+
+#functions
+filter(col, i, retcol) = (column(col) == i ? column(retcol) : 1/0)
+filter2(col, i, col2, j, retcol) = (column(col) == i && column(col2) == j ? column(retcol) : 1/0)
+
+set style data boxplot
+
+set title 'Weak scaling'
+set xlabel 'number of cores'
+set ylabel 'time [s]'
+
+#box style
+
+set pointsize 0.05
+set boxwidth 0.11
+set style fill  border lc rgb parallel_color
+
+set logscale y
+
+set xrange [0.9:8.8]
+set xtics (1,2,3,4,5,6,7,8)
+
+#erste Zeile ohne Titel!
+plot for [i=2:number_of_cores] filename_parallel using (i):(filter(3, i, 5)) lc rgb parallel_color lw lwidth notitle, \
+	filename_parallel using (1):(filter(3, 1, 5)) lc rgb parallel_color lw lwidth title 'parallel normal' , \
+		for [i=2:number_of_cores] filename_parallel_lazy using (i*zahl_2):(filter(3, i, 5)) lc rgb parallel_color_lazy lw lwidth fill empty border lc rgb parallel_color_lazy notitle, \
+		filename_parallel_lazy using (zahl_2):(filter(3, 1, 5)) lc rgb parallel_color_lazy lw lwidth fill empty border lc rgb parallel_color_lazy title 'parallel lazy'
