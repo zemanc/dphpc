@@ -1,0 +1,90 @@
+filename= 'time_locks.out'
+
+color1 = "#FF3C00"
+color2 = "#008CFF"
+color3 = "#00993A"
+lwidth = 3
+
+number_of_cores = 4 
+min_potenz = 7
+max_potenz = 11
+
+zahl_1 = 1.04
+zahl_2 = 1.04
+
+getGraphName(i) = (i == 1 || i == 3) ? "Cross Graph" : "Circle Graph"
+
+set terminal eps size 6,4
+
+set output 'lock_benchmark.eps'
+
+do for [thrp=0:0] {
+	threshold = 2**(2*thrp)
+	do for [r=11:11] {
+
+		grid_size = 2**r
+
+		#two plots per site
+		set multiplot layout 1,2  title 'Strong scaling '.grid_size.' x '.grid_size.', threshold='.sprintf("%g", threshold)
+
+		do for [grapht=1:2] {
+
+			#functions
+			filter(col, i, retcol) = (column(col) == i ? column(retcol) : 1/0)
+			filter2(col, i, col2, j, retcol) = (column(col) == i && column(col2) == j ? column(retcol) : 1/0)
+			filter3(col, i, col2, j, col3, k, retcol) = (column(col) == i && column(col2) == j && column(col3) == k ? column(retcol) : 1/0)
+			filter4(col, i, col2, j, col3, k, col4, l, retcol) = (column(col) == i && column(col2) == j && column(col3) == k && column(col4) == l ? column(retcol) : 1/0)
+
+			set style data boxplot
+
+			set title getGraphName(grapht)
+			set xlabel offset 0,0.5 'number of cores'
+			if (grapht==1) {
+				set ylabel offset 2 'time [s]'
+			} else {
+				unset ylabel
+			}
+
+			#box style
+
+			set pointsize 0.05
+			set boxwidth 0.21
+			set style fill  border lc rgb color1 
+
+			set logscale x 2
+			set logscale y 10
+
+			set xrange [0.8:4.8]
+
+			do for [i=1:number_of_cores] { set xtics add (sprintf("%g",i) i) }
+			do for [i=1:20] { set ytics add (i*0.2) }	
+			set ytics add (0.3)
+			set ytics add (0.5)
+
+			#erste Zeile ohne Titel!
+			plot \
+				for [i=2:number_of_cores] \
+					filename using (i*zahl_1): \
+					(filter4(1, grapht, 2, 1, 6, i, 4, grid_size, 8)) \
+					lc rgb color1 lw lwidth notitle, \
+				filename using (zahl_1): \
+					(filter4(1, grapht, 2, 1, 6, 1, 4, grid_size, 8)) \
+					lc rgb color1 lw lwidth title 'TAS_EXP_LOCK', \
+				for [i=2:number_of_cores] \
+					filename using (i/zahl_1): \
+					(filter4(1, grapht, 2, 2, 6, i, 4, grid_size, 8)) \
+					lc rgb color2 lw lwidth notitle, \
+				filename using (1/zahl_1): \
+					(filter4(1, grapht, 2, 2, 6, 1, 4, grid_size, 8)) \
+					lc rgb color2 lw lwidth title 'TAS_LOCK', \
+				for [i=2:number_of_cores] \
+					filename using (i): \
+					(filter4(1, grapht, 2, 4, 6, i, 4, grid_size, 8)) \
+					lc rgb color3 lw lwidth notitle, \
+				filename using (1): \
+					(filter4(1, grapht, 2, 4, 6, 1, 4, grid_size, 8)) \
+					lc rgb color3 lw lwidth title 'OMP_LOCK'
+		}
+		unset multiplot
+	}
+}
