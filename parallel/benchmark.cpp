@@ -8,13 +8,24 @@
 #include "testgraph.h"
 
 #include "../benchmark_algos/boost/astar.h"
+#define PART4
 
 int main()
 {
 	// timing stuff
-	std::ofstream timeout("time.out", std::ios::out);
-	timeout << "graph" << "\t" << "threshold" << "n" << "\t" << "n*n" << "\t" << "#proc" << "\t" << "run" << "\t"
-			<< "time [s]" << "\t" << "distance" << "time_lazy [s]" << "\t" << "distance_lazy" << std::endl;
+#ifdef PART1
+	std::ofstream timeout("time1.out", std::ios::out);
+#endif
+#ifdef PART2
+	std::ofstream timeout("time2.out", std::ios::out);
+#endif
+#ifdef PART3
+	std::ofstream timeout("time3.out", std::ios::out);
+#endif
+#ifdef PART4
+	std::ofstream timeout("time4.out", std::ios::out);
+#endif
+
 	std::chrono::high_resolution_clock::time_point t_start, t_end;
 	std::chrono::high_resolution_clock::time_point t_startl, t_endl;
 
@@ -24,11 +35,12 @@ int main()
 	std::list<Node*> *path = new std::list<Node*>;
 	double dist, dist2;
 
-	int runcount = 15;
+	int runcount = 50;
 	int number_of_processor = 8;
 
+#ifdef PART1
 	// benchmarking
-	for (unsigned int n = 128; n <= 4096; n*=2)
+	for (unsigned int n = 4096; n <= 4096; n*=2)
 	{
 		Graph g;
 	 	HolyGraph hg = HolyGraph(n);
@@ -95,6 +107,8 @@ int main()
 			}
 		}
 	}
+#endif
+#ifdef PART2
 	// benchmarking
 	for (unsigned int n = 128; n <= 4096; n*=2)
 	{
@@ -162,8 +176,9 @@ int main()
 			}
 		}
 	}
-
-	for (unsigned int r = 128; r <= 2048; r*=2)
+#endif
+#ifdef PART3
+	for (unsigned int r = 1024; r <= 4096; r*=2)
 	{
 		for (int i = 1; i <= number_of_processor; i++)
 		{
@@ -214,8 +229,10 @@ int main()
 			}
 		}
 	}
+#endif
+#ifdef PART4
 
-	for (unsigned int r = 128; r <= 2048; r*=2)
+	for (unsigned int r = 128; r <= 4096; r*=2)
 	{
 		for (int i = 1; i <= number_of_processor; i++)
 		{
@@ -266,7 +283,7 @@ int main()
 			}
 		}
 	}
-
+#endif
 	delete path;
 
 	return 0;
