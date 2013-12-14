@@ -12,7 +12,7 @@ min_potenz = 7
 max_potenz = 11
 
 zahl_1 = 1.03
-zahl_2 = 0.93
+zahl_2 = 0.98
 
 min_thr_pot = -3
 max_thr_pot = 3
@@ -30,7 +30,7 @@ do for [r=11:11] {
 	grid_size = 2**r
 
 	#two plots per site
-	set multiplot layout 1,2  title 'relative Error, '.grid_size.' x '.grid_size
+	set multiplot layout 1,2  title 'runtime with different thresholds, '.grid_size.' x '.grid_size
 
 	do for [grapht=1:2] {
 
@@ -60,7 +60,7 @@ do for [r=11:11] {
 		set title getGraphName(grapht)
 		set xlabel offset 0,0.5 'threshold relaxing'
 		if (grapht==1) {
-			set ylabel offset 2 'error [%]'
+			set ylabel offset 1.4,0 'runtime'
 		} else {
 			unset ylabel
 		}
@@ -74,9 +74,12 @@ do for [r=11:11] {
 		set style fill  border lc rgb parallel_color
 
 		set xrange [0.08:11]
-#		set yrange [miny*0.5:maxy*5]
+		set yrange [0.11:2]
 
 		do for [i=min_thr_pot:max_thr_pot] { set xtics add (sprintf("%g",2**i) 2**i) }
+		do for [i=1:4] { set ytics add (sprintf("%g",0.2*i) 0.2*i) }
+		set ytics add("0.3" 0.3)
+		set ytics add("1.5" 1.5)
 
 		#erste Zeile ohne Titel!
 		plot \
