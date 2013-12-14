@@ -59,7 +59,6 @@ void Graph::cleanup()
 		(*it)->h = 0;
 	}
 }
-
 std::string Graph::getColor(Node::state_t s) const
 {
 	switch (s)
