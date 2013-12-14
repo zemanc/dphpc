@@ -253,8 +253,28 @@ ETH Zürich \\ % Your institution for the title page
 \end{frame}
 
 %------------------------------------------------
+
+\begin{frame}
+\frametitle{Locking concept: 2 concepts for removing nodes}
+Standard:
+\begin{itemize}
+\item Lock node and predecessor as shown before and remove it right away
+\end{itemize}
+\quad\\ \quad \\
+Lazy locking:
+\begin{itemize}
+\item Don't lock anything and just mark the node as removed
+\item Other threads will clean up and remove it later
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
 \section{Benchmarks}
 %------------------------------------------------
+
+%------------------------------------------------
+\subsection{Threshold vs. Path Length}
 
 \definecolor{0.1}{HTML}{FF3C00}
 \definecolor{1}{HTML}{008CFF}
@@ -262,13 +282,72 @@ ETH Zürich \\ % Your institution for the title page
 
 \begin{frame}
 \frametitle{Threshold vs. Path Length}
+\begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.35\textwidth} % Left column and width
+\textbf{Threshold update}
 \begin{itemize}
-\item \textcolor{0.1}{Threshold = Threshold + \textbf{0.1}}
-\item \textcolor{1}{Threshold = Threshold + \textbf{1}}
-\item \textcolor{10}{Threshold = Threshold + \textbf{10}}
+\item \textcolor{0.1}{Threshold += \textbf{0.1}}
+\item \textcolor{1}{Threshold += \textbf{1}}
+\item \textcolor{10}{Threshold += \textbf{10}}
 \end{itemize}
+
+\column{.6\textwidth} % Right column and width
 \begin{center}
-	\includegraphics[height=112pt]{benchmark_path.pdf}
+	\includegraphics[height=190pt]{crossgraph.png}
+\end{center}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Threshold vs. Path Length}
+\begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.35\textwidth} % Left column and width
+\textbf{Threshold update}
+\begin{itemize}
+\item \textcolor{0.1}{Threshold += \textbf{0.1}}
+\item \textcolor{1}{Threshold += \textbf{1}}
+\item \textcolor{10}{Threshold += \textbf{10}}
+\end{itemize}
+
+\column{.6\textwidth} % Right column and width
+\begin{center}
+	\includegraphics[height=190pt]{circlegraph.png}
+\end{center}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Threshold vs. Path Length}
+\begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.35\textwidth} % Left column and width
+\textbf{Threshold update}
+\begin{itemize}
+\item \textcolor{0.1}{Threshold += \textbf{0.1}}
+\item \textcolor{1}{Threshold += \textbf{1}}
+\item \textcolor{10}{Threshold += \textbf{10}}
+\end{itemize}
+
+\column{.6\textwidth} % Right column and width
+\begin{center}
+	\includegraphics[height=190pt]{smileygraph.png}
+\end{center}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Threshold vs. Path Length}
+\begin{center}
+	\includegraphics[height=210pt]{path_close.png}
+\end{center}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Relative error path length (compared to A*)}
+\begin{center}
+	\includegraphics[height=220pt]{error_cores.pdf}
 \end{center}
 \end{frame}
 
