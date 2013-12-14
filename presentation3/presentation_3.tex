@@ -256,7 +256,7 @@ ETH Zürich \\ % Your institution for the title page
 
 \begin{frame}
 \frametitle{Locking concept: 2 concepts for removing nodes}
-Standard:
+Normal:
 \begin{itemize}
 \item Lock node and predecessor as shown before and remove it right away
 \end{itemize}
@@ -274,21 +274,21 @@ Lazy locking:
 %------------------------------------------------
 
 %------------------------------------------------
-\subsection{Threshold vs. Path Length}
+\subsection{Threshold vs. path length}
 
 \definecolor{0.1}{HTML}{FF3C00}
 \definecolor{1}{HTML}{008CFF}
 \definecolor{10}{HTML}{00993A}
 
 \begin{frame}
-\frametitle{Threshold vs. Path Length}
+\frametitle{Threshold vs. path length}
 \begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
 \column{.35\textwidth} % Left column and width
 \textbf{Threshold update}
 \begin{itemize}
-\item \textcolor{0.1}{Threshold += \textbf{0.1}}
-\item \textcolor{1}{Threshold += \textbf{1}}
-\item \textcolor{10}{Threshold += \textbf{10}}
+\item \textcolor{0.1}{threshold += \textbf{0.1}}
+\item \textcolor{1}{threshold += \textbf{1}}
+\item \textcolor{10}{threshold += \textbf{10}}
 \end{itemize}
 
 \column{.6\textwidth} % Right column and width
@@ -300,14 +300,14 @@ Lazy locking:
 
 
 \begin{frame}
-\frametitle{Threshold vs. Path Length}
+\frametitle{Threshold vs. path length}
 \begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
 \column{.35\textwidth} % Left column and width
 \textbf{Threshold update}
 \begin{itemize}
-\item \textcolor{0.1}{Threshold += \textbf{0.1}}
-\item \textcolor{1}{Threshold += \textbf{1}}
-\item \textcolor{10}{Threshold += \textbf{10}}
+\item \textcolor{0.1}{threshold += \textbf{0.1}}
+\item \textcolor{1}{threshold += \textbf{1}}
+\item \textcolor{10}{threshold += \textbf{10}}
 \end{itemize}
 
 \column{.6\textwidth} % Right column and width
@@ -319,14 +319,14 @@ Lazy locking:
 
 
 \begin{frame}
-\frametitle{Threshold vs. Path Length}
+\frametitle{Threshold vs. path length}
 \begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
 \column{.35\textwidth} % Left column and width
 \textbf{Threshold update}
 \begin{itemize}
-\item \textcolor{0.1}{Threshold += \textbf{0.1}}
-\item \textcolor{1}{Threshold += \textbf{1}}
-\item \textcolor{10}{Threshold += \textbf{10}}
+\item \textcolor{0.1}{threshold += \textbf{0.1}}
+\item \textcolor{1}{threshold += \textbf{1}}
+\item \textcolor{10}{threshold += \textbf{10}}
 \end{itemize}
 
 \column{.6\textwidth} % Right column and width
@@ -337,80 +337,143 @@ Lazy locking:
 \end{frame}
 
 \begin{frame}
-\frametitle{Threshold vs. Path Length}
+\frametitle{Threshold vs. path length}
+\begin{center}
+	\includegraphics[height=210pt]{smileygraph_zoom.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Threshold vs. path length}
 \begin{center}
 	\includegraphics[height=210pt]{path_close.png}
 \end{center}
 \end{frame}
 
+%------------------------------------------------
+\subsection{\# cores vs. path length}
 
 \begin{frame}
-\frametitle{Relative error path length (compared to A*)}
+\frametitle{Path length error: \# cores}
 \begin{center}
-	\includegraphics[height=220pt]{error_cores.pdf}
-\end{center}
-\end{frame}
-
-
-
-
-\begin{frame}
-\frametitle{Benchmark runtime}
-\begin{itemize}
-\item Runtime vs. A* from Boost Graph Library
-\item Using "cross graph" and 400 - 10'000 nodes
-\item Threshold += 1
-\item 20 runs per size
-\item Intel Core 2 P9600 @ 2.53 GHZ
-\end{itemize}
-\begin{center}
-	\includegraphics[height=184pt]{boxplot.png}
-\end{center}
-\end{frame}
-
-\begin{frame}
-\frametitle{Benchmark path length}
-\begin{itemize}
-\item Runtime vs. A* from Boost Graph Library
-\item Using "cross graph" and 400 - 10'000 nodes
-\item Threshold += 1
-\item 20 runs per size
-\item Intel Core 2 P9600 @ 2.53 GHZ
-\end{itemize}
-\end{frame}
-\begin{frame}
-\frametitle{Benchmark path length}
-\begin{center}
-    \begin{tabular}{ | r | c | c | c | c | }
-    \hline
-\# \textbf{Nodes}	&	\textbf{A-Star}	&	\textbf{Fringe}	&	\textbf{Difference} & \textbf{Difference in \%} \\ \hline
-400		&	69.731	&	70.6903	&	0.9593 & 1.37 \% \\ \hline
-900		&	101.071	&	102.638	&	1.567  & 1.55 \%\\ \hline
-1600		&	133.304	&	136.326	&	3.022 & 2.27 \% \\ \hline
-2500		&	165.47	&	167.891	&	2.421 & 1.46 \% \\ \hline
-3600		&	195.363	&	198.115	&	2.752 & 1.41 \% \\ \hline
-4900		&	227.957	&	231.554	&	3.597 & 1.58 \% \\ \hline
-6400		&	258.5	&	261.49	&	2.99  & 1.16 \% \\ \hline
-8100		&	288.961	&	293.483	&	4.522 & 1.56 \% \\ \hline
-10000	&	321.263	&	325.853	&	4.59  & 1.43 \% \\ \hline
-    \end{tabular}
+	\includegraphics[trim=0pt 0pt 0pt 30pt, clip, height=190pt]{error_cores.pdf}
 \end{center}
 
+\tiny
+\begin{columns}[t] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.4\textwidth} % Left column and width
+- relative error in path length compared to A* \\
+- 2048 x 2048 nodes
 
+\column{.4\textwidth} % Right column and width
+- threshold relaxing: +1 \\
+- 50 runs on 1 node of kanifushi.inf.ethz.ch
+\end{columns}
+\normalsize
 \end{frame}
 
-
+%------------------------------------------------
+\subsection{Threshold relaxing vs. path length}
 
 \begin{frame}
-\frametitle{Project Status}
-What we still have to do:\\\quad\\
-\begin{itemize}
-\item Implement parallel version
-\item Benchmarking (strong/weak scaling)
-\item Threshold fine-tuning
-\item Write report
-\end{itemize}
+\frametitle{Path length error: threshold relaxing}
+\begin{center}
+	\includegraphics[trim=0pt 0pt 0pt 30pt, clip, height=190pt]{error_threshold.pdf}
+\end{center}
+
+\tiny
+\begin{columns}[t] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.4\textwidth} % Left column and width
+- relative error in path length compared to A* \\
+- 2048 x 2048 nodes
+
+
+\column{.4\textwidth} % Right column and width
+- As we have seen before \# cores doesn't matter \\
+- 50 runs on 1 node of kanifushi.inf.ethz.ch
+
+\end{columns}
+\normalsize
 \end{frame}
+
+%------------------------------------------------
+\begin{frame}
+\frametitle{Strong scaling}
+\begin{center}
+	\includegraphics[trim=0pt 0pt 0pt 30pt, clip, height=190pt]{strong_scaling.pdf}
+\end{center}
+
+\tiny
+\begin{columns}[t] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+\column{.4\textwidth} % Left column and width
+- 2048 x 2048 nodes
+
+
+\column{.4\textwidth} % Right column and width
+- 50 runs on 1 node of kanifushi.inf.ethz.ch
+\end{columns}
+\normalsize
+\end{frame}
+
+
+%
+%\begin{frame}
+%\frametitle{Benchmark runtime}
+%\begin{itemize}
+%\item Runtime vs. A* from Boost Graph Library
+%\item Using "cross graph" and 400 - 10'000 nodes
+%\item Threshold += 1
+%\item 20 runs per size
+%\item Intel Core 2 P9600 @ 2.53 GHZ
+%\end{itemize}
+%\begin{center}
+%	\includegraphics[height=184pt]{boxplot.png}
+%\end{center}
+%\end{frame}
+
+%\begin{frame}
+%\frametitle{Benchmark path length}
+%\begin{itemize}
+%\item Runtime vs. A* from Boost Graph Library
+%\item Using "cross graph" and 400 - 10'000 nodes
+%\item Threshold += 1
+%\item 20 runs per size
+%\item Intel Core 2 P9600 @ 2.53 GHZ
+%\end{itemize}
+%\end{frame}
+%\begin{frame}
+%\frametitle{Benchmark path length}
+%\begin{center}
+%    \begin{tabular}{ | r | c | c | c | c | }
+%    \hline
+%\# \textbf{Nodes}	&	\textbf{A-Star}	&	\textbf{Fringe}	&	\textbf{Difference} & \textbf{Difference in \%} \\ \hline
+%400		&	69.731	&	70.6903	&	0.9593 & 1.37 \% \\ \hline
+%900		&	101.071	&	102.638	&	1.567  & 1.55 \%\\ \hline
+%1600		&	133.304	&	136.326	&	3.022 & 2.27 \% \\ \hline
+%2500		&	165.47	&	167.891	&	2.421 & 1.46 \% \\ \hline
+%3600		&	195.363	&	198.115	&	2.752 & 1.41 \% \\ \hline
+%4900		&	227.957	&	231.554	&	3.597 & 1.58 \% \\ \hline
+%6400		&	258.5	&	261.49	&	2.99  & 1.16 \% \\ \hline
+%8100		&	288.961	&	293.483	&	4.522 & 1.56 \% \\ \hline
+%10000	&	321.263	&	325.853	&	4.59  & 1.43 \% \\ \hline
+%    \end{tabular}
+%\end{center}
+%
+%
+%\end{frame}
+
+
+
+%\begin{frame}
+%\frametitle{Project Status}
+%What we still have to do:\\\quad\\
+%\begin{itemize}
+%\item Implement parallel version
+%\item Benchmarking (strong/weak scaling)
+%\item Threshold fine-tuning
+%\item Write report
+%\end{itemize}
+%\end{frame}
 %------------------------------------------------
 
 \begin{frame}
