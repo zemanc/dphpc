@@ -246,12 +246,12 @@ double boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end
 	// set own start an goal
 	vertex start = start_n;
 	vertex goal = end_n;
-	std::ofstream pathout("path_boost.out", std::ios::out);
-  	std::ofstream timeout("time_boost.out", std::ios::app);
+// 	std::ofstream pathout("path_boost.out", std::ios::out);
+//   	std::ofstream timeout("time_boost.out", std::ios::app);
 
 
-	pathout << "Start vertex: " << start << endl;
-	pathout << "Goal vertex: " << goal << endl;
+// 	pathout << "Start vertex: " << start << endl;
+// 	pathout << "Goal vertex: " << goal << endl;
   
 	// timing
 	std::chrono::high_resolution_clock::time_point t_start, t_end;  
@@ -281,8 +281,8 @@ double boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end
 		// end timing
 		t_end = std::chrono::high_resolution_clock::now();
 
-		std::chrono::duration<double> time_span =
-			std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start);	
+// 		std::chrono::duration<double> time_span =
+// 			std::chrono::duration_cast<std::chrono::duration<double>>(t_end - t_start);	
 
 		list<vertex> shortest_path;
 
@@ -295,30 +295,30 @@ double boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end
 
 		}
 
-		pathout << "Shortest path from " << start << " to " << goal << ": ";
-
-		list<vertex>::iterator spi = shortest_path.begin();
-		pathout << start;
-
-		for(++spi; spi != shortest_path.end(); ++spi)
-			pathout << " -> " << *spi;
-		
-		timeout << time_span.count() << "\t" << d[goal] << endl;
+// 		pathout << "Shortest path from " << start << " to " << goal << ": ";
+// 
+// 		list<vertex>::iterator spi = shortest_path.begin();
+// 		pathout << start;
+// 
+// 		for(++spi; spi != shortest_path.end(); ++spi)
+// 			pathout << " -> " << *spi;
+// 		
+// 		timeout << time_span.count() << "\t" << d[goal] << endl;
 // 		timeout << endl << "Total travel time: " << d[goal] << endl;
 // 		timeout << endl << "CPU time: " << time_span.count() << " seconds" << endl;
 
-		ofstream dotfile;
-		dotfile.open("output_boost.dot");
-		write_graphviz(dotfile, g, node_writer<location*, ColorMap>
-					 (locations, 
-					  shortest_path, 
-					  cmap,
-					  0,
-					  100,
-					  0, 
-					  100,
-					  400,
-					  400));
+// 		ofstream dotfile;
+// 		dotfile.open("output_boost.dot");
+// 		write_graphviz(dotfile, g, node_writer<location*, ColorMap>
+// 					 (locations, 
+// 					  shortest_path, 
+// 					  cmap,
+// 					  0,
+// 					  100,
+// 					  0, 
+// 					  100,
+// 					  400,
+// 					  400));
 
 		delete [] locations;
 
@@ -329,7 +329,7 @@ double boost_shortestPath_ek(Graph& my_g, unsigned int start_n, unsigned int end
 	// clean up
 	delete [] locations;
   
-	timeout << "Didn't find a path from " << start << " to " << goal << "!" << endl;
+// 	timeout << "Didn't find a path from " << start << " to " << goal << "!" << endl;
 
 	return -1;
 

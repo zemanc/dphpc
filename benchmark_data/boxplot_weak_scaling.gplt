@@ -1,11 +1,11 @@
-filename= 'time4.out'
+filename= 'time2.out'
 
 parallel_color = "#FF3C00"
 parallel_color_lazy = "#008CFF"
 sequential_color = "#00993A"
 lwidth = 3
 
-number_of_cores = 4 
+number_of_cores = 8 
 min_potenz = 7
 max_potenz = 11
 
@@ -20,7 +20,7 @@ set output 'weak_scaling.eps'
 
 do for [thrp=0:1] {
 	threshold = 2**(2*thrp)
-	do for [r=11:11] {
+	do for [r=10:10] {
 
 		grid_size = 2**r
 
@@ -66,14 +66,14 @@ do for [thrp=0:1] {
 			plot \
 				for [i=2:number_of_cores] \
 					filename using (i*zahl_1): \
-					(filter4(1, grapht+2, 2, threshold, 5, i, 3, int(grid_size*sqrt(2**(i-1))), 7)) \
+					(filter4(1, grapht+2, 2, threshold, 5, i, 3, int(grid_size*sqrt(i)), 7)) \
 					lc rgb parallel_color lw lwidth notitle, \
 				filename using (zahl_1): \
 					(filter4(1, grapht+2, 2, threshold, 5, 1, 3, grid_size, 7)) \
 					lc rgb parallel_color lw lwidth title 'parallel normal', \
 				for [i=2:number_of_cores] \
 					filename using (i/zahl_2): \
-					(filter4(1, grapht+2, 2, threshold, 5, i, 3, int(grid_size*sqrt(2**(i-1))), 9)) \
+					(filter4(1, grapht+2, 2, threshold, 5, i, 3, int(grid_size*sqrt(i)), 9)) \
 					lc rgb parallel_color_lazy lw lwidth \
 					fill empty border lc rgb parallel_color_lazy notitle, \
 				filename using (1/zahl_2): \
