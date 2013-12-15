@@ -57,7 +57,7 @@ do for [thrp=0:0] {
 			set xrange [0.1:8.9] 
 			set yrange [0.15:1]
 
-			do for [i=1:number_of_cores] { set xtics add (sprintf("%g\n%g",i, int(grid_size*sqrt(2**(i-1)))) i) }
+			do for [i=1:number_of_cores] { set xtics add (sprintf("%g\n%g",i, int(grid_size*sqrt(i))) i) }
 			do for [i=1:20] { set ytics add (i*0.2) }	
 			set ytics add (0.3)
 			set ytics add (0.5)
