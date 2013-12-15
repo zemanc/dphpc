@@ -256,12 +256,14 @@ ETH Zürich \\ % Your institution for the title page
 
 \begin{frame}
 \frametitle{Locking concept: 2 concepts for removing nodes}
-Normal:
+Both concepts use optimistic locking for acquiring the locks.\\
+\quad\\
+\textbf{Normal:}
 \begin{itemize}
 \item Lock node and predecessor as shown before and remove it right away
 \end{itemize}
 \quad\\ \quad \\
-Lazy locking:
+\textbf{Lazy locking:}
 \begin{itemize}
 \item Don't lock anything and just mark the node as removed
 \item Other threads will clean up and remove it later
