@@ -9,8 +9,8 @@ number_of_cores = 8
 min_potenz = 7
 max_potenz = 11
 
-zahl_1 = 0.1
-zahl_2 = 0.1
+zahl_1 = 0.13
+zahl_2 = 0.13
 
 getGraphName(i) = (i == 1 || i == 3) ? "Cross Graph" : "Circle Graph"
 
