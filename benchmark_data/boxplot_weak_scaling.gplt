@@ -9,8 +9,8 @@ number_of_cores = 8
 min_potenz = 7
 max_potenz = 11
 
-zahl_1 = 1.04
-zahl_2 = 1.04
+zahl_1 = 0.15
+zahl_2 = 0.15
 
 getGraphName(i) = (i == 1 || i == 3) ? "Cross Graph" : "Circle Graph"
 
@@ -18,7 +18,7 @@ set terminal eps size 6,4
 
 set output 'weak_scaling.eps'
 
-do for [thrp=0:1] {
+do for [thrp=0:0] {
 	threshold = 2**(2*thrp)
 	do for [r=10:10] {
 
@@ -48,35 +48,36 @@ do for [thrp=0:1] {
 			#box style
 
 			set pointsize 0.05
-			set boxwidth 0.21
+			set boxwidth 0.41
 			set style fill  border lc rgb parallel_color
 
-			set logscale x 2
+#			set logscale x 2
 			set logscale y 10
 
-			set xrange [0.8:9.4]
-#			set yrange [miny*0.95:maxy/0.95]
+			set xrange [0.1:8.9] 
+			set yrange [0.15:1]
 
-#			do for [i=1:number_of_cores] { set xtics add (sprintf("%g\n%g",i, int(grid_size*sqrt(2**(i-1)))) i) }
-#			do for [i=1:20] { set ytics add (i*0.2) }	
-#			set ytics add (0.3)
-#			set ytics add (0.5)
+			do for [i=1:number_of_cores] { set xtics add (sprintf("%g\n%g",i, int(grid_size*sqrt(2**(i-1)))) i) }
+			do for [i=1:20] { set ytics add (i*0.2) }	
+			set ytics add (0.3)
+			set ytics add (0.5)
+			set xtics font ",10" rotate by 45
 
 			#erste Zeile ohne Titel!
 			plot \
 				for [i=2:number_of_cores] \
-					filename using (i*zahl_1): \
+					filename using (i+zahl_1): \
 					(filter4(1, grapht+2, 2, threshold, 5, i, 3, int(grid_size*sqrt(i)), 7)) \
 					lc rgb parallel_color lw lwidth notitle, \
-				filename using (zahl_1): \
+				filename using (1+zahl_1): \
 					(filter4(1, grapht+2, 2, threshold, 5, 1, 3, grid_size, 7)) \
 					lc rgb parallel_color lw lwidth title 'parallel normal', \
 				for [i=2:number_of_cores] \
-					filename using (i/zahl_2): \
+					filename using (i-zahl_2): \
 					(filter4(1, grapht+2, 2, threshold, 5, i, 3, int(grid_size*sqrt(i)), 9)) \
 					lc rgb parallel_color_lazy lw lwidth \
 					fill empty border lc rgb parallel_color_lazy notitle, \
-				filename using (1/zahl_2): \
+				filename using (1-zahl_2): \
 					(filter4(1, grapht+2, 2, threshold, 5, 1, 3, grid_size, 9)) \
 					lc rgb parallel_color_lazy lw lwidth fill empty \
 					border lc rgb parallel_color_lazy title 'parallel lazy'
