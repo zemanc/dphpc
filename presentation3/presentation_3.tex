@@ -137,6 +137,7 @@ ETH Zürich \\ % Your institution for the title page
 	\item Strong scaling
 	\item Weak scaling
 	\item Path quality
+	\item Threshold handling
 	\end{itemize}
 \end{itemize}
 \end{frame}
@@ -321,7 +322,7 @@ The code is written in C++ / Open MP and it has been compiled with g++ v. 4.6.1 
 \textbf{Graphs}
 \begin{itemize}
 \item based on a regular grid with distance 1 and 8 edges per node
-\item each node  is moved randomly\\(normal distribution, $\sigma$ = 0.3)
+\item each node  is moved randomly\\(normal distribution, $\sigma = 0.3$)
 \item different obstacles (circle, crosses, etc.)
 \vspace{10pt}
 \begin{center}
@@ -343,7 +344,7 @@ The code is written in C++ / Open MP and it has been compiled with g++ v. 4.6.1 
 \textbf{Graphs}
 \begin{itemize}
 \item based on a regular grid with distance 1 and 8 edges per node
-\item each node  is moved randomly\\(normal distribution, $\sigma$ = 0.3)
+\item each node  is moved randomly\\(normal distribution, $\sigma = 0.3$)
 \item different obstacles (circle, crosses, etc.)
 \vspace{10pt}
 \begin{center}
@@ -486,9 +487,9 @@ compared to A* from Boost Graph Library
 %------------------------------------------------
 \begin{frame}
 \frametitle{Conclusions}
-In general Fringe Search is a good single source shortest path algorithm, that can be very well implemented in parallel.\\
+In general Fringe Search is a good single source shortest path algorithm, that can be well implemented in parallel.\\
 \begin{itemize}
-\item Path quality not dependent of \# cores
+\item Path quality is not dependent of \# cores
 \item Good strong scaling
 \item Weak scaling is not perfect
 \item quality $\leftrightarrow$ runtime trade-off can be tuned for desired result
