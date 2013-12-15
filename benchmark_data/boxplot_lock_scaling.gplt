@@ -1,11 +1,11 @@
-filename= 'time_locks.out'
+filename= 'time_locks_1.out'
 
 color1 = "#FF3C00"
 color2 = "#008CFF"
 color3 = "#00993A"
 lwidth = 3
 
-number_of_cores = 4 
+number_of_cores = 8 
 min_potenz = 7
 max_potenz = 11
 
@@ -54,7 +54,7 @@ do for [thrp=0:0] {
 			set logscale x 2
 			set logscale y 10
 
-			set xrange [0.8:4.8]
+			set xrange [0.8:8.4]
 
 			do for [i=1:number_of_cores] { set xtics add (sprintf("%g",i) i) }
 			do for [i=1:20] { set ytics add (i*0.2) }	
