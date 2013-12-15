@@ -52,10 +52,10 @@ do for [thrp=0:0] {
 			set style fill  border lc rgb parallel_color
 
 #			set logscale x 2
-			set logscale y 10
+#			set logscale y 10
 
 			set xrange [0.1:8.9] 
-			set yrange [0.15:1]
+			set yrange [0.15:0.9]
 
 			do for [i=1:number_of_cores] { set xtics add (sprintf("%g\n%g",i, int(grid_size*sqrt(i))) i) }
 			do for [i=1:20] { set ytics add (i*0.2) }	
