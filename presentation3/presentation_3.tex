@@ -86,7 +86,7 @@
 
 \title[Parallel Fringe Search]{Parallel Fringe Search} % The short title appears at the bottom of every slide, the full title is only on the title page
 
-\author{Christian Zeman \& Lukas Mosimann} % Your name
+\author{Lukas Mosimann \& Christian Zeman} % Your name
 \institute[ETH] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 {
 ETH Zürich \\ % Your institution for the title page
@@ -111,7 +111,7 @@ ETH Zürich \\ % Your institution for the title page
 %----------------------------------------------------------------------------------------
 
 %------------------------------------------------
-\section{Algorithm} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
+\section{Fringe Search} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
 %------------------------------------------------
 
 \begin{frame}
@@ -273,15 +273,73 @@ Lazy locking:
 \section{Benchmarks}
 %------------------------------------------------
 
+\begin{frame}
+\frametitle{Benchmarking}
+\textbf{Setup:}\\ \quad\\
+Each of the following boxplots was generated from data from \textbf{50 runs} on \textbf{1 node} of kanifushi.inf.ethz.ch.\\
+\quad\\
+Specifications of kanifushi.inf.ethz.ch:
+\begin{itemize}
+\item NUMA model with 32 CPUs on 4 nodes
+\item 8 CPUs per node
+\item Intel(R) Xeon(R) CPU E7- 4830  @ 2.13GHz
+\item per CPU: 32KB L1 cache, 256KB L2 cache
+\item per node: 24MB L3 cache, 16GB memory
+\end{itemize}
+
+\end{frame}
+
 %------------------------------------------------
-\subsection{Threshold vs. path length}
+\subsection{Locks}
+\begin{frame}
+\frametitle{Benchmarking: Locks}
+\begin{center}
+	\includegraphics[height=210pt]{lock_benchmark.pdf}
+\end{center}
+\end{frame}
+
+%------------------------------------------------
+\subsection{Strong scaling}
+\begin{frame}
+\frametitle{Benchmarking: Strong scaling}
+\begin{center}
+	\includegraphics[height=210pt]{strong_scaling.pdf}
+\end{center}
+\end{frame}
+
+%------------------------------------------------
+\subsection{Weak scaling}
+\begin{frame}
+\frametitle{Benchmarking: Weak scaling}
+\begin{center}
+	\includegraphics[height=210pt]{weak_scaling.pdf}
+\end{center}
+\end{frame}
+
+%------------------------------------------------
+\subsection{Path length}
+\begin{frame}
+\frametitle{Benchmarking: Path length $\leftrightarrow$ \# cores}
+compared to A* from Boost Graph Library
+\begin{center}
+	\includegraphics[height=210pt]{error_cores.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Benchmarking: Path length vs. \# cores}
+compared to A*
+\begin{center}
+	\includegraphics[height=210pt]{error_cores.pdf}
+\end{center}
+\end{frame}
 
 \definecolor{0.1}{HTML}{FF3C00}
 \definecolor{1}{HTML}{008CFF}
 \definecolor{10}{HTML}{00993A}
 
 \begin{frame}
-\frametitle{Threshold vs. path length}
+\frametitle{Benchmarking: Path length $\leftrightarrow$ Threshold update}
 \begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
 \column{.35\textwidth} % Left column and width
 \textbf{Threshold update}
@@ -300,7 +358,7 @@ Lazy locking:
 
 
 \begin{frame}
-\frametitle{Threshold vs. path length}
+\frametitle{Benchmarking: Path length $\leftrightarrow$ Threshold update}
 \begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
 \column{.35\textwidth} % Left column and width
 \textbf{Threshold update}
@@ -319,7 +377,7 @@ Lazy locking:
 
 
 \begin{frame}
-\frametitle{Threshold vs. path length}
+\frametitle{Benchmarking: Path length $\leftrightarrow$ Threshold update}
 \begin{columns}[c] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
 \column{.35\textwidth} % Left column and width
 \textbf{Threshold update}
@@ -337,83 +395,51 @@ Lazy locking:
 \end{frame}
 
 \begin{frame}
-\frametitle{Threshold vs. path length}
+\frametitle{Benchmarking: Path length $\leftrightarrow$ Threshold update}
 \begin{center}
 	\includegraphics[height=210pt]{smileygraph_zoom.png}
 \end{center}
 \end{frame}
 
 \begin{frame}
-\frametitle{Threshold vs. path length}
+\frametitle{Benchmarking: Path length $\leftrightarrow$ Threshold update}
 \begin{center}
 	\includegraphics[height=210pt]{path_close.png}
 \end{center}
 \end{frame}
 
-%------------------------------------------------
-\subsection{\# cores vs. path length}
 
 \begin{frame}
-\frametitle{Path length error: \# cores}
+\frametitle{Benchmarking: Path length $\leftrightarrow$ Threshold update}
+compared to A* from Boost Graph Library
 \begin{center}
-	\includegraphics[trim=0pt 0pt 0pt 30pt, clip, height=190pt]{error_cores.pdf}
+	\includegraphics[height=210pt]{error_threshold.pdf}
 \end{center}
-
-\tiny
-\begin{columns}[t] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
-\column{.4\textwidth} % Left column and width
-- relative error in path length compared to A* \\
-- 2048 x 2048 nodes
-
-\column{.4\textwidth} % Right column and width
-- threshold relaxing: +1 \\
-- 50 runs on 1 node of kanifushi.inf.ethz.ch
-\end{columns}
-\normalsize
 \end{frame}
 
 %------------------------------------------------
-\subsection{Threshold relaxing vs. path length}
-
+\subsection{Threshold handling}
 \begin{frame}
-\frametitle{Path length error: threshold relaxing}
+\frametitle{Benchmarking: Run time $\leftrightarrow$ Threshold update}
 \begin{center}
-	\includegraphics[trim=0pt 0pt 0pt 30pt, clip, height=190pt]{error_threshold.pdf}
+	\includegraphics[height=210pt]{runtime_threshold.pdf}
 \end{center}
-
-\tiny
-\begin{columns}[t] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
-\column{.4\textwidth} % Left column and width
-- relative error in path length compared to A* \\
-- 2048 x 2048 nodes
-
-
-\column{.4\textwidth} % Right column and width
-- As we have seen before \# cores doesn't matter \\
-- 50 runs on 1 node of kanifushi.inf.ethz.ch
-
-\end{columns}
-\normalsize
 \end{frame}
 
 %------------------------------------------------
+\section{Conclusions}
+%------------------------------------------------
 \begin{frame}
-\frametitle{Strong scaling}
-\begin{center}
-	\includegraphics[trim=0pt 0pt 0pt 30pt, clip, height=190pt]{strong_scaling.pdf}
-\end{center}
-
-\tiny
-\begin{columns}[t] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
-\column{.4\textwidth} % Left column and width
-- 2048 x 2048 nodes
-
-
-\column{.4\textwidth} % Right column and width
-- 50 runs on 1 node of kanifushi.inf.ethz.ch
-\end{columns}
-\normalsize
+\frametitle{Conclusions}
+In general Fringe Search is a good single source shortest path algorithm, that can be very well implemented in parallel.\\
+\begin{itemize}
+\item Path quality not dependent of \# cores
+\item Good strong scaling
+\item Weak scaling is not perfect
+\item quality $\leftrightarrow$ runtime trade-off can be tuned for desired result
+\end{itemize}
 \end{frame}
+
 
 
 %
