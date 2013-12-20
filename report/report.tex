@@ -5,6 +5,8 @@
 
 \documentclass[letterpaper]{article}
 \usepackage{spconf,amsmath,amssymb,graphicx}
+\usepackage[utf8]{inputenc} 			% Zeichensatz
+\usepackage[T1]{fontenc} 			% Umlaute unterstützen
 
 % Example definitions.
 % --------------------
@@ -17,13 +19,12 @@
 
 % Title.
 % ------
-\title{A Descriptive Title, not too general, not too long}
+\title{Parallel implementation of Fringe Search}
 %
 % Single address.
 % ---------------
-\name{Markus P\"uschel\thanks{The author thanks Jelena Kovacevic. This paper
-is a modified version of the template she used in her class.}} 
-\address{Department of Computer Science\\ ETH Z\"urich\\Z\"urich, Switzerland}
+\name{Lukas Mosimann, Christian Zeman} 
+\address{ETH Z\"urich\\Z\"urich, Switzerland}
 
 % For example:
 % ------------
@@ -63,48 +64,26 @@ should write the abstract last.
 
 \section{Introduction}\label{sec:intro}
 
-Do not start the introduction with the abstract or a slightly modified
-version. It follows a possible structure of the introduction. 
-Note that the structure can be modified, but the
-content should be the same. Introduction and abstract should fill at most the first page, better less.
+This project was part of the course \textit{Design of Parallel and High-Performance Computing} given by Torsten Hoefler and Markus Püschel in autumn 2013 at ETH Zürich.
 
-\mypar{Motivation} The first task is to motivate what you do.  You can
-start general and zoom in one the specific problem you consider.  In
-the process you should have explained to the reader: what you are doing,
-why you are doing, why it is important (order is usually reversed).
 
-For example, if my result is the fastest sorting implementation ever, one
-could roughly go as follows. First explain why sorting is important
-(used everywhere with a few examples) and why performance matters (large datasets,
-realtime). Then explain that fast implementations are very hard and
-expensive to get (memory hierarchy, vector, parallel). 
+\mypar{Motivation} 
+Pathfinding is an important part in many applications, especially in computer games and robotics. A very popular algorithm for pathfinding is A*, an algorithm that will find an optimal path between two nodes on a graph with a best-first search approach using a priority queue. A path is called optimal if it is the shortest possible path between two points.\\
+Fringe search is an alternative to A* that was introduced in \cite{fringe:05}. It doesn't use a priority queue to store the nodes and therefore generally outperforms A* \cite{fringe:05}. The trade-off is that Fringe Search, compared to A*, does not guarantee to find the shortest path. It's rather used to find a good path, which might not be optimal, but short enough in order to be a reasonable path.\\
+The goal of this paper was the implementation and benchmarking of a parallel version of Fringe Search similar to \cite{brand:09} but in a shared memory environment.
 
-Now you state what you do in this paper. In our example: 
-presenting a sorting implementation that is
-faster for some sizes as all the other ones.
+\mypar{Related work} This paper is mainly based on two papers. The Fringe Search algorithm was introduced in \cite{fringe:05}. S. Brand and R. Bidarra implemented a parallel version in a distributed memory environment described in \cite{brand:12} and a bit more specific in the Master Thesis of S. Brand \cite{brand:09}. In this paper the implementation was done for a shared memory environment.
 
-\mypar{Related work} Next, you have to give a brief overview of
-related work. For a report like this, anywhere between 2 and 8
-references. Briefly explain what they do. In the end contrast to what
-you do to make now precisely clear what your contribution is.
+\section{Background: Shortest Path Problem}\label{sec:background}
+In this section we formally define the shortest path problem we consider and introduce two algorithms that are used to solve it including a cost analysis.
 
-\section{Background: Whatever the Background is}\label{sec:background}
+\mypar{Single source shortest path}
+A problem where the goal is to find the shortest path between a start and an end node in a directed or undirected graph. In our case we used a directed graph.
 
-Give a short, self-contained summary of necessary
-background information. For example, assume you present an
-implementation of sorting algorithms. You could organize into sorting
-definition, algorithms considered, and asymptotic runtime statements. The goal of the
-background section is to make the paper self-contained for an audience
-as large as possible. As in every section
-you start with a very brief overview of the section. Here it could be as follows: In this section 
-we formally define the sorting problem we consider and introduce the algorithms we use
-including a cost analysis.
+\mypar{A*}
+A very popular algorithm that uses a best-first search approach in order to find the shortest path. It always finds the shortest possible path and therefore it's called optimal. It uses a priority queue for the nodes and therefore each insert into the queue has complexity $O(\log n)$.
 
-\mypar{Sorting}
-Precisely define sorting problem you consider.
-
-\mypar{Sorting algorithms}
-Explain the algorithm you use including their costs.
+\mypar{Fringe Search}bllal
 
 As an aside, don't talk about "the complexity of the algorithm.'' It's incorrect,
 problems have a complexity, not algorithms.
@@ -147,12 +126,12 @@ answer from the plot in its discussion.
 \item Every plot should be referenced and discussed.
 \end{itemize}
 
-\begin{figure}\centering
-  \includegraphics[scale=0.33]{dft-performance.eps}
-  \caption{Performance of four single precision implementations of the
-  discrete Fourier transform. The operations count is roughly the
-  same. The labels in this plot are maybe a little bit too small.\label{fftperf}}
-\end{figure}
+%\begin{figure}\centering
+%  \includegraphics[scale=0.33]{dft-performance.eps}
+%  \caption{Performance of four single precision implementations of the
+%  discrete Fourier transform. The operations count is roughly the
+%  same. The labels in this plot are maybe a little bit too small.\label{fftperf}}
+%\end{figure}
 
 \section{Conclusions}
 
