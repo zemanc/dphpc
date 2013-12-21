@@ -67,7 +67,7 @@ This project was part of the course \textit{Design of Parallel and High-Performa
 
 \mypar{Motivation} 
 Pathfinding is an important part in many applications, especially in computer games and robotics. Fringe search is a popular algorithm for single-pair shortest path problems. Unlike A* it won't guarantee to find the shortest path, but rather a path "short enough". The advantage of Fringe Search is that it generally outperforms A* as shown in \cite{fringe:05}.\\
-The goal of this paper was the implementation and benchmarking of a parallel version of Fringe Search similar to \cite{brand:09} but in a shared memory environment.
+In \cite{brand:09} a parallel implementation has been done for a distributed memory environment. The goal of this paper was the implementation and benchmarking of a parallel version of Fringe Search for a shared memory environment.
 
 \mypar{Related work} This paper is mainly based on two papers. The Fringe Search algorithm was introduced in \cite{fringe:05}. S. Brand and R. Bidarra implemented a parallel version in a distributed memory environment described in \cite{brand:12} and a bit more specific in the Master Thesis of S. Brand \cite{brand:09}. In this paper the implementation was done for a shared memory environment.
 
@@ -81,7 +81,7 @@ A problem where the goal is to find the shortest path between a start and an end
 A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function (e.g. Euclidean distance to end node). It always finds the shortest possible path and therefore it's called optimal. It uses a priority queue for the nodes and therefore each insert into the queue has complexity $O(\log n)$.
 
 \mypar{Fringe Search}
-A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a simple list where an insert has the complexity $O(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A* \cite{fringe:05}.
+A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a simple list where an insert has the complexity $O(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fringe:algo}.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.245]{fringe_rep.eps}
