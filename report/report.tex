@@ -110,7 +110,7 @@ As a first step we implemented a strictly sequential Fringe Search in order to h
  \While{x != zero}{
  	\eIf{$x.f \leq threshold$}{
  		\If{$x == end$}{
- 			delete node $zero$ from $nowlaterlist$\;
+ 			delete $zero$ from $nowlaterlist$\;
 			return $reconstructPath()$; \tcp*[f]{done} \\
  		}
  		$x.status \leftarrow closed$\;
@@ -138,7 +138,7 @@ As a first step we implemented a strictly sequential Fringe Search in order to h
  		$x \leftarrow x.next$\;
  	}
 }
-delete $zero$\;
+delete $zero$ from $nowlaterlist$\;
 return -1; \tcp*[f]{no existing path to end}
 \caption{Fringe Search (sequential)\label{algo:seq}}
 \end{algorithm}
