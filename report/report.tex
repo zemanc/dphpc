@@ -79,7 +79,7 @@ In this section we formally define the single-pair shortest path problem and we 
 A problem where the goal is to find the shortest path between a start and an end node in a directed or undirected graph. In our case we used a directed graph.
 
 \mypar{A*}
-A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function (e.g. Euclidean distance to end node). It always finds the shortest possible path and therefore it's called optimal. It uses a priority queue for the nodes and therefore each insert into the queue has complexity $O(\log n)$.
+A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function (e.g. Euclidean distance or Manhattan distance to end node). It always finds the shortest possible path and therefore it's called optimal. It uses a priority queue for the nodes and therefore each insert into the queue has complexity $O(\log n)$.
 
 \mypar{Fringe Search}
 A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a simple list where an insert has the complexity $O(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fig:algo}.

@@ -256,9 +256,9 @@
           <y:Geometry height="74.8444280738784" width="332.54534394723015" x="190.82749109234854" y="1410.081211187335"/>
           <y:Fill color="#FFFFFF" transparent="false"/>
           <y:BorderStyle hasColor="false" type="line" width="1.0"/>
-          <y:NodeLabel alignment="left" autoSizePolicy="content" fontFamily="Dialog" fontSize="18" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="66.859375" modelName="internal" modelPosition="bl" textColor="#000000" visible="true" width="319.3427734375" x="4.0" y="3.985053073878362">f(X) = g(X) + h(X)
+          <y:NodeLabel alignment="left" autoSizePolicy="content" fontFamily="Dialog" fontSize="18" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="66.859375" modelName="internal" modelPosition="bl" textColor="#000000" visible="true" width="307.1083984375" x="4.0" y="3.985053073878362">f(X) = g(X) + h(X)
 g(X): Passed dist. to X from start
-h(X): Euclidean dist. from X go end</y:NodeLabel>
+h(X): Heuristic dist. from X to end</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -541,7 +541,7 @@ f(D) = 5 + 2 = 7</y:NodeLabel>
           <y:Geometry height="50.30120443271774" width="145.31642427440624" x="-115.31854328232174" y="977.6504211081793"/>
           <y:Fill color="#FFFFFF" transparent="false"/>
           <y:BorderStyle hasColor="false" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="18" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="66.859375" modelName="internal" modelPosition="r" textColor="#000000" visible="true" width="152.1748046875" x="-10.858380413093755" y="-8.279085283641052">f(B) = 4 + 4 = 8
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="18" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="66.859375" modelName="internal" modelPosition="r" textColor="#000000" visible="true" width="152.1748046875" x="-10.858380413093755" y="-8.279085283641166">f(B) = 4 + 4 = 8
 f(C) = 3 + 5 = 8
 f(D) = 5 + 2 = 7</y:NodeLabel>
           <y:Shape type="rectangle"/>
@@ -689,7 +689,7 @@ f(D) = 5 + 2 = 7</y:NodeLabel>
           <y:Geometry height="50.30120443271774" width="145.31642427440624" x="359.00181133509255" y="977.6504211081793"/>
           <y:Fill color="#FFFFFF" transparent="false"/>
           <y:BorderStyle hasColor="false" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="18" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="66.859375" modelName="internal" modelPosition="r" textColor="#000000" visible="true" width="152.1748046875" x="-10.858380413093755" y="-8.279085283641052">f(B) = 4 + 4 = 8
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="18" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="66.859375" modelName="internal" modelPosition="r" textColor="#000000" visible="true" width="152.1748046875" x="-10.858380413093755" y="-8.279085283641166">f(B) = 4 + 4 = 8
 f(C) = 3 + 5 = 8
 f(D) = 5 + 2 = 7</y:NodeLabel>
           <y:Shape type="rectangle"/>
