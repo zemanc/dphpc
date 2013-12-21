@@ -8,6 +8,7 @@
 \usepackage[utf8]{inputenc} 			% Zeichensatz
 \usepackage[T1]{fontenc} 			% Umlaute unterstützen
 \usepackage{float}
+\usepackage[ruled,vlined]{algorithm2e}	% Pseudocode
 
 % Example definitions.
 % --------------------
@@ -81,15 +82,68 @@ A problem where the goal is to find the shortest path between a start and an end
 A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function (e.g. Euclidean distance to end node). It always finds the shortest possible path and therefore it's called optimal. It uses a priority queue for the nodes and therefore each insert into the queue has complexity $O(\log n)$.
 
 \mypar{Fringe Search}
-A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a simple list where an insert has the complexity $O(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fringe:algo}.
+A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a simple list where an insert has the complexity $O(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fig:algo}.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.245]{fringe_rep.eps}
-  \caption{Fringe Search example \label{fringe:algo}}
+  \caption{Fringe Search example \label{fig:algo}}
 \end{figure}
 
 
-\section{Your Proposed Method}\label{sec:your method}
+\section{Concept and implementation}\label{sec:impl}
+
+In this section we will show how the implementation has been done and illustrate  the used locking concepts.
+
+\mypar{Sequential Fringe Search}
+As a first step we implemented a strictly sequential Fringe Search in order to have a basis for the parallel implementation and also as a reference for the benchmarks regarding the speedup of the parallel version. The pseudocode is shown in algorithm \ref{algo:seq}.
+\begin{algorithm}[h]
+ %\SetLine % For v3.9
+ \SetInd{0.5em}{0.5em}
+ %\SetAlgoLined % For previous releases [?]
+ %\KwData{this text}
+ %\KwResult{how to write algorithm with \LaTeX2e }
+ %initialization\;
+ create $nowlaterlist$\;
+ add nodes $zero$ and $start$ to $nowlaterlist$\;
+ $threshold \leftarrow heuristicDist(start, end)$\;
+ $x \leftarrow start$\;
+ \While{x != zero}{
+ 	\eIf{$x.f \leq threshold$}{
+ 		\If{$x == end$}{
+ 			delete node $zero$ from $nowlaterlist$\;
+			return $reconstructPath()$; \tcp*[f]{done} \\
+ 		}
+ 		$x.status \leftarrow closed$\;
+		\For{each neighbour $nb$}{
+			\uIf{$nb.state == open$}{
+				calculate new distance\;
+				\If{$dist < nb.g$}{
+					update $nb.f$ and $nb.g$ and set $nb.parent$\;
+					move $nb$ right behind $x$ in $nowlaterlist$\;
+				}
+			}
+			\ElseIf{$nb.state = inactive$}{
+				calculate $nb.g$ and $nb.f$\;
+				$nb.parent \leftarrow x$\;
+				insert $nb$ right behind $x$ in $nowlaterlist$\;
+			}
+		}
+		delete $x$ from $nowlaterlist$\;
+	}
+ 	{
+ 		$x \leftarrow x.next$\;
+ 	}
+	\If{$x == zero$}{
+ 		increase $threshold$\;
+ 		$x \leftarrow x.next$\;
+ 	}
+}
+delete $zero$\;
+return -1; \tcp*[f]{no existing path to end}
+\caption{Fringe Search (sequential)\label{algo:seq}}
+\end{algorithm}
+
+\mypar{Locking concept}
 
 Now comes the ``beef'' of the report, where you explain what you
 did. Again, organize it in paragraphs with titles. As in every section
