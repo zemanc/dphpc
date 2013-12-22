@@ -177,16 +177,16 @@ In order to avoid deadlocks we always lock in the same direction (see figure \re
 The sequence for inserting nodes is shown in figure \ref{fig:insert}.
 
 \begin{figure}[h]\centering
-  \includegraphics[scale=0.245]{insert2.eps}
-  \caption{Insert node into list \label{fig:insert}}
+  \includegraphics[scale=0.31]{insert.eps}
+  \caption{Insert a node into the list \label{fig:insert}}
 \end{figure}
 
 \mypar{Locks: Remove nodes}
 The sequence for removing nodes is shown in  figure \ref{fig:remove}.
 
 \begin{figure}[h]\centering
-  \includegraphics[scale=0.245]{remove2.eps}
-  \caption{Remove node from list. Note: The pointers of the removed node remain so that a traversing thread won't get lost. \label{fig:remove}}
+  \includegraphics[scale=0.31]{remove.eps}
+  \caption{Remove a node from the list. Note: The pointers of the removed node remain so that a traversing thread won't get lost (traversing is without locks). \label{fig:remove}}
 \end{figure}
 
 Now comes the ``beef'' of the report, where you explain what you
