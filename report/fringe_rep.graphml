@@ -183,7 +183,7 @@
           <y:Geometry height="28.0" width="120.0" x="193.64507943007916" y="1333.3976561477568"/>
           <y:Fill color="#F0F0F0" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="18" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="24.953125" modelName="custom" textColor="#000000" visible="true" width="48.9208984375" x="35.53955078125" y="1.5234375">open<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="18" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="24.953125" modelName="custom" textColor="#000000" visible="true" width="75.12109375" x="22.439453125" y="1.5234375">inactive<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>

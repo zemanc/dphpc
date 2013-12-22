@@ -8,7 +8,8 @@
 \usepackage[utf8]{inputenc} 			% Zeichensatz
 \usepackage[T1]{fontenc} 			% Umlaute unterstützen
 \usepackage{float}
-\usepackage[ruled,vlined]{algorithm2e}	% Pseudocode
+\usepackage[boxed,vlined,linesnumbered]{algorithm2e}	% Pseudocode
+\setalcapskip{2ex}									% caption unter code
 
 % Example definitions.
 % --------------------
@@ -82,7 +83,7 @@ A problem where the goal is to find the shortest path between a start and an end
 A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function (e.g. Euclidean distance or Manhattan distance to end node). It always finds the shortest possible path and therefore it's called optimal. It uses a priority queue for the nodes and therefore each insert into the queue has complexity $O(\log n)$.
 
 \mypar{Fringe Search}
-A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a simple list where an insert has the complexity $O(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fig:algo}.
+A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a linked list where an insert has the complexity $O(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fig:algo}.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.245]{fringe_rep.eps}
@@ -94,56 +95,99 @@ A single-pair shortest path algorithm that is similar to A*, but instead of a pr
 
 In this section we will show how the implementation has been done and illustrate  the used locking concepts.
 
+\mypar{Graph structure}
+We used a directed graph implemented as adjacency list. This means that each node has a list of pointers to the edges that connect it to other nodes.
+
+\mypar{Linked lists}
+We used two doubly linked lists we will henceforth call the "nowlist" and the "laterlist". The nowlist generally contains the nodes that have status $now$ whereas the laterlist contains the nodes that have status $later$. Whenever the nowlist is empty we increase the threshold and swap the two lists as we also swap the definition of the status ($now$ will become $later$ and vice versa).
+
 \mypar{Sequential Fringe Search}
-As a first step we implemented a strictly sequential Fringe Search in order to have a basis for the parallel implementation and also as a reference for the benchmarks regarding the speedup of the parallel version. The pseudocode is shown in algorithm \ref{algo:seq}.
+As a first step we implemented a strictly sequential Fringe Search in order to have a basis for the parallel implementation and also as a reference for the benchmarks regarding the speedup of the parallel version.
+
+\mypar{Parallel Fringe Search}
+Besides the necessary locks for the insertion and removal from the lists the threshold relaxation part is the bottleneck because this part has to be done sequentially by only one thread. The pseudocode can be found in algorithm \ref{algo:par}.
+
 \begin{algorithm}[h]
- %\SetLine % For v3.9
- \SetInd{0.5em}{0.5em}
- %\SetAlgoLined % For previous releases [?]
- %\KwData{this text}
- %\KwResult{how to write algorithm with \LaTeX2e }
- %initialization\;
- create $nowlaterlist$\;
- add nodes $zero$ and $start$ to $nowlaterlist$\;
- $threshold \leftarrow heuristicDist(start, end)$\;
- $x \leftarrow start$\;
- \While{x != zero}{
- 	\eIf{$x.f \leq threshold$}{
- 		\If{$x == end$}{
- 			delete $zero$ from $nowlaterlist$\;
-			return $reconstructPath()$; \tcp*[f]{done} \\
- 		}
- 		$x.status \leftarrow closed$\;
-		\For{each neighbour $nb$}{
-			\uIf{$nb.state == open$}{
-				calculate new distance\;
-				\If{$dist < nb.g$}{
-					update $nb.f$ and $nb.g$ and set $nb.parent$\;
-					move $nb$ right behind $x$ in $nowlaterlist$\;
+\SetInd{0.5em}{0.5em}
+add nodes $zero$ and $start$ to $nowlist$ \;
+add node $zero$ and $laterlist$ \;
+$threshold \leftarrow heuristicDist(start, end)$ \;
+\tcp{\textbf{\underline{start parallel part}}}
+$x \leftarrow start$ \;
+\tcp{\textbf{\underline{barrier: wait for all threads}}}
+\While(\tcp*[f]{any nodes left}){$nowlist \neq \emptyset$}{
+	\While(\tcp*[f]{nodes $\leq$ thresh}){$nowlist \neq \emptyset$}{
+ 		\eIf{$x.f \leq threshold$}{
+ 	 		\If{$x == end$}{
+				return $reconstructPath()$ \tcp*[r]{done}
+	 		}
+ 			$x.status \leftarrow closed$ \;
+			\For{each neighbour $nb$}{
+				\uIf{$nb.status == now$}{
+					calculate new distance \;
+					\If{$dist < nb.g$}{
+						update $nb.f$, $nb.g$ and $nb.parent$ \;
+						move $nb$ right behind $x$ in $nowlist$ \;
+					}
+				}
+				\uElseIf{$nb.status == later$}{
+					calculate new distance \;
+					\If{$dist < nb.g$}{
+						update $nb.f$, $nb.g$ and $nb.parent$ \;
+						remove $nb$ from $laterlist$ \;					
+						insert $nb$ right behind $x$ in $nowlist$ \;
+						$nb.status \leftarrow now$ \;
+					}
+				}
+				\ElseIf{$nb.status == inactive$}{
+					calc $nb.g$, $nb.f$ and set $nb.parent \leftarrow x$\;
+					insert $nb$ right behind $x$ in $nowlist$ \;
+					$nb.status \leftarrow now$ \;
 				}
 			}
-			\ElseIf{$nb.state = inactive$}{
-				calculate $nb.g$ and $nb.f$\;
-				$nb.parent \leftarrow x$\;
-				insert $nb$ right behind $x$ in $nowlaterlist$\;
-			}
-		}
-		delete $x$ from $nowlaterlist$\;
+			remove $x$ from $nowlist$ \;
+		}{
+ 			$x.status \leftarrow later$ and 
+ 			$lastlater \leftarrow x$ \;
+ 			$x \leftarrow x.next.next. ...$ \tcp*[r]{skip a few}
+ 			move $lastlater$ from $nowlist$ to $laterlist$ \; 
+ 		}
 	}
- 	{
- 		$x \leftarrow x.next$\;
- 	}
-	\If{$x == zero$}{
- 		increase $threshold$\;
- 		$x \leftarrow x.next$\;
- 	}
+	\tcp{\textbf{\underline{sequential part}}}
+	increase $threshold$ \;
+	swap $nowlist \leftrightarrow laterlist$ and $now \leftrightarrow later$ \;
+	\tcp{\textbf{\underline{run again in parallel}}}
+	\lIf{$lastlater$ still in $nowlist$}{$x \leftarrow lastlater$ \;}
+	\lElse(\tcp*[h]{zero from nowlist}){$x \leftarrow zero$ }
 }
-delete $zero$ from $nowlaterlist$\;
-return -1; \tcp*[f]{no existing path to end}
-\caption{Fringe Search (sequential)\label{algo:seq}}
+return -1 \tcp*[r]{no existing path to end}
+\caption{Parallel Fringe Search\label{algo:par}}
 \end{algorithm}
 
-\mypar{Locking concept}
+
+\mypar{Locks: Avoiding deadlocks}
+In order to avoid deadlocks we always lock in the same direction (see figure \ref{fig:lock}). If we don't know whether the second node we would like to lock is in the correct direction (e.g. left in the nowlist) we must not force a lock. This can only occur if we want to move a node in the nowlist and this is only the case if we've found a shorter path to a node that already has a path that is below threshold. In this case we can try locking it. If the try is successful we can update the path and move it and if not we just leave the old path that was already below threshold. This does not change the behaviour of the algorithm since the node was below threshold anyway (actually this node easily could have been closed by another thread before we'd found the better path), but acting like this we ensure that no deadlocks can happen.
+
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.38]{locking.eps}
+  \caption{Locking direction \label{fig:lock}}
+\end{figure}
+
+\mypar{Locks: Insert nodes}
+The sequence for inserting nodes is shown in figure \ref{fig:insert}.
+
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.245]{insert2.eps}
+  \caption{Insert node into list \label{fig:insert}}
+\end{figure}
+
+\mypar{Locks: Remove nodes}
+The sequence for removing nodes is shown in  figure \ref{fig:remove}.
+
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.245]{remove2.eps}
+  \caption{Remove node from list. Note: The pointers of the removed node remain so that a traversing thread won't get lost. \label{fig:remove}}
+\end{figure}
 
 Now comes the ``beef'' of the report, where you explain what you
 did. Again, organize it in paragraphs with titles. As in every section
