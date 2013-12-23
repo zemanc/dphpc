@@ -30,7 +30,7 @@ do for [r=11:11] {
 	grid_size = 2**r
 
 	#two plots per site
-	set multiplot layout 1,2  title 'speedup with different thresholds, '.grid_size.' x '.grid_size
+	set multiplot layout 1,2  title 'speedup vs. sequential, '.grid_size.' x '.grid_size
 
 	do for [grapht=1:2] {
 
