@@ -100,18 +100,18 @@ do for [r=11:11] {
 		plot \
 			for [i=min_thr_pot+1:max_thr_pot] \
 				filename using (2**i): \
-				(filter4d(1, grapht, 2, 2**i, 3, grid_size, 5, 2*p, 7)) \
-				lc rgb parallel_color lw lwidth notitle, \
-			filename using (2**min_thr_pot): \
-				(filter4d(1, grapht, 2, 2**min_thr_pot, 3, grid_size, 5, 2*p, 7)) \
-				lc rgb parallel_color lw lwidth title 'parallel normal 2 cores', \
-			for [i=min_thr_pot+1:max_thr_pot] \
-				filename using (2**i): \
 				(filter4d(1, grapht, 2, 2**i, 3, grid_size, 5, p, 7)) \
 				lc rgb parallel_color2 lw lwidth notitle, \
 			filename using (2**min_thr_pot): \
 				(filter4d(1, grapht, 2, 2**min_thr_pot, 3, grid_size, 5, p, 7)) \
-				lc rgb parallel_color2 lw lwidth title 'parallel normal 4 cores', \
+				lc rgb parallel_color2 lw lwidth title 'parallel normal 2 cores', \
+			for [i=min_thr_pot+1:max_thr_pot] \
+				filename using (2**i): \
+				(filter4d(1, grapht, 2, 2**i, 3, grid_size, 5, 2*p, 7)) \
+				lc rgb parallel_color lw lwidth notitle, \
+			filename using (2**min_thr_pot): \
+				(filter4d(1, grapht, 2, 2**min_thr_pot, 3, grid_size, 5, 2*p, 7)) \
+				lc rgb parallel_color lw lwidth title 'parallel normal 4 cores', \
 			for [i=min_thr_pot+1:max_thr_pot] \
 				filename using (2**i): \
 				(filter4d(1, grapht, 2, 2**i, 3, grid_size, 5, 4*p, 7)) \
