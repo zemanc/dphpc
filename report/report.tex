@@ -4,7 +4,7 @@
 % --------------------------------------------------------------------------
 
 \documentclass[letterpaper]{article}
-\usepackage{spconf,amsmath,amssymb,graphicx}
+\usepackage{spconf,amsmath,amssymb,graphicx,paralist,url}
 \usepackage[utf8]{inputenc} 			% Zeichensatz
 \usepackage[T1]{fontenc} 			% Umlaute unterstützen
 \usepackage{float}
@@ -215,18 +215,67 @@ We implemented and tested two different strategies for removing the nodes. The f
 
 \section{Experimental Results}\label{sec:exp}
 
-Here you evaluate your work using experiments. You start again with a
-very short summary of the section. The typical structure follows.
+In this section we evaluate our implementation by looking at the speed of the sequential algorithm, the performance of the different locks, strong scaling, weak scaling, the speedup with different threshold relaxation values and the quality (length) of the path depending on the threshold relaxation value.
 
-\mypar{Experimental setup} Specify the platform (processor, frequency, maybe OS, maybe cache sizes)
-as well as the compiler, version, and flags used. If your work is about performance, 
-I strongly recommend that you play with optimization flags and consider also icc for additional potential speedup.
+\subsection{Experimental setup}\label{ssec:setup}
 
-Then explain what kind of benchmarks you ran. The idea is to give enough information so the experiments are reproducible by somebody else on his or her code.
-For sorting you would talk about the input sizes. For a tool that performs NUMA optimization, you would specify the programs you ran.
+\mypar{Hardware and compiler}
+The experiments have been done on kanifushi.inf.ethz.ch, a computer with the following properties:
+\begin{compactitem}
+\item NUMA model with 32 CPUs on 4 nodes
+\item 8 CPUs per node
+\item Intel(R) Xeon(R) CPU E7- 4830 @ 2.13GHz
+\item per CPU: 32KB L1 cache, 256KB L2 cache
+\item per node: 24MB L3 cache, 16GB memory
+\end{compactitem}
+Because the it's an implementation for a shared memory environment we've used only 1 node with 8 CPUs for the experiments. In order to do this the application had to be executed with the \textit{numactl} tool (e.g. \textit{numactl --cpunodebind 0 --membind 0 fringe}).\\
+The code has been compiled with g++ v. 4.6.1 using O1 optimization. All of the following performance analysis plots are the result of 50 runs on 1 node.
 
-\mypar{Results}
+\mypar{Graphs used for benchmarking}
+Each experiment has been run on two different graph types with different obstacles, the "cross graph" and the "circle graph" which both are illustrated in figure \ref{fig:graphs}. Both graphs have the following properties:
+\begin{compactitem}
+\item based on a regular grid with distance 1 and 8 edges per node
+\item each node is moved randomly\\(normal distribution, $\sigma = 0.3$)
+\item start node is top left and end node is bottom right
+\end{compactitem}
+
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.3]{benchmark_graphs.eps}
+  \caption{The graphs used for benchmarking: "cross graph" (left) and "circle graph" (right). In this picture the blue nodes represent the found path, the green nodes are the closed nodes and the red nodes were in the nowlist or laterlist when the algorithm finished. \label{fig:graphs}}
+\end{figure}
+
+\subsection{Results}\label{ssec:results}
+
+\mypar{Sequential Fringe Search}
+In order to affirm good performance of the sequential version we tested the sequential Fringe search against the A* search from the Boost Graph Library\footnote{\url{http://www.boost.org/doc/libs/1_55_0/libs/graph/doc/index.html}} as we couldn't find a reliable implementation of Fringe Search we could compare our code to.\\
+Our implementation of Fringe Search proved to be much faster than A* from the Boost Graph Library (about 10 times as fast on a graph with $1024 \times 1024$ nodes). But of course one has to take into account that Fringe Search doesn't guarantee an optimal path like A*.
+
+\mypar{Locks}
+As mentioned in section \ref{ssec:lock}, next to the locks provided by OpenMP, we implemented some other locks using inline assembly. We implemented the following additional locks:
+\begin{compactitem}
+\item TAS: test-and-set lock
+\item TAS EXP: test-and-set lock with exponential back-off
+\end{compactitem}
+As you can see in figure \ref{fig:lock_bench} the inline assembly locks were significantly faster than the OpenMP locks. Therefore we used the test-and-set lock for our implementation and also the following benchmarks are based on the implementation with these locks.
+
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.558]{lock_benchmark.eps}
+  \caption{Strong scaling using different locks.\label{fig:lock_bench}}
+\end{figure}
+
+
+\mypar{Lazy removal versus normal removal}
+
+
+
 Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behaviour with changing input size, then how your code compares to external benchmarks.
+
+
+
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.558]{speedup_threshold.eps}
+  \caption{The speeeeeeeedup. \label{fig:speedup}}
+\end{figure}
 
 For some tips on benchmarking including how to create a decent viewgraph see pages 22--27 in \cite{Pueschel:10}.
 
