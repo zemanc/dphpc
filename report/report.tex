@@ -93,21 +93,29 @@ A single-pair shortest path algorithm that is similar to A*, but instead of a pr
 
 \section{Concept and implementation}\label{sec:impl}
 
-In this section we will show how the implementation has been done and illustrate  the used locking concepts.
+In this section we will show how the implementation has been done, emphasise the important aspects of it and illustrate the used concepts for locking.
+
+\subsection{Language and data structure}\label{ssec:lang}
+
+\mypar{Language}
+The implementation has been done with C++11 and OpenMP 3.0.
 
 \mypar{Graph structure}
-We used a directed graph implemented as adjacency list. This means that each node has a list of pointers to the edges that connect it to other nodes.
+We used a directed graph implemented as adjacency list. This means that each node has a list of pointers to the edges that connect it to other nodes. An edge contains a pointer to the node it's pointing to and the length of the edge.\\
+Each node has a position in a 2D plane which is also needed for the heuristic cost function (e.g. Euclidean distance to the end node).
 
 \mypar{Linked lists}
 We used two doubly linked lists we will henceforth call the "nowlist" and the "laterlist". The nowlist generally contains the nodes that have status $now$ whereas the laterlist contains the nodes that have status $later$. Whenever the nowlist is empty we increase the threshold and swap the two lists as we also swap the definition of the status ($now$ will become $later$ and vice versa).
+
+\subsection{From sequential to parallel}\label{ssec:seqpar}
 
 \mypar{Sequential Fringe Search}
 As a first step we implemented a strictly sequential Fringe Search in order to have a basis for the parallel implementation and also as a reference for the benchmarks regarding the speedup of the parallel version.
 
 \mypar{Parallel Fringe Search}
-Besides the necessary locks for the insertion and removal from the lists the threshold relaxation part is the bottleneck because this part has to be done sequentially by only one thread. The pseudocode can be found in algorithm \ref{algo:par}.
+Besides the necessary locks for the insertion and removal from the lists the threshold relaxation part (see line \ref{code:thresh} in algorithm \ref{algo:par}) is the bottleneck because this part has to be done sequentially by only one thread. The pseudocode for the parallel Fringe Search can be found in algorithm \ref{algo:par}.
 
-\begin{algorithm}[h]
+\begin{algorithm}[t!]
 \SetInd{0.5em}{0.5em}
 add nodes $zero$ and $start$ to $nowlist$ \;
 add node $zero$ and $laterlist$ \;
@@ -148,24 +156,37 @@ $x \leftarrow start$ \;
 			remove $x$ from $nowlist$ \;
 		}{
  			$x.status \leftarrow later$ and 
- 			$lastlater \leftarrow x$ \;
- 			$x \leftarrow x.next.next. ...$ \tcp*[r]{skip a few}
+ 			$lastlater \leftarrow x$ \nllabel{code:lastlater}\;
+ 			$x \leftarrow x.next$
  			move $lastlater$ from $nowlist$ to $laterlist$ \; 
  		}
 	}
 	\tcp{\textbf{\underline{sequential part}}}
-	increase $threshold$ \;
-	swap $nowlist \leftrightarrow laterlist$ and $now \leftrightarrow later$ \;
+	increase $threshold$ \nllabel{code:thresh} \;
+	swap $nowlist \leftrightarrow laterlist$ and $now \leftrightarrow later$ \nllabel{code:swap} \;
 	\tcp{\textbf{\underline{run again in parallel}}}
-	\lIf{$lastlater$ still in $nowlist$}{$x \leftarrow lastlater$ \;}
-	\lElse(\tcp*[h]{zero from nowlist}){$x \leftarrow zero$ }
+	\lIf{$lastlater$ still in $nowlist$}{$x \leftarrow lastlater$ \nllabel{code:ifll} \;}
+	\lElse(\tcp*[h]{zero from nowlist}){$x \leftarrow zero$ \nllabel{code:elsell}}
 }
 return -1 \tcp*[r]{no existing path to end}
-\caption{Parallel Fringe Search\label{algo:par}}
+\caption{Parallel Fringe Search\label{algo:par}. Note: The locking mechanism is not part of this pseudocode, but it's thoroughly described in section \ref{ssec:lock} and in figures \ref{fig:lock}, \ref{fig:insert} and \ref{fig:remove}).}
 \end{algorithm}
 
+\mypar{Swapping the lists}
+Whenever we relax the threshold the nowlist and the laterlist will get swapped (line \ref{code:swap} in algorithm \ref{algo:par}). This means the nowlist will become the laterlist and vice versa. Also the node states will get swapped (now will become later and vice versa).\\
+This part has to be done sequentially. After this we can run in parallel again but we don't want to have all the threads starting from the $zero$ node again but rather have them distributed over the new nowlist. We somehow achieve this by remembering the last node in the laterlist a thread has worked with (see line \ref{code:lastlater} in algorithm \ref{algo:par}). Like this, the probability is high that this node is now in the nowlist and not all threads will start at the same node. Another advantage of this behaviour is that we might profit from the cache effect because this node might still be in the cache. But of course we have to check if this node is now really in the nowlist which can't be guaranteed. If this is not the case we just start from the $zero$ node which is the only node we can be sure that it's still in the nowlist (see lines \ref{code:ifll} and \ref{code:elsell} in algorithm \ref{algo:par}).
 
-\mypar{Locks: Avoiding deadlocks}
+\subsection{Locking}\label{ssec:lock}
+
+\mypar{Traversing the list}
+Whenever a thread traverses the nowlist it tries to lock every node it encounters. It does not force a lock because this would slow the application down significantly (many threads would wait at the same node)! It just tries and if it's successful it can work with this node (visit the adjacent nodes, etc.). If the thread fails trying to lock the node it means that another thread is working with exactly this node.\\
+In this case we don't go just to the next node in the list because this might lead to some jam because the other thread will probably try to lock this node soon and like this the two threads would get in each others way quite often.\\
+So instead of just going to the next node if we encounter a locked node we skip a few nodes in order to achieve a nice distribution of the threads over the nowlist. Skipping 150 nodes has proven to provide a relatively good distribution which results in a faster runtime.
+
+\mypar{Lock type}
+We implemented and tried several locks. Next to the locks provided by OpenMP we implemented other locks using inline assembly (e.g. test-and-set lock). 
+
+\mypar{Avoiding deadlocks}
 In order to avoid deadlocks we always lock in the same direction (see figure \ref{fig:lock}). If we don't know whether the second node we would like to lock is in the correct direction (e.g. left in the nowlist) we must not force a lock. This can only occur if we want to move a node in the nowlist and this is only the case if we've found a shorter path to a node that already has a path that is below threshold. In this case we can try locking it. If the try is successful we can update the path and move it and if not we just leave the old path that was already below threshold. This does not change the behaviour of the algorithm since the node was below threshold anyway (actually this node easily could have been closed by another thread before we'd found the better path), but acting like this we ensure that no deadlocks can happen.
 
 \begin{figure}[h]\centering
@@ -173,7 +194,7 @@ In order to avoid deadlocks we always lock in the same direction (see figure \re
   \caption{Locking direction \label{fig:lock}}
 \end{figure}
 
-\mypar{Locks: Insert nodes}
+\mypar{Insert nodes}
 The sequence for inserting nodes is shown in figure \ref{fig:insert}.
 
 \begin{figure}[h]\centering
@@ -181,21 +202,16 @@ The sequence for inserting nodes is shown in figure \ref{fig:insert}.
   \caption{Insert a node into the list \label{fig:insert}}
 \end{figure}
 
-\mypar{Locks: Remove nodes}
-The sequence for removing nodes is shown in  figure \ref{fig:remove}.
+\mypar{Remove nodes}
+The sequence for removing nodes is shown in  figure \ref{fig:remove}.\\
+We implemented and tested two different strategies for removing the nodes. The first strategy is to remove the node immediately as shown in figure \ref{fig:remove} when it has to be removed. The other strategy is to just mark it as removed, go on and let other threads actually remove it while they are traversing the list.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.31]{remove.eps}
   \caption{Remove a node from the list. Note: The pointers of the removed node remain so that a traversing thread won't get lost (traversing is without locks). \label{fig:remove}}
 \end{figure}
 
-Now comes the ``beef'' of the report, where you explain what you
-did. Again, organize it in paragraphs with titles. As in every section
-you start with a very brief overview of the section.
 
-In this section, structure is very important so one can follow the technical content.
-
-Mention and cite any external resources that you used including libraries or other code.
 
 \section{Experimental Results}\label{sec:exp}
 
