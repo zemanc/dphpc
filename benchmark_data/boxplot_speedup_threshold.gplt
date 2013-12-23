@@ -4,7 +4,7 @@ parallel_color = "#FF3C00"
 parallel_color_lazy = "#008CFF"
 parallel_color2 = "#EE8E00"
 parallel_color_lazy2 = "#33B3AA"
-sequential_color = "#00993A"
+sequential_color = "#00551C"
 lwidth = 5
 
 set key font ",15"
