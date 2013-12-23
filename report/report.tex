@@ -256,7 +256,7 @@ As mentioned in section \ref{ssec:lock}, next to the locks provided by OpenMP, w
 \item TAS: test-and-set lock
 \item TAS EXP: test-and-set lock with exponential back-off
 \end{compactitem}
-As you can see in figure \ref{fig:lock_bench} the inline assembly locks were significantly faster than the OpenMP locks. Therefore we used the test-and-set lock for our implementation and also the following benchmarks are based on the implementation with these locks.
+As you can see in figure \ref{fig:lock_bench} the inline assembly locks were significantly faster than the OpenMP locks. Therefore we used the test-and-set lock with exponential back-off for our implementation and also the following benchmarks are based on the implementation with these locks.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.558]{lock_benchmark.eps}
