@@ -27,7 +27,7 @@ do for [thrp=0:0] {
 		grid_size = 2**r
 
 		#two plots per site
-		set multiplot layout 1,2  title 'Weak scaling, threshold='.sprintf("%g", threshold) font ",17"
+		set multiplot layout 1,2  title 'Weak scaling, threshold+='.sprintf("%g", threshold) font ",17"
 
 		do for [grapht=1:2] {
 

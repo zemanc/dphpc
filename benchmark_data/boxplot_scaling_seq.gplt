@@ -22,7 +22,7 @@ do for [thrp=0:0] {
 	threshold = 2**thrp
 
 	#two plots per site
-	set multiplot layout 1,2  title 'Scaling sequential, threshold='.sprintf("%g", threshold) font ",17"
+	set multiplot layout 1,2  title 'Scaling sequential, threshold+='.sprintf("%g", threshold) font ",17"
 
 	#calculate max and min for scale
 	maxy = system("awk 'NR==1{max=0} $1<=2&&$2==".int(sprintf("%g",threshold))."&&$5+1==0&&$7>max{max=$7} END{print max;}' time1.out")

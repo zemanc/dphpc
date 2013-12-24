@@ -31,7 +31,7 @@ do for [thrp=0:0] {
 		grid_size = 2**r
 
 		#two plots per site
-		set multiplot layout 1,2  title 'Speedup Strong scaling '.grid_size.' x '.grid_size.', threshold='.sprintf("%g", threshold) font ",17"
+		set multiplot layout 1,2  title 'Speedup Strong scaling '.grid_size.' x '.grid_size.', threshold+='.sprintf("%g", threshold) font ",17"
 
 		#calculate max and min for scale
 		maxy = system("awk 'NR==1{max=0} $1<=2&&$2==".sprintf("%g",threshold)."&&$3==".grid_size."&&$7>max{max=$7} $1<=2&&$2==".sprintf("%g",threshold)."&&$3==".sprintf("%g",grid_size)."&&$9>max&&NF==10{max=$9} END{print max;}' time1.out")
