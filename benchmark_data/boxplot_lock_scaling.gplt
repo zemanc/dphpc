@@ -1,9 +1,10 @@
+#OK 24.12
 filename= 'time_locks_1.out'
 
 color1 = "#FF3C00"
 color2 = "#008CFF"
-color3 = "#00993A"
-lwidth = 3
+color3 = "#00551C"
+lwidth = 5
 
 number_of_cores = 8 
 min_potenz = 7
@@ -16,6 +17,7 @@ getGraphName(i) = (i == 1 || i == 3) ? "Cross Graph" : "Circle Graph"
 
 set terminal eps size 6,4
 
+set key font ",15"
 set output 'lock_benchmark.eps'
 
 do for [thrp=0:0] {
@@ -25,7 +27,7 @@ do for [thrp=0:0] {
 		grid_size = 2**r
 
 		#two plots per site
-		set multiplot layout 1,2  title 'Strong scaling '.grid_size.' x '.grid_size.', threshold='.sprintf("%g", threshold)
+		set multiplot layout 1,2  title 'Strong scaling '.grid_size.' x '.grid_size.', threshold='.sprintf("%g", threshold) font ",17"
 
 		do for [grapht=1:2] {
 
@@ -37,15 +39,15 @@ do for [thrp=0:0] {
 
 			set style data boxplot
 
-			set title getGraphName(grapht) offset 0,-0.5
-			set xlabel offset 0,0.5 'number of cores'
+			set title getGraphName(grapht) font ",15" offset 0,-0.5 
+			set xlabel offset 0,0.5 'number of cores' font ",15"
 			if (grapht==1) {
-				set ylabel offset 1.4,0 'time [s]'
+				set ylabel offset 1.4,0 'time [s]' font ",15"
 				set lmargin 7
 				set rmargin 0
 				set tmargin 1.3
 
-				do for [i=0:9] { set ytics add (sprintf("%.1f",0.2*i) 0.2*i) }
+				do for [i=0:9] { set ytics add (sprintf("%.1f",0.2*i) 0.2*i) font ",15" }
 			} else {
 				set lmargin 2
 				set rmargin 5
@@ -54,7 +56,7 @@ do for [thrp=0:0] {
 				unset ytics
 				
 				do for [i=0:9] { set ytics add (" " 0.2*i) }
-				do for [i=0:9] { set y2tics add (sprintf("%.1f",0.2*i) 0.2*i) }
+				do for [i=0:9] { set y2tics add (sprintf("%.1f",0.2*i) 0.2*i) font ",15" }
 			}
 
 			#box style
@@ -64,10 +66,10 @@ do for [thrp=0:0] {
 			set style fill  border lc rgb color1 
 
 			set xrange [0.6:8.4]
-			set yrange [0.15:1.7]
-			set y2range [0.15:1.7]
+			set yrange [0.0:1.7]
+			set y2range [0.0:1.7]
 
-			do for [i in "1 2 3 4 6 8"] { set xtics add (sprintf("%g",i*1) i*1) }
+			do for [i in "1 2 3 4 6 8"] { set xtics add (sprintf("%g",i*1) i*1) font ",15" }
 
 			#erste Zeile ohne Titel!
 			plot \

@@ -1,10 +1,11 @@
+#OK 24.12
 filename= 'time1.out'
 
-parallel_color = "#FF3C00"
-parallel_color_lazy = "#008CFF"
-parallel_color2 = "#EE8E00"
+parallel_color_lazy = "#FF3C00"
+sequential_color = "#008CFF"
+parallel_color2 = "#FF3C00"
 parallel_color_lazy2 = "#33B3AA"
-sequential_color = "#00993A"
+parallel_color = "#00551C"
 lwidth = 5
 
 number_of_cores = 4 
@@ -21,6 +22,7 @@ p = 4
 
 getGraphName(i) = (i == 1 || i == 3) ? "Cross Graph" : "Circle Graph"
 
+set key font ",15"
 set terminal eps size 6,4
 
 set output 'runtime_threshold.eps'
@@ -30,7 +32,7 @@ do for [r=11:11] {
 	grid_size = 2**r
 
 	#two plots per site
-	set multiplot layout 1,2  title 'runtime with different thresholds, '.grid_size.' x '.grid_size
+	set multiplot layout 1,2  title 'runtime with different thresholds, '.grid_size.' x '.grid_size font ",17"
 
 	do for [grapht=1:2] {
 
@@ -57,29 +59,40 @@ do for [r=11:11] {
 
 		set style data boxplot
 
-		set title getGraphName(grapht)
-		set xlabel offset 0,0.5 'threshold relaxing'
+		set title getGraphName(grapht) offset 0,-0.5 font ",15"
+		set xlabel offset 0,0.5 'threshold relaxing' font ",15"
 		if (grapht==1) {
-			set ylabel offset 1.4,0 'runtime'
+			set ylabel offset 1.4,0 'runtime [s]' font ",15"
+			set lmargin 7
+			set rmargin 0
+			set tmargin 1.3
+			do for [i=0:10] { set ytics add (sprintf("%.1f",0.2*i) 0.2*i)  font ",15"}
+
 		} else {
+
+			set lmargin 2
+			set rmargin 5
+			set tmargin 1.3
 			unset ylabel
+			unset ytics
+
+			do for [i=0:10] { set ytics add ("" 0.2*i) }
+			do for [i=0:10] { set y2tics add (sprintf("%.1f",0.2*i) 0.2*i)  font ",15"}
 		}
+		show margin;
 
 		#box style
 		set logscale x 2
-		set logscale y 10
 
 		set pointsize 0.05
 		set boxwidth 0.11
 		set style fill  border lc rgb parallel_color
 
 		set xrange [0.08:11]
-		set yrange [0.11:2]
+		set yrange[0:1.9]
+		set y2range[0:1.9]
 
-		do for [i=min_thr_pot:max_thr_pot] { set xtics add (sprintf("%g",2**i) 2**i) }
-		do for [i=1:4] { set ytics add (sprintf("%g",0.2*i) 0.2*i) }
-		set ytics add("0.3" 0.3)
-		set ytics add("1.5" 1.5)
+		do for [i=min_thr_pot:max_thr_pot] { set xtics add (sprintf("%g",2**i) 2**i)  font ",15"}
 
 		#erste Zeile ohne Titel!
 		plot \
@@ -93,35 +106,17 @@ do for [r=11:11] {
 				lc rgb sequential_color lw lwidth fill empty \
 				border lc rgb sequential_color title 'sequential', \
 			for [i=min_thr_pot+1:max_thr_pot] \
-				filename using (2**i*zahl_2): \
-				(filter4(1, grapht, 2, 2**i, 3, grid_size, 5, p, 9)) \
-				lc rgb parallel_color_lazy2 lw lwidth \
-				fill empty border lc rgb parallel_color_lazy2 notitle, \
-			filename using (2**min_thr_pot*zahl_2): \
-				(filter4(1, grapht, 2, 2**min_thr_pot, 3, grid_size, 5, p, 9)) \
-				lc rgb parallel_color_lazy2 lw lwidth fill empty \
-				border lc rgb parallel_color_lazy2 title 'parallel lazy 4 cores', \
-			for [i=min_thr_pot+1:max_thr_pot] \
-				filename using (2**i*zahl_1): \
+				filename using (2**i): \
 				(filter4(1, grapht, 2, 2**i, 3, grid_size, 5, p, 7)) \
 				lc rgb parallel_color2 lw lwidth notitle, \
-			filename using (2**min_thr_pot*zahl_1): \
+			filename using (2**min_thr_pot): \
 				(filter4(1, grapht, 2, 2**min_thr_pot, 3, grid_size, 5, p, 7)) \
 				lc rgb parallel_color2 lw lwidth title 'parallel normal 4 cores', \
 			for [i=min_thr_pot+1:max_thr_pot] \
-				filename using (2**i*zahl_2): \
-				(filter4(1, grapht, 2, 2**i, 3, grid_size, 5, 2*p, 9)) \
-				lc rgb parallel_color_lazy lw lwidth \
-				fill empty border lc rgb parallel_color_lazy notitle, \
-			filename using (2**min_thr_pot*zahl_2): \
-				(filter4(1, grapht, 2, 2**min_thr_pot, 3, grid_size, 5, 2*p, 9)) \
-				lc rgb parallel_color_lazy lw lwidth fill empty \
-				border lc rgb parallel_color_lazy title 'parallel lazy 8 cores', \
-			for [i=min_thr_pot+1:max_thr_pot] \
-				filename using (2**i*zahl_1): \
+				filename using (2**i): \
 				(filter4(1, grapht, 2, 2**i, 3, grid_size, 5, 2*p, 7)) \
 				lc rgb parallel_color lw lwidth notitle, \
-			filename using (2**min_thr_pot*zahl_1): \
+			filename using (2**min_thr_pot): \
 				(filter4(1, grapht, 2, 2**min_thr_pot, 3, grid_size, 5, 2*p, 7)) \
 				lc rgb parallel_color lw lwidth title 'parallel normal 8 cores'
 

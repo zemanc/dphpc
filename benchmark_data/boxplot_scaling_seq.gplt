@@ -1,6 +1,7 @@
+#OK 24.12
 filename= 'time1.out'
 
-sequential_color = "#00993A"
+sequential_color = "#008CFF"
 lwidth = 5
 
 number_of_cores = 8 
@@ -12,6 +13,7 @@ zahl_2 = 0.98
 
 getGraphName(i) = (i == 1 || i == 3) ? "Cross Graph" : "Circle Graph"
 
+set key font ",15"
 set terminal eps size 6,4
 
 set output 'seq_scaling.eps'
@@ -20,7 +22,7 @@ do for [thrp=0:0] {
 	threshold = 2**thrp
 
 	#two plots per site
-	set multiplot layout 1,2  title 'Scaling sequential, threshold='.sprintf("%g", threshold)
+	set multiplot layout 1,2  title 'Scaling sequential, threshold='.sprintf("%g", threshold) font ",17"
 
 	#calculate max and min for scale
 	maxy = system("awk 'NR==1{max=0} $1<=2&&$2==".int(sprintf("%g",threshold))."&&$5+1==0&&$7>max{max=$7} END{print max;}' time1.out")
@@ -36,12 +38,22 @@ do for [thrp=0:0] {
 
 		set style data boxplot
 
-		set title getGraphName(grapht)
-		set xlabel offset 0,0.5 'width of graph'
+		set title getGraphName(grapht) offset 0,-0.5 font ",15"
+		set xlabel offset 0,0.5 'width of graph' font ",15"
 		if (grapht==1) {
-			set ylabel offset 2 'time [s]'
+			set ylabel offset 3.8,0 'time [s]'
+			set lmargin 6
+			set rmargin 1
+			set tmargin 1.3
+			set ytics offset 0.7,0
+
 		} else {
+			set lmargin 1
+			set rmargin 6
+			set tmargin 1.3
 			unset ylabel
+			do for[i in "0.001 0.01 0.1 1"] { set ytics add (" " i) font ",15"}
+			set y2tics offset -1.1,0
 		}
 
 		#box style
@@ -50,10 +62,12 @@ do for [thrp=0:0] {
 		set boxwidth 0.35
 
 		set logscale y 10
+		set logscale y2 10
 		set logscale x 2
 
 		set xrange [2**min_potenz*0.7:2**max_potenz/0.7]
 		set yrange [miny*0.7:maxy/0.7]
+		set y2range [miny*0.7:maxy/0.7]
 		set nokey
 
 		#erste Zeile ohne Titel!
