@@ -1,10 +1,10 @@
 #OK 24.12
 filename= 'time2.out'
 
-parallel_color = "#FF3C00"
-parallel_color_lazy = "#008CFF"
-sequential_color = "#00993A"
-lwidth = 3
+parallel_color_lazy = "#FF3C00"
+sequential_color = "#008CFF"
+parallel_color = "#00551C"
+lwidth = 5
 
 number_of_cores = 8 
 min_potenz = 7
@@ -15,6 +15,7 @@ zahl_2 = 0.15
 
 getGraphName(i) = (i == 1 || i == 3) ? "Cross Graph" : "Circle Graph"
 
+set key font ",15"
 set terminal eps size 6,4
 
 set output 'weak_scaling.eps'
@@ -26,7 +27,7 @@ do for [thrp=0:0] {
 		grid_size = 2**r
 
 		#two plots per site
-		set multiplot layout 1,2  title 'Weak scaling, threshold='.sprintf("%g", threshold)
+		set multiplot layout 1,2  title 'Weak scaling, threshold='.sprintf("%g", threshold) font ",17"
 
 		do for [grapht=1:2] {
 
@@ -38,12 +39,28 @@ do for [thrp=0:0] {
 
 			set style data boxplot
 
-			set title getGraphName(grapht)
-			set xlabel offset 0,0 'number of cores / graph width'
+			set title getGraphName(grapht) font ",15" offset 0,-0.5
 			if (grapht==1) {
-				set ylabel offset 2 'time [s]'
+				set xlabel 'number of cores / graph width' font ",15" offset 0,0 
+				set ylabel offset 1.4,0 'time [s]' font ",15"
+				set lmargin 7
+				set rmargin 0
+				set tmargin 1.3
+				set bmargin 3
+
+				do for [i=0:14] { set ytics add (sprintf("%.1f",0.1*i) 0.1*i) font ",15" }
 			} else {
+				#werom ou immr so en seich nötig esch....
+				set xlabel 'number of cores / graph width' font ",15" offset 0,0.9 
+				set lmargin 2
+				set rmargin 5
+				set tmargin 1.3
+				set bmargin 3
 				unset ylabel
+				unset ytics
+
+				do for [i=0:14] { set ytics add (sprintf(" ") 0.1*i) font ",15" }
+				do for [i=0:14] { set y2tics add (sprintf("%.1f",0.1*i) 0.1*i) font ",15" }
 			}
 
 			#box style
@@ -56,29 +73,28 @@ do for [thrp=0:0] {
 #			set logscale y 10
 
 			set xrange [0.1:8.9] 
-			set yrange [0.15:0.9]
+			set yrange [0:0.95]
+			set y2range [0:0.95]
 
 			do for [i=1:number_of_cores] { set xtics add (sprintf("%g\n%g",i, int(grid_size*sqrt(i))) i) }
-			do for [i=1:20] { set ytics add (i*0.2) }	
-			set ytics add (0.3)
-			set ytics add (0.5)
-			set xtics font ",10" rotate by 45
+
+			set xtics font ",13" rotate by 55 offset 0,-0.4
 
 			#erste Zeile ohne Titel!
 			plot \
 				for [i=2:number_of_cores] \
-					filename using (i+zahl_1): \
+					filename using (i-zahl_1): \
 					(filter4(1, grapht+2, 2, threshold, 5, i, 3, int(grid_size*sqrt(i)), 7)) \
 					lc rgb parallel_color lw lwidth notitle, \
-				filename using (1+zahl_1): \
+				filename using (1-zahl_1): \
 					(filter4(1, grapht+2, 2, threshold, 5, 1, 3, grid_size, 7)) \
 					lc rgb parallel_color lw lwidth title 'parallel normal', \
 				for [i=2:number_of_cores] \
-					filename using (i-zahl_2): \
+					filename using (i+zahl_2): \
 					(filter4(1, grapht+2, 2, threshold, 5, i, 3, int(grid_size*sqrt(i)), 9)) \
 					lc rgb parallel_color_lazy lw lwidth \
 					fill empty border lc rgb parallel_color_lazy notitle, \
-				filename using (1-zahl_2): \
+				filename using (1+zahl_2): \
 					(filter4(1, grapht+2, 2, threshold, 5, 1, 3, grid_size, 9)) \
 					lc rgb parallel_color_lazy lw lwidth fill empty \
 					border lc rgb parallel_color_lazy title 'parallel lazy'
