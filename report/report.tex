@@ -283,18 +283,15 @@ One can also see that the more cores we use, the lower the actual benefit in ter
 Also, it actually doesn't matter which strategy for removing the nodes we use (lazy vs. normal - see section \ref{ssec:lock}). The difference in speed is negligible.
 
 \mypar{Weak scaling}
-Because of the limitations in terms of speedup according to Amdahl's law which are also visible in figure \ref{fig:strong_scaling} the next important question is how the runtime behaves with an increasing problem size for an increasing number of cores, the so called weak scaling.\\
-First we will look how the runtime of our sequential algorithm behaves with an increasing problem size. The results in figure \ref{fig:seq_scaling} show that the runtime gets considerably higher the bigger the problem is.
-\begin{figure}[h]\centering
-  \includegraphics[scale=0.558]{seq_scaling.eps}
-  \caption{Runtime of sequential algorithm with increasing problem size \label{fig:seq_scaling}}
-\end{figure}
-Now if we keep the problem size per core (number of nodes per core) constant we still experience an increase in runtime with increasing problem size, bit it's not as dramatic as with the sequential version (see figure \ref{fig:weak_scaling}).
+Because of the limitations in terms of speedup according to Amdahl's law which are also visible in figure \ref{fig:strong_scaling} the next important question is how the runtime behaves with an increasing problem size for an increasing number of cores. This means we keep the problem size per core (number of nodes per core) constant.\\
+As you can see in figure \ref{fig:weak_scaling} we still experience an increase in runtime with increasing problem size, but it's not that much and certainly not as dramatic as if it would be if we didn't increase the number of cores.
 \begin{figure}[h]\centering
   \includegraphics[scale=0.558]{weak_scaling.eps}
   \caption{Weak scaling\label{fig:weak_scaling}}
 \end{figure}
-The runtime still increases because with an increasing problem size we also increase the sequential part of the algorithm (longer path will lead to more threshold updates).
+The behaviour meets our expectations, because with increasing problem size we also increase the time the program spends in the sequential part (longer path will lead to more threshold updates).
+
+
 
 Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behaviour with changing input size, then how your code compares to external benchmarks.
 
