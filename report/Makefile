@@ -9,8 +9,6 @@ all: $(patsubst %.tex,%.pdf,$(wildcard *.tex))
 	latex $<
 	bibtex report.aux
 	latex $<
-	latex $<
-	latex $<
 
 %.ps: %.dvi
 	dvips -t letter -Ppdf -G0 $< -o $@

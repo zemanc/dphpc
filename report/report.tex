@@ -8,9 +8,10 @@
 \usepackage[utf8]{inputenc} 			% Zeichensatz
 \usepackage[T1]{fontenc} 			% Umlaute unterstützen
 \usepackage{float}
+\usepackage[skip=3px]{caption}
 \usepackage[boxed,vlined,linesnumbered]{algorithm2e}	% Pseudocode
-%\SetAlCapSkip{2ex}				
-\setalcapskip{2ex}							% caption unter code
+\SetAlCapSkip{2ex}				
+%\setalcapskip{2ex}							% caption unter code
 \hyphenation{now-list}
 \hyphenation{later-list}
 
@@ -71,7 +72,7 @@ This project was part of the course \textit{Design of Parallel and High-Performa
 
 
 \mypar{Motivation} 
-Pathfinding is an important problem occuring in many applications, especially in computer games and robotics. Fringe search is a popular algorithm for single-pair shortest path problems. Unlike A* it doesn't guarantee to find the shortest path, but rather a path "short enough". The advantage of Fringe Search is that it generally outperforms A* as shown in \cite{fringe:05}.\\
+Pathfinding is an important problem occuring in many applications, especially in computer games and robotics. Fringe Search is a popular algorithm for single-pair shortest path problems. Unlike A* it doesn't guarantee to find the shortest path, but rather a path "short enough". The advantage of Fringe Search is that it generally outperforms A* as shown in \cite{fringe:05}.\\
 In \cite{brand:09} a parallel implementation of Fringe Search has been done for a distributed memory environment. The goal of this paper was the implementation and benchmarking of a parallel version of Fringe Search for a shared memory environment.
 
 \mypar{Related work} This paper is mainly based on three papers. The Fringe Search algorithm was introduced in \cite{fringe:05}. S. Brand and R. Bidarra implemented a parallel version in a distributed memory environment described in \cite{brand:12} and a bit more specific in the Master Thesis of S. Brand \cite{brand:09}. In this paper the implementation was done for a shared memory environment.
@@ -83,10 +84,10 @@ In this section we formally define the single-pair shortest path problem and we 
 A problem where the goal is to find the shortest path between a given start and an end node in a directed or undirected graph. In our case we used a directed graph.
 
 \mypar{A*}
-A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function (e.g. Euclidean distance or Manhattan distance to the end node). It always finds the shortest possible path as long as the heuristic function never overestimates the real distance. Therefore it's called optimal. A* uses a priority queue for selecting the next nodes and therefore each insertion into the queue has complexity $\mathcal{O}(\log n)$ with respect to the size of the queue.
+A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function, which estimates the distance to the end node. It always finds the shortest possible path as long as the heuristic function never overestimates the real distance. Therefore it's called optimal. A* uses a priority queue for selecting the best node and therefore each insertion into the queue has complexity $\mathcal{O}(\log n)$ with respect to the size of the queue.
 
 \mypar{Fringe Search}
-A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a doubly linked list where an insertion has the complexity $\mathcal{O}(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fig:algo}.
+A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a doubly linked list where an insertion has only complexity $\mathcal{O}(1)$ and visits a node already if it's "promising enough" which is determined by a global threshold value that will be continuously increased. The path will not be optimal but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fig:algo}.
 \begin{figure}[h]\centering
   \includegraphics[scale=0.245]{fringe_rep.eps}
   \caption{Fringe Search example \label{fig:algo}}
@@ -95,22 +96,21 @@ A single-pair shortest path algorithm that is similar to A*, but instead of a pr
 
 \section{Concept and implementation}\label{sec:impl}
 
-In this section we will show how the implementation has been done, emphasize the important aspects of it and illustrate the used concepts for locking.
+In this section we will show how the implementation has been done, emphasize important aspects and illustrate the used concepts for locking. 
 
-\subsection{Language and data structure}\label{ssec:lang}
+\subsection{Language and data structures}\label{ssec:lang}
 
-\mypar{Language}
-The implementation has been done with C++11 and OpenMP 3.1.
+\mypar{Language} All implementations has been done with C++11 and OpenMP 3.
 
 \mypar{Graph structure}
-We used a directed graph implemented as adjacency list. This means that each node has a list of pointers to its neighbours as well as the distance to this node. Basically this distance can be everything as long as there exists a good heuristic cost function, which does not overestimate the real distance. \\
-In our experiments we interpreted the graph as nodes in a 2D plane, because it is easy to visualize. Each node has its position stored, so we can estimate the distance between to nodes with the Euclidian distance or also the Manhattan Distance if we're having a quadratic grid.
+We used a directed graph implemented as adjacency list. This means that each node stores a list of pointers to its neighbours as well as the distance to these nodes. Basically this distance can be everything as long as there exists a good heuristic cost function, which does not overestimate the real distance. \\
+In our experiments we interpreted the graph as nodes in a 2D plane, because it is easy to visualize. Each node has its position stored, so we can estimate the distance between two nodes with the Euclidian distance or also the Manhattan Distance if we're having a quadratic grid.
 
 \mypar{Status}
-Each Node possesses a status. A node, which is \textit{inactive}, has not yet been visited. In the beginning, each node except the start node is inactive. A \textit{closed} Node has an estimated cost under the current threshold (i.e. the sum of the real cost from the start to this node and the estimated cost from this node to the end is lower than the current threshold). A node with status \textit{now} is a node that possibly lies on the path between start and end. It has a closed neighbor, i.e. we know the real distance from the start to his node. Status \textit{later} means, that the node also has a closed neighbor, but the cost estimation of this node currently is above threshold, so the node will not be visited again, until we increased the threshold.
+Each Node possesses a status. A node, which is \textit{inactive}, has not yet been visited. In the beginning, each node except the start node is inactive. A \textit{closed} Node has an estimated cost under the current threshold (i.e. the sum of the real cost from the start to this node and the estimated cost from this node to the end is lower than the current threshold). A node with status \textit{now} is a node that possibly lies on the path between start and end. It has a closed neighbor, i.e. we know the real distance from the start to this node. Status \textit{later} means, that the node also has a closed neighbor, but the cost estimation of this node currently is above threshold, so the node will not be visited again, until we increase the threshold.
 
 \mypar{Linked lists}
-We used two doubly linked lists we will henceforth call the "nowlist" and the "laterlist". The nowlist generally contains the nodes that have status $now$ whereas the laterlist contains the nodes that have status $later$. Whenever the nowlist is empty we increase the threshold and swap the two lists as we also swap the definition of the status ($now$ will become $later$ and vice versa). 
+We used two doubly linked lists we will henceforth call the \textit{nowlist} and the \textit{laterlist}. The nowlist generally contains the nodes that have status now whereas the laterlist contains the nodes that have status later. Whenever the nowlist becomes empty we increase the threshold and swap the two lists as we also swap the definition of the status (now will become later and vice versa). 
 
 \subsection{From sequential to parallel}\label{ssec:seqpar}
 
@@ -122,6 +122,7 @@ Besides the necessary locks for the insertion and removal from the lists the thr
 \begin{algorithm}[t!]
 \SetKwFunction{heuristicDist}{heuristicDist}
 \SetKwFunction{reconstructPath}{reconstructPath}
+\SetKw{And}{ and }
 
 \SetInd{0.5em}{0.5em}
 \newcommand{\var}[1]{{\textit{#1}}}
@@ -129,36 +130,36 @@ Besides the necessary locks for the insertion and removal from the lists the thr
 add node \var{start} to \var{nowlist} \;
 $\var{laterlist} \gets \emptyset$ \;
 $\var{threshold} \gets \heuristicDist{\var{start}, \var{end}}$ \;
-\While{$\var{nowlist} \neq \emptyset \textnormal{ \&\& } \var{laterlist} \neq \emptyset $}{ 
-	\While(\tcp*[f]{\textnormal{$\exists$ nodes $\leq$ threshold}}){$nowlist \neq \emptyset$}{
+\While{$\var{nowlist} \neq \emptyset \And \var{laterlist} \neq \emptyset $}{ 
+	\While(\tcp*[f]{\textnormal{$\exists$ nodes $\leq$ \var{threshold}}}){$nowlist \neq \emptyset$}{
 		\var{x} $\gets$ Node from \var{nowlist} \;
  		\eIf{$\var{x}.\var{distanceEstimation} \leq \var{threshold}$}{
  	 		\If{$\var{x}$ == $\var{end}$}{
 				\Return $\reconstructPath{}$ \tcp*[f]{\textnormal{done}}
 	 		}
  			$\var{x}.\var{status} \gets closed$ \;
-			\ForEach{neighbour $\var{nb}$}{
-				\uIf{$\var{nb}.\var{status}$ == $ now$}{
+			\ForEach{\textnormal{neighbour} $\var{nb}$}{
+				\uIf{$\var{nb}.\var{status}$ = $ \var{now}$}{
 					calculate new distance estimation \var{dist} \;
 					\If{$\var{dist} < \var{nb}.\var{distanceEstimation}$}{
-						$\var{nb}.\var{distanceEstimation} = \var{dist}$ \;
-						$\var{nb}.\var{parent} = \var{x} $\;
+						$\var{nb}.\var{distanceEstimation} \gets \var{dist}$ \;
+						$\var{nb}.\var{parent} \gets \var{x} $\;
 						move $\var{nb}$ right behind $\var{x}$ in $\var{nowlist}$ \;
 					}
 				}
-				\uElseIf{$\var{nb}.\var{status}$ == $ later$}{
+				\uElseIf{$\var{nb}.\var{status} = \var{later}$}{
 					calculate new distance estimation \var{dist} \;
 					\If{$\var{dist} < \var{nb}.\var{distanceEstimation}$}{
-						$\var{nb}.\var{distanceEstimation} = \var{dist}$ \;
-						$\var{nb}.\var{parent} = \var{x} $\;
+						$\var{nb}.\var{distanceEstimation} \gets \var{dist}$ \;
+						$\var{nb}.\var{parent} \gets \var{x} $\;
 						remove $\var{nb}$ from $\var{laterlist}$ \;					
 						insert $\var{nb}$ right behind $\var{x}$ in $\var{nowlist}$ \nllabel{code:moveback}\;
 						$\var{nb}.\var{status} \gets \var{now}$ \;
 					}
 				}
-				\ElseIf{$nb.status == inactive$}{
+				\ElseIf{$\var{nb}.\var{status} = \var{inactive}$}{
 					calculate $\var{nb}.\var{distanceEstimation}$ \;
-					$\var{nb}.\var{parent} ? \var{x}$\;
+					$\var{nb}.\var{parent} \gets \var{x}$\;
 					calc $nb.g$, $nb.f$ and set $nb.parent \leftarrow x$\;
 					insert $\var{nb}$ right behind $\var{x}$ in $\var{nowlist}$ \;
 					$\var{nb}.\var{status} \gets \var{now} $ \;
@@ -171,16 +172,17 @@ $\var{threshold} \gets \heuristicDist{\var{start}, \var{end}}$ \;
  		}
 	}
 	increase $\var{threshold}$ \nllabel{code:thresh} \;
-	swap $\var{nowlist} \leftrightarrow laterlist$\nllabel{code:swaplist} \;
+	swap $\var{nowlist} $ and $ laterlist$\nllabel{code:swaplist} \;
 	swap the values of $\var{now}$ and $\var{later}$ \nllabel{code:swap} \;
 }
-return -1 \tcp*[r]{no existing path to end}
-\caption{parallelizable Fringe Search with two lists\label{algo:par}. Note: With the locking mechanism described in section \ref{ssec:lock} and in figures \ref{fig:lock}, \ref{fig:insert} and \ref{fig:remove}), this algorithm can be parallelized.}
+\Return -1 \tcp*[r]{no existing path to end}
+\caption{parallelizable Fringe Search with two lists\label{algo:par}}
 \end{algorithm}
 
 \mypar{Swapping the lists}
 Whenever we relax the threshold the nowlist and the laterlist and the states of the included nodes will get swapped (lines \ref{code:swaplist} and \ref{code:swap} in algorithm \ref{algo:par}). This means the nowlist will become the laterlist and vice versa.\\
-This part has to be done sequentially. After this we can run in parallel again but we don't want to have all the threads starting from the first node again in the nowlist again but rather have them distributed over the whole nowlist. We achieve this by remembering the last node in the laterlist a thread has worked with (e.g. a node moved into the laterlist in line \ref{code:move} in algorithm \ref{algo:par}). Like this, the probability is high that this node currently is in the nowlist and not all threads will start at the same node. Another advantage of this behaviour is that we might profit from the cache effect because this node might still be in the cache. But of course we have to check if this node is now truly in the nowlist which can't be guaranteed (a node remembered in line \ref{code:move} could be moved back in line \ref{code:moveback}). If this is not the case we just start from the first node in the new nowlist.
+After increasing the threshold we don't want to have all the threads starting from the first node in the nowlist but rather have them distributed over the whole nowlist. We achieve this by remembering the last node in the laterlist a thread has worked with (e.g. we save the last node moved into the laterlist in line \ref{code:move} in algorithm \ref{algo:par}). Like this, the probability is high that this node is in the nowlist after swapping and not all threads will start at the same node. Another advantage of this behaviour is that we might profit from the cache effect because this node might still be in the cache. \\
+But of course we have to check if this node is now truly in the nowlist which can't be guaranteed (a node remembered in line \ref{code:move} could be moved back in line \ref{code:moveback}). If this is not the case we just start from the first node in the new nowlist.
 
 \subsection{Locking}\label{ssec:lock}
 
@@ -193,9 +195,9 @@ So instead of just going to the next node if we encounter a locked node, we skip
 We implemented and tried several locks. Next to the locks provided by OpenMP we implemented other locks using inline assembly (e.g. test-and-set lock). 
 
 \mypar{Avoiding deadlocks}
-In order to avoid deadlocks we always lock in the same direction (see figure \ref{fig:lock}). If we don't know whether the second node we would like to lock is in the correct direction (e.g. left in the nowlist) we must not force a lock. Not knowing  the direction can only occur if we want to move a node in the nowlist and this is only the case if we've found a shorter path to a node that already has a path that is below the previous threshold. In this case we can try locking it. If the try is successful we can update the path and move it, and if the try was not successful we just leave the old path that was already below the old threshold. This does not change the behaviour of the algorithm since the other node was also in the nowlist and so it could have been closed by another thread anyway. 
-If we lock a node outside the two lists, this can be done without any problems, because we never try to lock more than one node outside the lists.
-Acting like this, we prevent any possible circular wait dependencies and no deadlocks can occur (see \cite{Coffman:71}).
+In order to avoid deadlocks we always lock in the same direction (see figure \ref{fig:lock}). If we don't know whether the second node we would like to lock is in the correct direction (e.g. left in the nowlist) we must not force a lock. Not knowing  the direction can only occur if we want to move a node in the nowlist and this is only the case if we've found a shorter path to a node that already has a path that is below the previous threshold. In this case we can try locking it. If the try is successful we can update the path and move it, and if the try was not successful we just leave the old path that was already below the old threshold. This does not change the behaviour of the algorithm since the other node was also in the nowlist and so it could have been closed by another thread before anyway. \\
+If we lock a node outside the two lists, this can be done without any problems, because no thread will ever try to lock more than one node outside the lists.
+Acting like this, we prevent any possible circular wait dependencies and so no deadlocks can occur (see \cite{Coffman:71}).
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.38]{locking.eps}
@@ -203,19 +205,20 @@ Acting like this, we prevent any possible circular wait dependencies and no dead
 \end{figure}
 
 \mypar{Insert nodes}
-The sequence for inserting nodes is shown in figure \ref{fig:insert}.
+The sequence for inserting nodes into a list is shown in figure \ref{fig:insert}.
 
+% TODO: Statt grün die gleiche Farbe wie beim remove (sieht bei grau viel besser aus :))
 \begin{figure}[h]\centering
   \includegraphics[scale=0.31]{insert.eps}
   \caption{Insert a node into the list \label{fig:insert}}
 \end{figure}
 
 \mypar{Remove nodes}
-The sequence for removing nodes is shown in  figure \ref{fig:remove}.\\
+The sequence for removing nodes from a list is shown in  figure \ref{fig:remove}.\\
 We implemented and tested two different strategies for removing the nodes. The first strategy is to physically remove the node immediately as shown in figure \ref{fig:remove}. The other strategy is to just mark it as removed, go on and let other threads physically remove it while they are traversing the list (lazy deletion).
 
 \mypar{Acquiring locks}
-All locks are acquired by "optimistic locking". This means that if we try to get locks on nodes with specific properties (e.g. the node must be predecessor of another, the node must have a specific state). Now we spin/wait until we get the lock and after acquiring the lock we ensure the conditions are still met and if not we release the lock immediately.
+All locks are acquired by "optimistic locking". This means that if we try to get locks on nodes with specific properties (e.g. the node must be predecessor of another node or the node must have a specific state), we spin/wait until we get the lock and after acquiring the lock we ensure the conditions are still met and if not we release the lock immediately.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.31]{remove.eps}
@@ -239,7 +242,7 @@ The experiments have been done on kanifushi.inf.ethz.ch, a computer with the fol
 \item per CPU: 32KB L1 cache, 256KB L2 cache
 \item per node: 24MB L3 cache, 16GB memory
 \end{compactitem}
-Because the it's an implementation for a shared memory environment we've used only 1 node with 8 CPUs for the experiments. In order to do this the application had to be executed with the \textit{numactl} tool (e.g. \textit{numactl --cpunodebind 0 --membind 0 fringe}).\\
+Because it's an implementation for a shared memory environment we've used only 1 node with 8 CPUs for the experiments. In order to do this the application had to be executed with the \textit{numactl} tool (e.g. \textit{numactl -{}-cpunodebind=0 -{}-membind=0 fringe}).\\
 The code has been compiled with g++ v. 4.6.1 using O1 optimization. All of the following performance analysis plots are the result of 50 runs on 1 node.
 
 \mypar{Graphs used for benchmarking}
@@ -258,7 +261,7 @@ Each experiment has been run on two different graph types with different obstacl
 \subsection{Results}\label{ssec:results}
 
 \mypar{Sequential Fringe Search}
-In order to affirm good performance of the sequential version we tested the sequential Fringe search against the A* search from the Boost Graph Library\footnote{\url{http://www.boost.org/doc/libs/1_55_0/libs/graph/doc/index.html}} as we couldn't find a reliable implementation of Fringe Search we could compare our code to.\\
+In order to affirm good performance of the sequential version we tested the sequential Fringe Search against the A* search from the Boost Graph Library\footnote{\url{http://www.boost.org/doc/libs/1_55_0/libs/graph/doc/index.html}} as we couldn't find a reliable implementation of Fringe Search we could compare our code to.\\
 Our implementation of Fringe Search proved to be much faster than A* from the Boost Graph Library (about 10 times as fast on a graph with $1024 \times 1024$ nodes). But of course one has to take into account that Fringe Search doesn't guarantee an optimal path like A*.
 
 \mypar{Locks}
@@ -267,7 +270,7 @@ As mentioned in section \ref{ssec:lock}, next to the locks provided by OpenMP, w
 \item TAS: test-and-set lock
 \item TAS EXP: test-and-set lock with exponential back-off
 \end{compactitem}
-As you can see in figure \ref{fig:lock_bench} the inline assembly locks were significantly faster than the OpenMP locks. Therefore we used the test-and-set lock with exponential back-off for our implementation and also the following benchmarks are based on the implementation with these locks.
+As shown in figure \ref{fig:lock_bench} the inline assembly locks were significantly faster than the OpenMP locks. Therefore we used the test-and-set lock with exponential back-off for our implementation and also the following benchmarks are based on the implementation with these locks.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.558]{lock_benchmark.eps}
@@ -278,21 +281,21 @@ As you can see in figure \ref{fig:lock_bench} the inline assembly locks were sig
 \mypar{Strong scaling}
 One of the most important questions is how much faster the application gets by using more cores for a fixed problem size. The results are shown in figure \ref{fig:strong_scaling}.
 \begin{figure}[h]\centering
-  \includegraphics[scale=0.558]{strong_scaling.eps}
-  \caption{Strong scaling \label{fig:strong_scaling}}
+  \includegraphics[scale=0.558]{strong_scaling_speedup.eps}
+  \caption{Strong scaling (speedup against sequential version) \label{fig:strong_scaling}}
 \end{figure}
-For both benchmark graphs the parallel version is faster than the sequential version if it uses 2 or more cores. Using only 1 core it's naturally slower because of the additional overhead due to the locking.\\
+For both benchmark graphs the parallel version is faster than the sequential version if it uses 2 or more cores. Using the parallel version with one core is of course slower than the sequential version  because of the additional overhead and the locking.\\
 One can also see that the more cores we use, the lower the actual benefit in terms of speedup gets. This is consistent with Amdahl's law as the sequential part of the program remains the same.\\
 Also, it actually doesn't matter which strategy for removing the nodes we use (lazy vs. normal - see section \ref{ssec:lock}). The difference in speed is negligible.
 
 \mypar{Weak scaling}
 Because of the limitations in terms of speedup according to Amdahl's law which are also visible in figure \ref{fig:strong_scaling} the next important question is how the runtime behaves with an increasing problem size for an increasing number of cores. This means we keep the problem size per core (number of nodes per core) constant.\\
-As you can see in figure \ref{fig:weak_scaling} we still experience an increase in runtime with increasing problem size, but it's not that much and certainly not as dramatic as if it would be if we didn't increase the number of cores.
+As shown in figure \ref{fig:weak_scaling} we still experience an increase in runtime with increasing problem size, but it's not that much and certainly not as dramatic as if it would be if we didn't increase the number of cores.
 \begin{figure}[h]\centering
   \includegraphics[scale=0.558]{weak_scaling.eps}
   \caption{Weak scaling\label{fig:weak_scaling}}
 \end{figure}
-The behaviour meets our expectations, because with increasing problem size we also increase the time the program spends in the sequential part (longer path will lead to more threshold updates).\\
+The behaviour meets our expectations, because with increasing problem size we also increase the time the program spends in the sequential part (longer path will lead to more threshold updates). Because the shortest path in the Circle Graph is shorter than in the Cross Graph, we need less threshold updates and so the time does not increase that much. \\
 Also in this case the difference between normal and lazy removal is negligible. Therefore, for the future plots we will only show the results for normal removal.
 
 
@@ -349,4 +352,5 @@ Possible next steps could be enhancing the application to make it also work in a
 \bibliography{bibl_conf}
 
 \end{document}
+
 
