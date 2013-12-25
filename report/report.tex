@@ -264,14 +264,6 @@ As you can see in figure \ref{fig:lock_bench} the inline assembly locks were sig
 \end{figure}
 
 
-\mypar{Path length versus $\#$ cores}
-One interesting question was whether the path length gets worse the more threads we have. As mentioned in section \ref{ssec:lock} (avoiding deadlocks) we cannot always update a node with a better path if it's already below threshold and locked by another thread. And the more threads we have the higher is the possibility that this happens. This behaviour is not ideal but it's still consistent with the definition of the algorithm.
-\begin{figure}[h]\centering
-  \includegraphics[scale=0.558]{error_cores.eps}
-  \caption{Relative error in path length compared to A* depending on the number of cores\label{fig:error_cores}}
-\end{figure}
-As shown in figure \ref{fig:error_cores} the number of cores/threads does not affect the quality of the path.
-
 \mypar{Strong scaling}
 One of the most important questions is how much faster the application gets by using more cores for a fixed problem size. The results are shown in figure \ref{fig:strong_scaling}.
 \begin{figure}[h]\centering
@@ -292,29 +284,39 @@ As you can see in figure \ref{fig:weak_scaling} we still experience an increase 
 The behaviour meets our expectations, because with increasing problem size we also increase the time the program spends in the sequential part (longer path will lead to more threshold updates).
 
 
+\mypar{Path length versus $\#$ cores}
+One interesting question was whether the path length gets worse the more threads we have. As mentioned in section \ref{ssec:lock} (avoiding deadlocks) we cannot always update a node with a better path if it's already below threshold and locked by another thread. And the more threads we have the higher is the possibility that this happens. This behaviour is not ideal but it's still consistent with the definition of the algorithm.
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.558]{error_cores.eps}
+  \caption{Relative error in path length compared to A* depending on the number of cores\label{fig:error_cores}}
+\end{figure}
+As shown in figure \ref{fig:error_cores} the number of cores/threads does not affect the quality of the path.
 
-Next divide the experiments into classes, one paragraph for each. In each class of experiments you typically pursue one questions that then is answered by a suitable plot or plots. For example, first you may want to investigate the performance behaviour with changing input size, then how your code compares to external benchmarks.
 
-For some tips on benchmarking including how to create a decent viewgraph see pages 22--27 in \cite{Pueschel:10}.
+\mypar{Path length versus threshold relaxation}
+The threshold relaxation value defines by how much we increase the threshold once we don't have any more nodes below threshold left. If we increase the threshold only by a small value we will just consider few new nodes but they all are relatively promising nodes and result in a short path. If we increase the threshold by a bigger value we'll have more nodes to look at, but not all of them will be that good in terms of path length.
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.558]{error_threshold.eps}
+  \caption{Relative error in path length compared to shortest path (A*) depending on threshold relaxation value\label{fig:error_thresh}}
+\end{figure}
+As you can see in figure \ref{fig:error_thresh} the relative error gets quite high once we have a threshold relaxation value greater than 1 whereas the path quality is very good for small threshold relaxation values.
 
-{\bf Comments:}
-\begin{itemize}
-\item Create very readable, attractive plots (do 1 column, not 2 column plots
-for this report) with readable font size. However, the font size should also not be too large; typically it is smaller than the text font size.
-An example is in Fig.~\ref{fftperf} (of course you can have a different style).
-\item Every plot answers a question. You state this question and extract the
-answer from the plot in its discussion.
-\item Every plot should be referenced and discussed.
-\end{itemize}
+\mypar{Runtime versus threshold relaxation}
+As shown in figure \ref{fig:error_thresh} we can have a very good path with a low threshold relaxation value. However, by doing this we always just have a few nodes in our nowlist and we have to increase the threshold more often, which is not good because it's the sequential part of the algorithm. Therefore we expect our algorithm to be slower the smaller the threshold relaxation value is, which is also the case as can be seen in figure \ref{fig:runtime_thresh}.
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.558]{runtime_threshold.eps}
+  \caption{Runtime depending on threshold relaxation value\label{fig:runtime_thresh}}
+\end{figure}
+One can also see that the runtime for the sequential version gets slower if the relaxation value is too high. With a high value the algorithm will visit many nodes, even the not so promising ones. So we will have quite a big fan-out (compare with figure \ref{fig:graphs}) that one core alone won't be able to handle in sufficient time. By running the application in parallel there are more cores that can handle these relatively big nowlist and as shown in figure \ref{fig:speedup_thresh}, the higher the threshold relaxation value is the more speedup we get with the parallel version and of course, more cores will result in a higher speedup.
+\begin{figure}[h]\centering
+  \includegraphics[scale=0.558]{speedup_threshold.eps}
+  \caption{Speedup of parallel version versus sequential version using different threshold relaxation values\label{fig:speedup_thresh}}
+\end{figure}
 
-%\begin{figure}\centering
-%  \includegraphics[scale=0.33]{dft-performance.eps}
-%  \caption{Performance of four single precision implementations of the
-%  discrete Fourier transform. The operations count is roughly the
-%  same. The labels in this plot are maybe a little bit too small.\label{fftperf}}
-%\end{figure}
 
 \section{Conclusions}
+
+
 
 Here you need to summarize what you did and why this is
 important. {\em Do not take the abstract} and put it in the past
@@ -326,54 +328,6 @@ approach to .... Even though we only considered x, the
 .... technique should be applicable ....) You can also formulate next
 steps if you want. Be brief. After the conclusions there are only the references.
 
-\section{Further comments}
-
-Here we provide some further tips.
-
-\mypar{Further general guidelines}
-
-\begin{itemize}
-\item For short papers, to save space, I use paragraph titles instead of
-subsections, as shown in the introduction.
-
-\item It is generally a good idea to break sections into such smaller
-units for readability and since it helps you to (visually) structure the story.
-
-\item The above section titles should be adapted to more precisely
-reflect what you do.
-
-\item Each section should be started with a very
-short summary of what the reader can expect in this section. Nothing
-more awkward as when the story starts and one does not know what the
-direction is or the goal.
-
-\item Make sure you define every acronym you use, no matter how
-convinced you are the reader knows it.
-
-\item Always spell-check before you submit (to us in this case).
-
-\item Be picky. When writing a paper you should always strive for very
-high quality. Many people may read it and the quality makes a big difference.
-In this class, the quality is part of the grade.
-
-\item Books helping you to write better: \cite{Higham:98} and \cite{Strunk:00}.
-
-\item Conversion to pdf (latex users only): 
-
-dvips -o conference.ps -t letter -Ppdf -G0 conference.dvi
-
-and then
-
-ps2pdf conference.ps
-\end{itemize}
-
-\mypar{Graphics} For plots that are not images {\em never} generate the bitmap formats
-jpeg, gif, bmp, tif. Use eps, which means encapsulate postscript. It is
-scalable since it is a vector graphic description of your graph. E.g.,
-from Matlab, you can export to eps.
-
-The format pdf is also fine for plots (you need pdflatex then), but only if the plot was never before in the format 
-jpeg, gif, bmp, tif.
 
 
 % References should be produced using the bibtex program from suitable
