@@ -1,17 +1,17 @@
 #OK 24.12.
 filename= 'time1.out'
 
-parallel_color_lazy = "#FF3C00"
+parallel_color = "#FF3C00"
 sequential_color = "#008CFF"
-parallel_color = "#00551C"
+parallel_color_lazy = "#00551C"
 lwidth = 5
 
 number_of_cores = 8 
 min_potenz = 7
 max_potenz = 11
 
-zahl_1 = 0.13
-zahl_2 = 0.13
+zahl_1 = 0
+zahl_2 = 0
 
 getGraphName(i) = (i == 1 || i == 3) ? "Cross Graph" : "Circle Graph"
 
@@ -83,6 +83,7 @@ do for [thrp=0:0] {
 			set y2range [0:maxy*1.3]
 
 			do for [i=1:number_of_cores] { set xtics add (sprintf("%g",i) i) font ",15" }
+			set xtics add (sprintf(" ") 0)
 
 			#erste Zeile ohne Titel!
 			plot \
@@ -92,17 +93,8 @@ do for [thrp=0:0] {
 					lc rgb parallel_color lw lwidth notitle, \
 				filename using (1-zahl_1): \
 					((filter4(1, grapht, 2, threshold, 5, 1, 3, grid_size, 8)/exact_result-1)*100) \
-					lc rgb parallel_color lw lwidth title 'parallel normal', \
-				for [i=2:number_of_cores] \
-					filename using (i+zahl_1): \
-					((filter4(1, grapht, 2, threshold, 5, i, 3, grid_size, 10)/exact_result-1)*100) \
-					lc rgb parallel_color_lazy lw lwidth \
-					fill empty border lc rgb parallel_color_lazy notitle, \
-				filename using (1+zahl_2): \
-					((filter4(1, grapht, 2, threshold, 5, 1, 3, grid_size, 10)/exact_result-1)*100) \
-					lc rgb parallel_color_lazy lw lwidth fill empty \
-					border lc rgb parallel_color_lazy title 'parallel lazy', \
-				filename using (1): \
+					lc rgb parallel_color lw lwidth title 'parallel', \
+				filename using (0.9): \
 					((filter4(1, grapht, 2, threshold, 5, -1, 3, grid_size, 8)/exact_result-1)*100) \
 					lc rgb sequential_color lw lwidth fill empty \
 					border lc rgb sequential_color title 'sequential'

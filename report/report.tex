@@ -9,7 +9,9 @@
 \usepackage[T1]{fontenc} 			% Umlaute unterstützen
 \usepackage{float}
 \usepackage[boxed,vlined,linesnumbered]{algorithm2e}	% Pseudocode
-\setalcapskip{2ex}									% caption unter code
+\SetAlCapSkip{2ex}									% caption unter code
+\hyphenation{now-list}
+\hyphenation{later-list}
 
 % Example definitions.
 % --------------------
@@ -68,7 +70,7 @@ This project was part of the course \textit{Design of Parallel and High-Performa
 
 
 \mypar{Motivation} 
-Pathfinding is an important part in many applications, especially in computer games and robotics. Fringe search is a popular algorithm for single-pair shortest path problems. Unlike A* it won't guarantee to find the shortest path, but rather a path "short enough". The advantage of Fringe Search is that it generally outperforms A* as shown in \cite{fringe:05}.\\
+Pathfinding is an important problem occuring in many applications, especially in computer games and robotics. Fringe search is a popular algorithm for single-pair shortest path problems. Unlike A* it doesn't guarantee to find the shortest path, but rather a path "short enough". The advantage of Fringe Search is that it generally outperforms A* as shown in \cite{fringe:05}.\\
 In \cite{brand:09} a parallel implementation of Fringe Search has been done for a distributed memory environment. The goal of this paper was the implementation and benchmarking of a parallel version of Fringe Search for a shared memory environment.
 
 \mypar{Related work} This paper is mainly based on three papers. The Fringe Search algorithm was introduced in \cite{fringe:05}. S. Brand and R. Bidarra implemented a parallel version in a distributed memory environment described in \cite{brand:12} and a bit more specific in the Master Thesis of S. Brand \cite{brand:09}. In this paper the implementation was done for a shared memory environment.
@@ -77,14 +79,13 @@ In \cite{brand:09} a parallel implementation of Fringe Search has been done for 
 In this section we formally define the single-pair shortest path problem and we consider and introduce two algorithms that are used to solve it.
 
 \mypar{Single-pair shortest path problem}
-A problem where the goal is to find the shortest path between a start and an end node in a directed or undirected graph. In our case we used a directed graph.
+A problem where the goal is to find the shortest path between a given start and an end node in a directed or undirected graph. In our case we used a directed graph.
 
 \mypar{A*}
-A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function (e.g. Euclidean distance or Manhattan distance to end node). It always finds the shortest possible path and therefore it's called optimal. It uses a priority queue for the nodes and therefore each insert into the queue has complexity $O(\log n)$.
+A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function (e.g. Euclidean distance or Manhattan distance to end node). It always finds the shortest possible path as long as the heuristic function never overestimates the real distance. Therefore it's called optimal. It uses a priority queue for the nodes and therefore each insertion into the queue has complexity $\mathcal{O}(\log n)$ with respect to the size of the queue.
 
 \mypar{Fringe Search}
-A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a linked list where an insert has the complexity $O(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fig:algo}.
-
+A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a doubly linked list where an insertion has the complexity $\mathcal{O}(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. It's not optimal (it doesn't guarantee to find the shortest path) but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure \ref{fig:algo}.
 \begin{figure}[h]\centering
   \includegraphics[scale=0.245]{fringe_rep.eps}
   \caption{Fringe Search example \label{fig:algo}}
@@ -98,96 +99,103 @@ In this section we will show how the implementation has been done, emphasise the
 \subsection{Language and data structure}\label{ssec:lang}
 
 \mypar{Language}
-The implementation has been done with C++11 and OpenMP 3.0.
+The implementation has been done with C++11 and OpenMP 3.1.
 
 \mypar{Graph structure}
-We used a directed graph implemented as adjacency list. This means that each node has a list of pointers to the edges that connect it to other nodes. An edge contains a pointer to the node it's pointing to and the length of the edge.\\
-Each node has a position in a 2D plane which is also needed for the heuristic cost function (e.g. Euclidean distance to the end node).
+We used a directed graph implemented as adjacency list. This means that each node has a list of pointers to its neighbours as well as the distance to this node. Basically this distance can be everything as long as there exists a good heuristic cost function, which does not overestimate the real distance. \\
+In our experiments we interpreted the graph as nodes in a 2D plane, because it is easy to visualize. Each node stores its position, so we can estimate the distance between to nodes with the Euclidian distance or the Manhattan Distance.
+
+\mypar{Status}
+Each Node stores a status. A node, which is \textit{inactive}, has not yet been visited. In the beginning, each node is inactive. A \textit{closed} Node has an estimated cost under the current threshold (i.e. the sum of the real cost from the start to this node and the estimated cost from this node to the end is lower than the current threshold). An \textit{now} Node is a Node, which probably is on the path between start and end. It has a closed neighbor, i.e. we know the real distance from the start to his node. Status \textit{later} means, that it also has e closed neighbor, but the cost estimation through this Node is over the current threshold, so the node will only be visited again, if we increase the threshold.
 
 \mypar{Linked lists}
-We used two doubly linked lists we will henceforth call the "nowlist" and the "laterlist". The nowlist generally contains the nodes that have status $now$ whereas the laterlist contains the nodes that have status $later$. Whenever the nowlist is empty we increase the threshold and swap the two lists as we also swap the definition of the status ($now$ will become $later$ and vice versa).
+We used two doubly linked lists we will henceforth call the "nowlist" and the "laterlist". The nowlist generally contains the nodes that have status $now$ whereas the laterlist contains the nodes that have status $later$. Whenever the nowlist is empty we increase the threshold and swap the two lists as we also swap the definition of the status ($now$ will become $later$ and vice versa). 
 
 \subsection{From sequential to parallel}\label{ssec:seqpar}
 
 \mypar{Sequential Fringe Search}
-As a first step we implemented a strictly sequential Fringe Search in order to have a basis for the parallel implementation and also as a reference for the benchmarks regarding the speedup of the parallel version.
+As a first step we implemented a strictly sequential Fringe Search in order to have a basis for the parallel implementation and also as a reference for the benchmarks regarding the speedup of the parallel version. The pseudocode for the Fringe Search can be found in algorithm \ref{algo:par}.
 
 \mypar{Parallel Fringe Search}
-Besides the necessary locks for the insertion and removal from the lists the threshold relaxation part (see line \ref{code:thresh} in algorithm \ref{algo:par}) is the bottleneck because this part has to be done sequentially by only one thread. The pseudocode for the parallel Fringe Search can be found in algorithm \ref{algo:par}.
+Besides the necessary locks for the insertion and removal from the lists the threshold relaxation part (see line \ref{code:thresh} in algorithm \ref{algo:par}) is the bottleneck because this part has to be done sequentially by only one thread, after all threads reached this point.
 
 \begin{algorithm}[t!]
+\SetKwFunction{heuristicDist}{heuristicDist}
+\SetKwFunction{reconstructPath}{reconstructPath}
+
 \SetInd{0.5em}{0.5em}
-add nodes $zero$ and $start$ to $nowlist$ \;
-add node $zero$ and $laterlist$ \;
-$threshold \leftarrow heuristicDist(start, end)$ \;
-\tcp{\textbf{\underline{start parallel part}}}
-$x \leftarrow start$ \;
-\tcp{\textbf{\underline{barrier: wait for all threads}}}
-\While(\tcp*[f]{any nodes left}){$nowlist \neq \emptyset$}{
-	\While(\tcp*[f]{nodes $\leq$ thresh}){$nowlist \neq \emptyset$}{
- 		\eIf{$x.f \leq threshold$}{
- 	 		\If{$x == end$}{
-				return $reconstructPath()$ \tcp*[r]{done}
+\newcommand{\var}[1]{{\textit{#1}}}
+
+add node \var{start} to \var{nowlist} \;
+$\var{laterlist} \gets \emptyset$ \;
+$\var{threshold} \gets \heuristicDist{\var{start}, \var{end}}$ \;
+\While{$\var{nowlist} \neq \emptyset \textnormal{ \&\& } \var{laterlist} \neq \emptyset $}{ 
+	\While(\tcp*[f]{\textnormal{$\exists$ nodes $\leq$ threshold}}){$nowlist \neq \emptyset$}{
+		\var{x} $\gets$ Node from \var{nowlist} \;
+ 		\eIf{$\var{x}.\var{distanceEstimation} \leq \var{threshold}$}{
+ 	 		\If{$\var{x}$ == $\var{end}$}{
+				\Return $\reconstructPath{}$ \tcp*[f]{\textnormal{done}}
 	 		}
- 			$x.status \leftarrow closed$ \;
-			\For{each neighbour $nb$}{
-				\uIf{$nb.status == now$}{
-					calculate new distance \;
-					\If{$dist < nb.g$}{
-						update $nb.f$, $nb.g$ and $nb.parent$ \;
-						move $nb$ right behind $x$ in $nowlist$ \;
+ 			$\var{x}.\var{status} \gets closed$ \;
+			\ForEach{neighbour $\var{nb}$}{
+				\uIf{$\var{nb}.\var{status}$ == $ now$}{
+					calculate new distance estimation \var{dist} \;
+					\If{$\var{dist} < \var{nb}.\var{distanceEstimation}$}{
+						$\var{nb}.\var{distanceEstimation} = \var{dist}$ \;
+						$\var{nb}.\var{parent} = \var{x} $\;
+						move $\var{nb}$ right behind $\var{x}$ in $\var{nowlist}$ \;
 					}
 				}
-				\uElseIf{$nb.status == later$}{
-					calculate new distance \;
-					\If{$dist < nb.g$}{
-						update $nb.f$, $nb.g$ and $nb.parent$ \;
-						remove $nb$ from $laterlist$ \;					
-						insert $nb$ right behind $x$ in $nowlist$ \;
-						$nb.status \leftarrow now$ \;
+				\uElseIf{$\var{nb}.\var{status}$ == $ later$}{
+					calculate new distance estimation \var{dist} \;
+					\If{$\var{dist} < \var{nb}.\var{distanceEstimation}$}{
+						$\var{nb}.\var{distanceEstimation} = \var{dist}$ \;
+						$\var{nb}.\var{parent} = \var{x} $\;
+						remove $\var{nb}$ from $\var{laterlist}$ \;					
+						insert $\var{nb}$ right behind $\var{x}$ in $\var{nowlist}$ \nllabel{code:moveback}\;
+						$\var{nb}.\var{status} \gets \var{now}$ \;
 					}
 				}
 				\ElseIf{$nb.status == inactive$}{
+					calculate $\var{nb}.\var{distanceEstimation}$ \;
+					$\var{nb}.\var{parent} ? \var{x}$\;
 					calc $nb.g$, $nb.f$ and set $nb.parent \leftarrow x$\;
-					insert $nb$ right behind $x$ in $nowlist$ \;
-					$nb.status \leftarrow now$ \;
+					insert $\var{nb}$ right behind $\var{x}$ in $\var{nowlist}$ \;
+					$\var{nb}.\var{status} \gets \var{now} $ \;
 				}
 			}
-			remove $x$ from $nowlist$ \;
+			remove $\var{x}$ from $\var{nowlist}$ \;
 		}{
- 			$x.status \leftarrow later$ and 
- 			$lastlater \leftarrow x$ \nllabel{code:lastlater}\;
- 			$x \leftarrow x.next$
- 			move $lastlater$ from $nowlist$ to $laterlist$ \; 
+			$\var{x}.\var{status} \gets \var{later}$\;
+ 			move $\var{x}$ into \var{laterlist} \nllabel{code:move}\;
  		}
 	}
-	\tcp{\textbf{\underline{sequential part}}}
-	increase $threshold$ \nllabel{code:thresh} \;
-	swap $nowlist \leftrightarrow laterlist$ and $now \leftrightarrow later$ \nllabel{code:swap} \;
-	\tcp{\textbf{\underline{run again in parallel}}}
-	\lIf{$lastlater$ still in $nowlist$}{$x \leftarrow lastlater$ \nllabel{code:ifll} \;}
-	\lElse(\tcp*[h]{zero from nowlist}){$x \leftarrow zero$ \nllabel{code:elsell}}
+	increase $\var{threshold}$ \nllabel{code:thresh} \;
+	swap $\var{nowlist} \leftrightarrow laterlist$ \;
+	swap the values of $\var{now}$ and $\var{later}$ \nllabel{code:swap} \;
 }
 return -1 \tcp*[r]{no existing path to end}
-\caption{Parallel Fringe Search\label{algo:par}. Note: The locking mechanism is not part of this pseudocode, but it's thoroughly described in section \ref{ssec:lock} and in figures \ref{fig:lock}, \ref{fig:insert} and \ref{fig:remove}).}
+\caption{parallelizable Fringe Search with two lists\label{algo:par}. Note: With the locking mechanism described in section \ref{ssec:lock} and in figures \ref{fig:lock}, \ref{fig:insert} and \ref{fig:remove}), this algorithm can be parallelized.}
 \end{algorithm}
 
 \mypar{Swapping the lists}
 Whenever we relax the threshold the nowlist and the laterlist will get swapped (line \ref{code:swap} in algorithm \ref{algo:par}). This means the nowlist will become the laterlist and vice versa. Also the node states will get swapped (now will become later and vice versa).\\
-This part has to be done sequentially. After this we can run in parallel again but we don't want to have all the threads starting from the $zero$ node again but rather have them distributed over the new nowlist. We somehow achieve this by remembering the last node in the laterlist a thread has worked with (see line \ref{code:lastlater} in algorithm \ref{algo:par}). Like this, the probability is high that this node is now in the nowlist and not all threads will start at the same node. Another advantage of this behaviour is that we might profit from the cache effect because this node might still be in the cache. But of course we have to check if this node is now really in the nowlist which can't be guaranteed. If this is not the case we just start from the $zero$ node which is the only node we can be sure that it's still in the nowlist (see lines \ref{code:ifll} and \ref{code:elsell} in algorithm \ref{algo:par}).
+This part has to be done sequentially. After this we can run in parallel again but we don't want to have all the threads starting from the first node again in the nowlist again but rather have them distributed over the whole nowlist. We achieve this by remembering the last node in the laterlist a thread has worked with (e.g. a node moved into the laterlist in line \ref{code:move} in algorithm \ref{algo:par}). Like this, the probability is high that this node is now in the nowlist and not all threads will start at the same node. Another advantage of this behaviour is that we might profit from the cache effect because this node might still be in the cache. But of course we have to check if this node is now really in the nowlist which can't be guaranteed (a node remembered in line \ref{code:move} could be moved back in line \ref{code:moveback}). If this is not the case we just start from the first node in the new nowlist.
 
 \subsection{Locking}\label{ssec:lock}
 
 \mypar{Traversing the list}
 Whenever a thread traverses the nowlist it tries to lock every node it encounters. It does not force a lock because this would slow the application down significantly (many threads would wait at the same node)! It just tries and if it's successful it can work with this node (visit the adjacent nodes, etc.). If the thread fails trying to lock the node it means that another thread is working with exactly this node.\\
-In this case we don't go just to the next node in the list because this might lead to some jam because the other thread will probably try to lock this node soon and like this the two threads would get in each others way quite often.\\
-So instead of just going to the next node if we encounter a locked node we skip a few nodes in order to achieve a nice distribution of the threads over the nowlist. Skipping 150 nodes has proven to provide a relatively good distribution which results in a faster runtime.
+In this case we don't go just to the next node in the list because this might lead to some jam because the other thread will most likely try to lock this node soon and like this the two threads would get in each others way quite often.\\
+So instead of just going to the next node if we encounter a locked node we skip a few nodes in order to achieve a nice distribution of the threads over the nowlist. Skipping 150 nodes has proven to provide a relatively good distribution which results in a faster runtime for large graphs (larger than $10^7$ nodes).
 
 \mypar{Lock type}
 We implemented and tried several locks. Next to the locks provided by OpenMP we implemented other locks using inline assembly (e.g. test-and-set lock). 
 
 \mypar{Avoiding deadlocks}
-In order to avoid deadlocks we always lock in the same direction (see figure \ref{fig:lock}). If we don't know whether the second node we would like to lock is in the correct direction (e.g. left in the nowlist) we must not force a lock. This can only occur if we want to move a node in the nowlist and this is only the case if we've found a shorter path to a node that already has a path that is below threshold. In this case we can try locking it. If the try is successful we can update the path and move it and if not we just leave the old path that was already below threshold. This does not change the behaviour of the algorithm since the node was below threshold anyway (actually this node easily could have been closed by another thread before we'd found the better path), but acting like this we ensure that no deadlocks can happen.
+In order to avoid deadlocks we always lock in the same direction (see figure \ref{fig:lock}). If we don't know whether the second node we would like to lock is in the correct direction (e.g. left in the nowlist) we must not force a lock. This can only occur if we want to move a node in the nowlist and this is only the case if we've found a shorter path to a node that already has a path that is below the previous threshold. In this case we can try locking it. If the try is successful we can update the path and move it and if not we just leave the old path that was already below the old threshold. This does not change the behaviour of the algorithm since the other node was also in the nowlist and so it could have been closed by another thread anyway. 
+If we lock a node outside the two lists, this can be done without any problems, because we never try to lock more than one node outside the lists.
+Acting like this, we prevent any possible circular wait dependencies and no deadlocks can occur \cite{Coffman:71}.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.38]{locking.eps}
@@ -204,7 +212,10 @@ The sequence for inserting nodes is shown in figure \ref{fig:insert}.
 
 \mypar{Remove nodes}
 The sequence for removing nodes is shown in  figure \ref{fig:remove}.\\
-We implemented and tested two different strategies for removing the nodes. The first strategy is to remove the node immediately as shown in figure \ref{fig:remove} when it has to be removed. The other strategy is to just mark it as removed, go on and let other threads actually remove it while they are traversing the list.
+We implemented and tested two different strategies for removing the nodes. The first strategy is to remove the node immediately as shown in figure \ref{fig:remove} when it has to be removed. The other strategy is to just mark it as removed, go on and let other threads actually remove it while they are traversing the list (lazy deletion).
+
+\mypar{Acquiring locks}
+All locks are acquired by \"optimistic locking\". That means normally we try to get locks on nodes with specific properties (e.g. the node must be predecessor of another, the node must have a specific state). Now we spin until we get the lock, afterwards we test again, if the conditions are met and if not we release the lock immediately.
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.31]{remove.eps}
