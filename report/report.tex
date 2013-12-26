@@ -10,8 +10,8 @@
 \usepackage{float}
 \usepackage[skip=3px]{caption}
 \usepackage[boxed,vlined,linesnumbered]{algorithm2e}	% Pseudocode
-\SetAlCapSkip{2ex}				
-% \setalcapskip{2ex}							% caption unter code
+%\SetAlCapSkip{2ex}				
+\setalcapskip{2ex}							% caption unter code
 \hyphenation{now-list}
 \hyphenation{later-list}
 
@@ -60,10 +60,7 @@
 %
 
 \begin{abstract}
-Describe in concise words what you do, why you do it (not necessarily
-in this order), and the main result.  The abstract has to be
-self-contained and readable for a person in the general area. You
-should write the abstract last.
+We've implemented and parallelized Fringe Search, a single-pair shortest path algorithm, for a shared memory environment. By already using two cores, the parallel version outperformed the sequential one on our benchmark graphs without showing any noticeable compromises in terms of path quality.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -73,9 +70,9 @@ This project was part of the course \textit{Design of Parallel and High-Performa
 
 \mypar{Motivation} 
 Pathfinding is an important problem occurring in many applications, especially in computer games and robotics. Fringe Search is a popular algorithm for single-pair shortest path problems. Unlike A* it doesn't guarantee to find the shortest path, but rather a path "short enough". The advantage of Fringe Search is that it generally outperforms A* as shown in \cite{fringe:05}.\\
-In \cite{brand:09} a parallel implementation of Fringe Search has been done for a distributed memory environment. The goal of this paper was the implementation and benchmarking of a parallel version of Fringe Search for a shared memory environment.
+In \cite{brand:09} a parallel implementation of Fringe Search has been developed for a distributed memory environment. The goal of this paper was the implementation of a fast parallel version of Fringe Search for a shared memory environment.
 
-\mypar{Related work} This paper is mainly based on three papers. The Fringe Search algorithm was introduced in \cite{fringe:05}. S. Brand and R. Bidarra implemented a parallel version in a distributed memory environment described in \cite{brand:12} and a bit more specific in the Master Thesis of S. Brand \cite{brand:09}. In this paper the implementation was done for a shared memory environment.
+\mypar{Related work} This paper is mainly based on three papers. The Fringe Search algorithm has been introduced in \cite{fringe:05}. S. Brand and R. Bidarra have implemented a parallel version in a distributed memory environment, published in \cite{brand:09} and in \cite{brand:12}, whereas in this paper the implementation has been done for a shared memory environment.
 
 \section{Background: Shortest Path Problem}\label{sec:background}
 In this section we formally define the single-pair shortest path problem and we consider and introduce two algorithms that are used to solve it.
@@ -87,7 +84,7 @@ A problem where the goal is to find the shortest path between a given start and 
 A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function, which estimates the distance to the end node. It always finds the shortest possible path as long as the heuristic function never overestimates the real distance. Therefore it's called optimal. A* uses a priority queue for selecting the best node and therefore each insertion into the queue has complexity $\mathcal{O}(\log n)$ with respect to the size of the queue.
 
 \mypar{Fringe Search}
-A single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a doubly linked list where an insertion has only complexity $\mathcal{O}(1)$ and visits a node already if it's "promising enough" which is determined by a global threshold value that will be continuously increased. The path will not be optimal but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure~\ref{fig:algo}.
+Another single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising node first, it stores the nodes in a doubly linked list where an insertion has only complexity $\mathcal{O}(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. The path will not be optimal but it is generally faster than A*, as shown in \cite{fringe:05}. An example of the algorithm can be found in figure~\ref{fig:algo}.
 \begin{figure}[h]\centering
   \includegraphics[scale=0.245]{fringe_rep.eps}
   \caption{Fringe Search example \label{fig:algo}}
@@ -100,17 +97,17 @@ In this section we will show how the implementation has been done, emphasize imp
 
 \subsection{Language and data structures}\label{ssec:lang}
 
-\mypar{Language} All implementations has been done with C++11 and OpenMP 3.
+All implementations have been done with C++11, OpenMP 3 and some inline assembly for the locks.
 
 \mypar{Graph structure}
-We used a directed graph implemented as adjacency list. This means that each node stores a list of pointers to its neighbours as well as the distance to these nodes. Basically this distance can be everything as long as there exists a good heuristic cost function, which does not overestimate the real distance. \\
-In our experiments we interpreted the graph as nodes in a 2D plane, because it is easy to visualize. Each node has its position stored, so we can estimate the distance between two nodes with the Euclidean distance or also the Manhattan Distance if we're having a quadratic grid.
+We use a directed graph implemented as adjacency list. This means that each node stores a list of pointers to its neighbours as well as the distance to these nodes. Basically, this distance can be everything as long as there exists a good heuristic cost function which does not overestimate the real distance. \\
+In our experiments we interpreted the graph as nodes in a 2D plane for visualization purposes. Each node has its position stored, so we can estimate the distance between two nodes with the Euclidean distance (or the Manhattan distance for a quadratic grid).
 
 \mypar{Status}
-Each Node possesses a status. A node, which is \textit{inactive}, has not yet been visited. In the beginning, each node except the start node is inactive. A \textit{closed} Node has an estimated cost under the current threshold (i.e. the sum of the real cost from the start to this node and the estimated cost from this node to the end is lower than the current threshold). A node with status \textit{now} is a node that possibly lies on the path between start and end. It has a closed neighbor, i.e. we know the real distance from the start to this node. Status \textit{later} means, that the node also has a closed neighbor, but the cost estimation of this node currently is above threshold, so the node will not be visited again, until we increase the threshold.
+Each Node possesses a status. An \textit{inactive} node has not yet been visited. In the beginning, each node except the start node is \textit{inactive}. A \textit{closed} node has an estimated cost that must be below the current threshold (i.e. the sum of the real cost from the start to this node and the estimated cost from this node to the end is lower than the current threshold). If a node is closed it won't be updated anymore, even if we later find out that there would be a shorter path to this node. A node with status \textit{now} is a node that possibly lies on the path between start and end. It has a closed neighbor, what means that we know the real distance from the start to this node. Also a node with status \textit{later} has a closed neighbor but the cost estimation of this node currently is above threshold, so the node won't be visited again until we increase the threshold.
 
 \mypar{Linked lists}
-We used two doubly linked lists we will henceforth call the \textit{nowlist} and the \textit{laterlist}. The nowlist generally contains the nodes that have status now whereas the laterlist contains the nodes that have status later. Whenever the nowlist becomes empty we increase the threshold and swap the two lists as we also swap the definition of the status (now will become later and vice versa). 
+We use two doubly linked lists we will henceforth call the \textit{nowlist} and the \textit{laterlist}. The nowlist generally contains the nodes that have status \textit{now} whereas the laterlist contains the nodes that have status \textit{later}. Whenever the nowlist becomes empty we increase the threshold and swap the two lists as we also swap the definition of the status (now will become later and vice versa). 
 
 \subsection{From sequential to parallel}\label{ssec:seqpar}
 
@@ -180,19 +177,19 @@ $\var{threshold} \gets \heuristicDist{\var{start}, \var{end}}$ \;
 \end{algorithm}
 
 \mypar{Swapping the lists}
-Whenever we relax the threshold the nowlist and the laterlist and the states of the included nodes will get swapped (lines \ref{code:swaplist} and \ref{code:swap} in algorithm \ref{algo:par}). This means the nowlist will become the laterlist and vice versa.\\
-After increasing the threshold we don't want to have all the threads starting from the first node in the nowlist but rather have them distributed over the whole nowlist. We achieve this by remembering the last node in the laterlist a thread has worked with (e.g. we save the last node moved into the laterlist in line \ref{code:move} in algorithm \ref{algo:par}). Like this, the probability is high that this node is in the nowlist after swapping and not all threads will start at the same node. Another advantage of this behaviour is that we might profit from the cache effect because this node might still be in the cache. \\
-But of course we have to check if this node is now truly in the nowlist which can't be guaranteed (a node remembered in line \ref{code:move} could be moved back in line \ref{code:moveback}). If this is not the case we just start from the first node in the new nowlist.
+Whenever we relax the threshold, the nowlist and the laterlist and the states of the included nodes will get swapped (lines \ref{code:swaplist} and \ref{code:swap} in algorithm \ref{algo:par}). This means that the nowlist will become the laterlist and vice versa, as the nodes with status later are potentially below threshold after increasing it.\\
+After the swapping we don't want to have all the threads starting from the first node in the nowlist but rather have them distributed over the whole nowlist. We achieve this by remembering the last node in the laterlist a thread has worked with (e.g. we save the last node moved into the laterlist at line \ref{code:move} in algorithm \ref{algo:par}). Like this, the probability is high that this node is in the nowlist after the swapping and therefore not all threads will start at the same node. Another advantage of this behavior is that we might profit from the cache effect because this node might still be in the cache.\\
+But of course we have to check if this node truly is in the nowlist which can't be guaranteed (a node remembered at line \ref{code:move} could be moved back at line \ref{code:moveback}). If it's no longer there we just start from the first node in the new nowlist.
 
 \subsection{Locking}\label{ssec:lock}
 
 \mypar{Traversing the list}
-Whenever a thread traverses the nowlist it tries to lock every node it encounters. It does not force a lock because this would slow the application down significantly (many threads would wait at the same node)! It just tries and if it's successful it can work with this node (visit the adjacent nodes, etc.). If the thread fails trying to lock the node it means that another thread is working with exactly this node.\\
-In this case we don't go just to the next node in the list as this might lead to some jam because the other thread will most likely try to lock this node soon and like this the two threads would get in each others way quite often.\\
-So instead of just going to the next node if we encounter a locked node, we skip a few nodes in order to achieve a nice distribution of the threads over the nowlist. Skipping 150 nodes has proven to provide a relatively good distribution which results in a faster runtime for large graphs (larger than $10^6$ nodes).
+Whenever a thread traverses the nowlist it tries to lock every node it encounters. It does not force a lock! It just tries and if it's successful it can work with this node (visit the adjacent nodes, etc.). If the thread fails trying to lock the node it means that another thread is working with exactly this node.\\
+In this case we don't go just to the next node in the list as this might lead to some jam because the thread currently holding the lock will most likely try to lock the next node soon and like this the two threads would get in each others way quite often.\\
+So instead of just going to the next node if we encounter a locked node, we skip a few nodes in order to achieve a nice distribution of the threads over the nowlist. Skipping 150 nodes has proven to provide a relatively good distribution which results in a faster runtime for large graphs (more than $10^6$ nodes).
 
 \mypar{Lock type}
-Next to the locks provided by OpenMP we've implemented the following locks
+Next to the locking mechanism provided by OpenMP we've implemented the following locks
 \begin{compactitem}
 \item TAS: test-and-set lock
 \item TAS EXP: TAS with exponential back-off
