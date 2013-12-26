@@ -10,8 +10,8 @@
 \usepackage{float}
 \usepackage[skip=3px]{caption}
 \usepackage[boxed,vlined,linesnumbered]{algorithm2e}	% Pseudocode
-%\SetAlCapSkip{2ex}				
-\setalcapskip{2ex}							% caption unter code
+\SetAlCapSkip{2ex}				
+% \setalcapskip{2ex}							% caption unter code
 \hyphenation{now-list}
 \hyphenation{later-list}
 
@@ -258,7 +258,7 @@ Each experiment has been run on two different graph types with different obstacl
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.3]{benchmark_graphs.eps}
-  \caption{The graphs used for benchmarking: "cross graph" (left) and "circle graph" (right). In this picture the blue nodes represent the found path, the green nodes are the closed nodes and the red nodes were in the nowlist or laterlist when the algorithm finished. \label{fig:graphs}}
+  \caption{The graphs used for benchmarking: "cross graph" (left) and "circle graph" (right). The blue nodes represent the found path, the green nodes are "closed" and the red nodes have status now or later when the algorithm finished. \label{fig:graphs}}
 \end{figure}
 
 \subsection{Results}\label{ssec:results}
@@ -312,12 +312,12 @@ The threshold relaxation value defines by how much we increase the threshold onc
 As you can see in figure~\ref{fig:error_thresh} the relative error gets quite high once we have a threshold relaxation value greater than 1 whereas the path quality is very good for small threshold relaxation values.
 
 \mypar{Runtime versus threshold relaxation}
-As shown in figure~\ref{fig:error_thresh} we can have a very good path with a low threshold relaxation value. However, by doing this we always just have a few nodes in our nowlist and we have to increase the threshold more often, which is not good because it's the sequential part of the algorithm. Therefore we expect our algorithm to be slower the smaller the threshold relaxation value is, which is also the case as can be seen in figure~\ref{fig:runtime_thresh}.
+As shown in figure~\ref{fig:error_thresh} a low threshold relaxation value leads to small errors in path length. However, by doing this we always just have a few nodes in our nowlist (no use of many threads) and we have to increase the threshold more often (increasing sequential part). Therefore we expect our algorithm to be slower the smaller the threshold relaxation value is, which is also the case as can be seen in figure~\ref{fig:runtime_thresh}.\\
 \begin{figure}[h]\centering
   \includegraphics[scale=0.558]{runtime_threshold.eps}
   \caption{Runtime depending on threshold relaxation value\label{fig:runtime_thresh}}
 \end{figure}
-One can also see that the runtime for the sequential version gets slower if the relaxation value is too high. With a high value the algorithm will visit many nodes, even the not so promising ones. So we will have quite a big fan-out (compare with figure~\ref{fig:graphs}) that one core alone won't be able to handle in sufficient time. By running the application in parallel there are more cores that can handle these relatively big nowlist and, as shown in figure~\ref{fig:speedup_thresh}, the higher the threshold relaxation value is the more speedup we get with the parallel version.
+One can also see that the runtime for the sequential version gets slower if the relaxation value is too high. With a high value the algorithm will visit many nodes, even the not so promising ones. So we will have quite a big fan-out (compare with figure~\ref{fig:graphs}) that one core alone won't be able to handle in sufficient time. By running the application in parallel there are more cores that can handle these relatively big nowlist and, as shown in figure~\ref{fig:speedup_thresh}, turnaround is later with more cores.
 \begin{figure}[h]\centering
   \includegraphics[scale=0.558]{speedup_threshold.eps}
   \caption{Speedup of parallel version versus sequential version using different threshold relaxation values\label{fig:speedup_thresh}}
@@ -326,16 +326,16 @@ One can also see that the runtime for the sequential version gets slower if the 
 
 \section{Conclusions}
 
-We implemented a sequential version of Fringe Search that was significantly faster than the A* implementation from the Boost Graph Library. We implemented it as a parallel version for a shared memory environment. The important results are:
+We implemented a sequential version of Fringe Search that was significantly faster than the A* implementation from the Boost Graph Library. Then we parallelized it for a shared memory environment. The important results are:
 \begin{itemize}
 \item The parallel version running on only two cores was already faster than the sequential version.
 \item The parallel version didn't have any noticeable compromises in terms of path quality.
 \item Strong scaling has shown to be quite good, but of course limited by having a sequential part in the algorithm.
 \item Weak scaling is good but not perfect due to the increasing sequential part with increasing graph size.
-\item The implementation can easily be tuned with the threshold relaxation parameter in order to meet the individual requirements concerning path quality and runtime.
+\item The implementation can be tuned with the threshold relaxation parameter in order to meet the individual requirements concerning path quality and runtime.
 \end{itemize}
-We haven't found a solution to get rid of the sequential part (threshold relaxation and list swapping) and we are not sure if there exists one, but nevertheless we believe that this is a relatively fast implementation on a shared memory environment.\\
-Possible next steps could be enhancing the application to make it also work in a distributed memory environment or in a mix of both.
+There is still a significatn sequential part which is increasing with the problem size (threshold relaxation and list swapping) which can't be avoided easily, but nevertheless we believe that this is a relatively fast implementation on a shared memory environment.\\
+Next steps could be enhancing the application to make it also work in a distributed/hybrid memory environment.
 
 
 
