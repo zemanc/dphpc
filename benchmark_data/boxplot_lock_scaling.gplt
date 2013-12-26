@@ -2,7 +2,7 @@
 filename= 'time_locks_1.out'
 
 color1 = "#FF3C00"
-color2 = "#008CFF"
+color2 = "#EE8E00"
 color3 = "#00551C"
 lwidth = 5
 
@@ -74,6 +74,13 @@ do for [thrp=0:0] {
 			#erste Zeile ohne Titel!
 			plot \
 				for [i in "1 2 3 4 5 6 7 8" ] \
+					filename using (i*1): \
+					(filter4(1, grapht, 2, 4, 6, i, 4, grid_size, 8)) \
+					lc rgb color2 lw lwidth notitle, \
+				filename using (1): \
+					(filter4(1, grapht, 2, 4, 6, 1, 4, grid_size, 8)) \
+					lc rgb color2 lw lwidth title 'OMP_LOCK', \
+				for [i in "1 2 3 4 5 6 7 8" ] \
 					filename using (i+zahl_1): \
 					(filter4(1, grapht, 2, 1, 6, i, 4, grid_size, 8)) \
 					lc rgb color1 lw lwidth notitle, \
@@ -83,17 +90,10 @@ do for [thrp=0:0] {
 				for [i in "1 2 3 4 5 6 7 8" ] \
 					filename using (i-zahl_1): \
 					(filter4(1, grapht, 2, 2, 6, i, 4, grid_size, 8)) \
-					lc rgb color2 lw lwidth notitle, \
+					lc rgb color3 lw lwidth notitle, \
 				filename using (1-zahl_1): \
 					(filter4(1, grapht, 2, 2, 6, 1, 4, grid_size, 8)) \
-					lc rgb color2 lw lwidth title 'TAS_LOCK', \
-				for [i in "1 2 3 4 5 6 7 8" ] \
-					filename using (i*1): \
-					(filter4(1, grapht, 2, 4, 6, i, 4, grid_size, 8)) \
-					lc rgb color3 lw lwidth notitle, \
-				filename using (1): \
-					(filter4(1, grapht, 2, 4, 6, 1, 4, grid_size, 8)) \
-					lc rgb color3 lw lwidth title 'OMP_LOCK'
+					lc rgb color3 lw lwidth title 'TAS_LOCK'
 		}
 		unset multiplot
 	}

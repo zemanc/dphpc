@@ -2,7 +2,7 @@
 filename= 'time1.out'
 
 parallel_color = "#FF3C00"
-sequential_color = "#008CFF"
+sequential_color = "#000000"
 parallel_color_lazy = "#00551C"
 lwidth = 5
 
