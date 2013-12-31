@@ -60,7 +60,7 @@
 %
 
 \begin{abstract}
-We've implemented and parallelized Fringe Search, a single-pair shortest path algorithm, for a shared memory environment. By already using two cores, the parallel version outperformed the sequential one on our benchmark graphs without showing any noticeable compromises in terms of path quality.
+We've implemented and parallelized Fringe Search, which isa single-pair shortest path algorithm, for a shared memory environment. By already using two cores, the parallel version outperformed the sequential one on our benchmark graphs without showing any noticeable compromises in terms of path quality.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -101,10 +101,10 @@ All implementations have been done with C++11, OpenMP 3 and some inline assembly
 
 \mypar{Graph structure}
 We use a directed graph implemented as adjacency list. This means that each node stores a list of pointers to its neighbours as well as the distance to these nodes. Basically, this distance can be everything as long as there exists a good heuristic cost function which does not overestimate the real distance. \\
-In our experiments we interpreted the graph as nodes in a 2D plane for visualization purposes. Each node has its position stored, so we can estimate the distance between two nodes with the Euclidean distance (or the Manhattan distance for a quadratic grid).
+In our experiments we interpreted the graph as nodes in a 2D plane for visualization purposes. Each node has its position stored, so we can estimate the distance between two nodes with the Euclidean distance (or the Manhattan distance for a rectangular grid).
 
 \mypar{Status}
-Each Node possesses a status. An \textit{inactive} node has not yet been visited. In the beginning, each node except the start node is \textit{inactive}. A \textit{closed} node has an estimated cost that must be below the current threshold (i.e. the sum of the real cost from the start to this node and the estimated cost from this node to the end is lower than the current threshold). If a node is closed it won't be updated anymore, even if we later find out that there would be a shorter path to this node. A node with status \textit{now} is a node that possibly lies on the path between start and end. It has a closed neighbor, what means that we know the real distance from the start to this node. Also a node with status \textit{later} has a closed neighbor but the cost estimation of this node currently is above threshold, so the node won't be visited again until we increase the threshold.
+Each Node possesses a status. An \textit{inactive} node has not yet been visited. In the beginning, each node except the start node is inactive. A \textit{closed} node has an estimated cost that must be below the current threshold (i.e. the sum of the real cost from the start to this node and the estimated cost from this node to the end is lower than the current threshold). If a node is closed it won't be updated anymore, even if we later find out that there would be a shorter path to this node. A node with status \textit{now} is a node that possibly lies on the path between start and end. It has a closed neighbor, what means that we know the real distance from the start to this node. Also a node with status \textit{later} has a closed neighbor but the cost estimation of this node currently is above threshold, so the node won't be visited again until we increase the threshold or we find a better path.
 
 \mypar{Linked lists}
 We use two doubly linked lists we will henceforth call the \textit{nowlist} and the \textit{laterlist}. The nowlist generally contains the nodes that have status \textit{now} whereas the laterlist contains the nodes that have status \textit{later}. Whenever the nowlist becomes empty we increase the threshold and swap the two lists as we also swap the definition of the status (now will become later and vice versa). 
@@ -184,7 +184,7 @@ But of course we have to check if this node truly is in the nowlist which can't 
 
 \mypar{Traversing the list}
 Whenever a thread traverses the nowlist it tries to lock every node it encounters. It does not force a lock! It just tries and if it's successful it can work with this node (visit the adjacent nodes, etc.). If the thread fails trying to lock the node it means that another thread is working with exactly this node.\\
-In this case we don't go just to the next node in the list as this might lead to some jam because the thread currently holding the lock will most likely try to lock the next node soon and like this the two threads would get in each others way quite often.\\
+In this case we don't go just to the next node in the list as this might lead to some jam because the thread currently holding the lock will most likely try to lock the next node soon and like this the two threads would block each other quite often.\\
 So instead of just going to the next node if we encounter a locked node, we skip a few nodes in order to achieve a nice distribution of the threads over the nowlist. Skipping 150 nodes has proven to provide a relatively good distribution which results in a faster runtime for large graphs (more than $10^6$ nodes).
 
 \mypar{Lock type}
@@ -196,8 +196,9 @@ Next to the locking mechanism provided by OpenMP we've implemented the following
 by using inline assembly.
 
 \mypar{Avoiding deadlocks}
-In order to avoid deadlocks we always lock in the same direction (see figure~\ref{fig:lock}). If we don't know whether the second node we would like to lock is in the correct direction (e.g. left in the nowlist) we must not force a lock. Not knowing  the direction can only occur if we want to move a node in the nowlist and this is only the case if we've found a shorter path to a node that already has a path that is below the previous threshold. In this case we can try locking it. If the try is successful we can update the path and move it, and if the try was not successful we just leave the old path that was already below the old threshold. This does not change the characteristic of the algorithm since the other node was also in the nowlist and so it could have been closed by another thread before anyway. \\
-If we lock a node outside the two lists, this can be done without any problems, because no thread will ever try to lock more than one node outside the lists.
+%TODO: esch das do wörkli klar? Has afe chli gänderet, aber bemr noni ganz sechr :) v.a. de erst absatz esch no schwerig...
+In order to avoid deadlocks we always lock in the same direction (see figure~\ref{fig:lock}). If we don't know whether a second node we would like to lock is in the correct direction (e.g. we want to lock a left neighbor of a node already locked in the nowlist) we must not force a lock. Not knowing  the direction can only occur if we want to move a node in the nowlist and this is only the case if we've found a shorter path to a node that already has a path that is below the previous threshold. In this case we can try locking it. If the try is successful we can update the path and move it, and if the try was not successful we just leave the old path that was already below the old threshold. This does not change the characteristic of the algorithm since the other node was also in the nowlist and so it could have been closed by another thread before anyway. \\
+If we lock a node outside the two lists, this can be done without any problems, because no thread will ever try to lock more than one node outside the lists.\\
 Acting like this, we prevent any possible circular wait dependencies and so no deadlocks can occur \cite{Coffman:71}.
 
 \begin{figure}[h]\centering
@@ -221,7 +222,7 @@ All locks are acquired by "optimistic locking". This means, that if we try to ge
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.31]{remove.eps}
-  \caption{Remove a node from the list. Note: The pointers of a removed node remain untouched so that a traversing thread won't get lost. \label{fig:remove}}
+  \caption{Remove a node from the list. Note: The pointers of a removed node remain untouched so that if possible a traversing thread won't get lost. \label{fig:remove}}
 \end{figure}
 
 
@@ -330,7 +331,7 @@ We implemented a sequential version of Fringe Search that was significantly fast
 \item Weak scaling is good but not perfect due to the increasing sequential part with increasing graph size.
 \item The implementation can be tuned with the threshold relaxation parameter in order to meet the individual requirements concerning path quality and runtime.
 \end{itemize}
-There is still a significatn sequential part which is increasing with the problem size (threshold relaxation and list swapping) which can't be avoided easily, but nevertheless we believe that this is a relatively fast implementation on a shared memory environment.\\
+There is still a significant sequential part which is increasing with the problem size (threshold relaxation and list swapping) which can't be avoided easily, but nevertheless we believe that this is a relatively fast implementation on a shared memory environment.\\
 Next steps could be enhancing the application to make it also work in a distributed/hybrid memory environment.
 
 
