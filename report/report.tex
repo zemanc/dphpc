@@ -10,8 +10,8 @@
 \usepackage{float}
 \usepackage[skip=3px]{caption}
 \usepackage[boxed,vlined,linesnumbered]{algorithm2e}	% Pseudocode
-%\SetAlCapSkip{2ex}				
-\setalcapskip{2ex}							% caption unter code
+\SetAlCapSkip{2ex}				
+% \setalcapskip{2ex}							% caption unter code
 \hyphenation{now-list}
 \hyphenation{later-list}
 
@@ -101,14 +101,14 @@ All implementations have been done with C++11, OpenMP 3 and some inline assembly
 
 \mypar{Graph structure}
 We use a directed graph implemented as adjacency list. This means that each node stores a list of pointers to its neighbours as well as the distance to these nodes. Basically, this distance can be everything as long as there exists a good heuristic cost function that does not overestimate the real distance. \\
-In our experiments we interpreted the graph as nodes in a 2D plane, mainly for visualization purposes. Every node has a position so we can use the Euclidean distance as our heuristic function (on a rectangular grid one could also use the Manhattan distance).
+In our experiments we interpreted the graph as nodes in a 2D plane, mainly for visualization purposes. Every node has a position so we can use the Euclidean distance as our heuristic function (e.g. one could also use the Manhattan distance).
 
 \mypar{Status of a node} Each node possesses one of the following states:
 \begin{compactitem}
 \item \textit{Inactive:} The node has not yet been visited. In the beginning each node except the start node is inactive.
-\item \textit{Closed:} The node has been visited and its cost (sum of real distance form start to this node and the estimated distance from this node to the end) is below the current threshold. A closed node won't be updated anymore.
+\item \textit{Closed:} The node has been visited and its cost (sum of real distance from start to this node and the estimated distance from this node to the end) is below the current threshold. A closed node won't be updated anymore.
 \item \textit{Now:} The node has a closed neighbor, what means that we know the real distance from the start to this node. We don't know yet if the cost of this node is below or above threshold.
-\item \textit{Later:} Also a node with a closed neighbor, but the cost of this node is known and above threshold. The node won't be visited until we increase threshold or find a better path to it.
+\item \textit{Later:} Also a node with a closed neighbor, but the cost of this node is known and above the threshold. The node won't be visited until we increase the threshold or find a better path to it.
 \end{compactitem}
 
 \mypar{Linked lists}
@@ -181,7 +181,7 @@ $\var{threshold} \gets \heuristicDist{\var{start}, \var{end}}$ \;
 \end{algorithm}
 
 \mypar{Swapping the lists}
-Whenever we relax the threshold, the nowlist/laterlist and the states of the included nodes will get swapped (lines \ref{code:swaplist} and \ref{code:swap} in algorithm \ref{algo:par}), as the nodes with status later are potentially below threshold after increasing it.\\
+Whenever we relax the threshold, the nowlist/laterlist and the states of the included nodes will get swapped (lines \ref{code:swaplist} and \ref{code:swap} in algorithm \ref{algo:par}), as the nodes with status later are potentially below the threshold after increasing it.\\
 After swapping the lists  we don't want to have all the threads starting from the first node in the nowlist, but rather have them distributed over the whole nowlist. We achieve this by remembering the last visited node in the laterlist for each thread (e.g. we save the last node moved into the laterlist at line \ref{code:move} in algorithm \ref{algo:par}). By doing this, the thread can start from this node after swapping the lists and we get the wanted distribution. Another advantage of this behavior is that we might profit from the cache effect, because this node might still be in the cache.\\
 But of course we have to check if this node truly is in the nowlist which can't be guaranteed (a node remembered at line \ref{code:move} could have been moved back at line \ref{code:moveback}). If it's no longer there we just start from the first node in the nowlist.
 
