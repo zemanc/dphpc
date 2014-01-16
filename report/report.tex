@@ -84,10 +84,10 @@ A problem where the goal is to find the shortest path between a given start and 
 A very popular algorithm that uses a best-first search approach for solving the single-pair shortest path problem. For the best-first search it uses a heuristic function that estimates the distance to the end node. It always finds the shortest possible path as long as the heuristic function never overestimates the real distance. We say the found path is "optimal". A* uses a priority queue for selecting the next best node what causes each insertion into the queue having complexity $\mathcal{O}(\log n)$ with respect to the size of the queue.
 
 \mypar{Fringe Search}
-Another single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising reachable node first, it stores the reachable nodes in a doubly linked list where an insertion has only complexity $\mathcal{O}(1)$ and visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. By doing this, the path will not be optimal but the algorithm is usually faster than A*, as shown in \cite{fringe:05}. See figure~\ref{fig:algo} for an easy example.
+Another single-pair shortest path algorithm that is similar to A*, but instead of a priority queue that always has the most promising reachable node first it stores the reachable nodes in a doubly linked list where an insertion has only complexity $\mathcal{O}(1)$. It visits a node if it's "promising enough" which is determined by a global threshold value that will be continuously increased. By doing this, the path will not be optimal but the algorithm is usually faster than A*, as shown in \cite{fringe:05}. See figure~\ref{fig:algo} for an example.
 \begin{figure}[h]\centering
   \includegraphics[scale=0.245]{fringe_rep.eps}
-  \caption{Fringe Search example \label{fig:algo}}
+  \caption{Fringe Search example; start = A, end = F \label{fig:algo}}
 \end{figure}
 
 
@@ -100,10 +100,10 @@ In this section we give an overview of the implementation, emphasize important a
 All implementations have been done with C++11, OpenMP 3 and some inline assembly for the locks.
 
 \mypar{Graph structure}
-We use a directed graph implemented as adjacency list. This means that each node stores a list of pointers to its neighbours as well as the distance to these nodes. Basically, this distance can be everything as long as there exists a good heuristic cost function which does not overestimate the real distance. \\
-In our experiments we interpreted the graph as nodes in a 2D plane, mainly for visualization purposes. Every node has a position, so we can estimate the distance between two nodes with the Euclidean distance (on a rectangular grid one could also use the Manhattan distance).
+We use a directed graph implemented as adjacency list. This means that each node stores a list of pointers to its neighbours as well as the distance to these nodes. Basically, this distance can be everything as long as there exists a good heuristic cost function that does not overestimate the real distance. \\
+In our experiments we interpreted the graph as nodes in a 2D plane, mainly for visualization purposes. Every node has a position so we can use the Euclidean distance as our heuristic function (on a rectangular grid one could also use the Manhattan distance).
 
-\mypar{Status of a node} Each node possesses on of the following states:
+\mypar{Status of a node} Each node possesses one of the following states:
 \begin{compactitem}
 \item \textit{Inactive:} The node has not yet been visited. In the beginning each node except the start node is inactive.
 \item \textit{Closed:} The node has been visited and its cost (sum of real distance form start to this node and the estimated distance from this node to the end) is below the current threshold. A closed node won't be updated anymore.
@@ -181,14 +181,14 @@ $\var{threshold} \gets \heuristicDist{\var{start}, \var{end}}$ \;
 \end{algorithm}
 
 \mypar{Swapping the lists}
-Whenever we relax the threshold, the nowlist/laterlist and the states of the included nodes will get swapped (lines \ref{code:swaplist} and \ref{code:swap} in algorithm \ref{algo:par}). This means that the nowlist will become the laterlist and vice versa, as the nodes with status later are potentially below threshold after increasing it.\\
-After swapping the lists  we don't want to have all the threads starting from the first node in the nowlist but rather have them distributed over the whole nowlist. We achieve this by remembering the last visited node in the laterlist for each thread (e.g. we save the last node moved into the laterlist at line \ref{code:move} in algorithm \ref{algo:par}). By doing this the thread can start from this node after swapping the lists and we get the wanted distribution. Another advantage of this behavior is that we might profit from the cache effect, because this node might still be in the cache.\\
+Whenever we relax the threshold, the nowlist/laterlist and the states of the included nodes will get swapped (lines \ref{code:swaplist} and \ref{code:swap} in algorithm \ref{algo:par}), as the nodes with status later are potentially below threshold after increasing it.\\
+After swapping the lists  we don't want to have all the threads starting from the first node in the nowlist, but rather have them distributed over the whole nowlist. We achieve this by remembering the last visited node in the laterlist for each thread (e.g. we save the last node moved into the laterlist at line \ref{code:move} in algorithm \ref{algo:par}). By doing this, the thread can start from this node after swapping the lists and we get the wanted distribution. Another advantage of this behavior is that we might profit from the cache effect, because this node might still be in the cache.\\
 But of course we have to check if this node truly is in the nowlist which can't be guaranteed (a node remembered at line \ref{code:move} could have been moved back at line \ref{code:moveback}). If it's no longer there we just start from the first node in the nowlist.
 
 \subsection{Locking}\label{ssec:lock}
 
 \mypar{Traversing the list}
-Whenever a thread traverses the nowlist it tries to lock every node it encounters. But instead of forcing a lock, it just tries to lock the node and if it's successful it can work with this node (visit the adjacent nodes, etc.). If the thread fails trying to lock the node this means that another thread is working with exactly this node.\\
+Whenever a thread traverses the nowlist it tries to lock every node it encounters. But instead of forcing a lock, it just tries to lock the node and if it's successful it can work with this node (visit the adjacent nodes, etc.). If the thread fails trying to lock the node, this means that another thread is working with exactly this node.\\
 In case of a unsuccessful try we don't go to the very next node in the list, because the thread currently holding the lock will most likely try to lock the next node soon and like this the two threads would block each other quite often. Instead, we skip a few nodes in order to achieve a nice distribution of the threads over the nowlist.\\
 Skipping 150 nodes has proven to provide a relatively good distribution that results in a faster runtime for large graphs (more than $10^6$ nodes).
 
@@ -205,7 +205,7 @@ by using inline assembly.
 In order to avoid deadlocks we lock nodes always in the same order. This means we lock from right to left in both lists and we first lock the nodes in the nowlist, and then the nodes in the laterlist (see figure~\ref{fig:lock}).\\
 This requires that we know the relative location of the nodes we would like to lock (i.e. node X is left of node Y). This is always the case except for one situation:\\
 Let's say we've locked node A in the nowlist and via this node we find a shorter path to an adjacent node B, that is already in the nowlist and below threshold. In this case we would like to update B's cost, its parent node (A will become parent node of B) and move it right behind A. For all this we require a lock on B, but we can't tell if B is left or right of A, because we got to this node via a pointer in the adjacency list of A. If we now forced a lock on B we could run into a deadlock because it's possible that another thread has locked B and, as its cost is already below threshold, is waiting for the lock on A, since it's an adjacent node of B.\\
-The solution of this problem is to not force a lock but instead, just trying to lock the adjacent node. If the try is successful we can update the path and move it and if the try was not successful we just leave the old path that was already below threshold. This does not change the characteristic of the algorithm since the adjacent node could have already been closed by another thread as its value is below threshold. \\
+The solution of this problem is to not force a lock but instead, just trying to lock the adjacent node. If the try is successful we can update the path and move it. If the try was not successful we just leave the old path that was already below threshold. This does not change the characteristic of the algorithm since the adjacent node could have already been closed by another thread as its value is below threshold. \\
 Locking a node that is not in any of our two lists can be done without any problems because no thread will ever try to lock more than one node outside the lists.\\
 Acting as described above, we prevent any possible circular wait dependencies and so no deadlocks can occur \cite{Coffman:71}.
 
@@ -263,7 +263,7 @@ Each experiment has been run using two graph types with different obstacles, the
 
 \begin{figure}[h]\centering
   \includegraphics[scale=0.3]{benchmark_graphs.eps}
-  \caption{The graphs used for benchmarking: "Cross Graph" (left) and "Circle Graph" (right). The blue nodes represent the found path, the green nodes are "closed" and the red nodes have status now or later when the algorithm finished. \label{fig:graphs}}
+  \caption{The graphs used for benchmarking: "Cross Graph" (left) and "Circle Graph" (right). The blue nodes represent the found path, the green nodes are "closed" and the red nodes have status "now" or "later". \label{fig:graphs}}
 \end{figure}
 
 \subsection{Results}\label{ssec:results}
@@ -297,7 +297,7 @@ Because of the limitations in terms of speedup according to Amdahl's law (also v
 \end{figure}\\
 As shown in figure~\ref{fig:weak_scaling}, we still experience an increase in runtime with increasing problem size but it's not that much and the behavior actually meets our expectations, because with increasing problem size we also increase the time the program spends in the sequential part (longer path will lead to more threshold updates). Since the shortest path in the Circle Graph is shorter than the one in the Cross Graph, we need less threshold updates and so the time does not increase as much as for the Cross Graph.
 
-\mypar{Normal versus lazy removal} Looking at the figures~\ref{fig:strong_scaling} and \ref{fig:weak_scaling}, it's apparent that it doesn't matter which approach for removing the nodes we use (lazy vs. normal, see section \ref{ssec:lock}). The difference in speed is negligible. Therefore we will only show the results for normal removal in the future plots.
+\mypar{Normal versus lazy removal} Looking at the figures~\ref{fig:strong_scaling} and \ref{fig:weak_scaling}, it's apparent that it doesn't matter which approach for removing the nodes we use (lazy vs. normal, see section \ref{ssec:lock}). The difference in speed is negligible. Therefore we will only show the results for normal removal in future plots.
 
 \mypar{Path length versus $\#$ cores}
 An interesting question is if the path length gets worse the more threads we have. As mentioned in section \ref{ssec:lock} (avoiding deadlocks) we cannot always update a node with a better path if it's already below threshold and locked by another thread. And the more threads we have the higher is the possibility that this happens.
@@ -316,7 +316,7 @@ The threshold relaxation value defines by how much we increase the threshold onc
 As you can see in figure~\ref{fig:error_thresh}, the relative error gets quite high once we have a threshold relaxation value greater than 1, whereas the path quality is very good for small threshold relaxation values.
 
 \mypar{Runtime versus threshold relaxation}
-According to figure~\ref{fig:error_thresh}, a low threshold relaxation value leads to a short path. However, by doing this we always just have a few nodes in our nowlist, so the different threads will have more collisions and we have to increase the threshold more often which means that we will spend more time in the sequential part of the algorithm. Therefore we expect our algorithm to be slower the smaller the threshold relaxation value is. This is also the case as it can be seen in figure~\ref{fig:runtime_thresh}.\\
+According to figure~\ref{fig:error_thresh}, a low threshold relaxation value leads to a short path. However, by doing this we always just have a few nodes in our nowlist, so the different threads will have more collisions and we have to increase the threshold more often which means that we will spend more time in the sequential part of the algorithm. Therefore we expect our algorithm to be slower with smaller the threshold relaxation values. As it can be seen in figure~\ref{fig:runtime_thresh}, this is the case.\\
 \begin{figure}[h]\centering
   \includegraphics[scale=0.558]{runtime_threshold.eps}
   \caption{Runtime depending on threshold relaxation value\label{fig:runtime_thresh}}
@@ -330,7 +330,7 @@ Another interesting aspect of figure \ref{fig:runtime_thresh} is that the sequen
 
 \section{Conclusions}
 
-We implemented a sequential version of Fringe Search that is significantly faster than the A* implementation from the Boost Graph Library. Then we parallelized it for a shared memory environment. The important results are:
+We've implemented a sequential version of Fringe Search that is significantly faster than the A* implementation from the Boost Graph Library. Then we've parallelized it for a shared memory environment. The important results are:
 \begin{itemize}
 \item The parallel version running on only two cores was already faster than the sequential version.
 \item The parallel version didn't have any noticeable compromises in terms of path quality.
